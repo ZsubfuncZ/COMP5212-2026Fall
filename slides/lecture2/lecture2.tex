@@ -1,0 +1,1791 @@
+% Reconstructed from lecture1.pdf.
+% External images, screenshots, logos, and plots are intentionally omitted.
+% The wording and organization follow the source deck as closely as possible.
+
+\documentclass[aspectratio=169,12pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{array,booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usepackage{hyperref}
+
+\definecolor{slideorange}{HTML}{D62B09}
+\definecolor{bulletgreen}{HTML}{A8C9A0}
+\definecolor{bulletgray}{HTML}{D9E1E8}
+\definecolor{fadedgray}{HTML}{B7B7B7}
+\definecolor{rulegray}{HTML}{C9CED3}
+
+\hypersetup{colorlinks=true,urlcolor=black,linkcolor=black}
+\urlstyle{same}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=black,bg=white}
+\setbeamercolor{frametitle}{fg=slideorange,bg=white}
+\setbeamercolor{page number in head/foot}{fg=black,bg=white}
+\setbeamerfont{frametitle}{series=\bfseries,size*={27pt}{31pt}}
+\setbeamerfont{page number in head/foot}{size=\scriptsize}
+\setbeamersize{text margin left=0.90cm,text margin right=0.90cm}
+
+\setbeamertemplate{frametitle}{%
+  \vspace*{0.12cm}%
+  \centering
+  {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle\par}%
+  \vspace*{0.10cm}%
+}
+
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \begin{beamercolorbox}[wd=\paperwidth,ht=0.42cm,dp=0.15cm,center]{page number in head/foot}
+    \insertframenumber
+  \end{beamercolorbox}%
+}
+
+\setbeamertemplate{itemize item}{%
+  \raisebox{0.15ex}{\tikz\fill[bulletgreen] (0,0) circle (0.082cm);}%
+}
+\setbeamertemplate{itemize subitem}{%
+  \raisebox{0.15ex}{\tikz\fill[bulletgray] (0,0) circle (0.064cm);}%
+}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\spanop}{span}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Val}{Val}
+\DeclareMathOperator{\Proj}{Proj}
+
+\newcommand{\SectionSlide}[1]{%
+  \begin{frame}
+    \centering
+    \vfill
+    {\color{slideorange}\fontsize{29}{34}\selectfont\bfseries #1\par}
+    \vfill
+  \end{frame}
+}
+
+\newcommand{\SourceNote}[1]{%
+  \vfill
+  \begin{flushright}
+    {\scriptsize #1}
+  \end{flushright}
+}
+
+\newcommand{\tightitems}{%
+  \setlength{\itemsep}{0.14cm}%
+  \setlength{\topsep}{0.08cm}%
+  \setlength{\parsep}{0pt}%
+}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+% 1. Title slide. The HKUST logo is intentionally omitted.
+% -----------------------------------------------------------------------------
+\begin{frame}
+	\begin{tikzpicture}[remember picture, overlay]
+		\node[anchor=north west, inner sep=10pt] at (current page.north west)
+		{\includegraphics[width=6cm]{../source/logo.png}};
+	\end{tikzpicture}
+	
+	\centering
+	\vspace*{1.15cm}
+	{\fontsize{28}{32}\selectfont COMP 5212\par}
+	\vspace{0.35cm}
+	{\fontsize{30}{33}\selectfont Machine Learning\par}
+	\vspace{0.75cm}
+	{\Large Instructor: Zihan Zhang\par}
+	\vspace{0.35cm}
+	{\large Lecture 2: Hypothesis set and PAC learning\par}
+
+	
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 2
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Outline}
+  \vspace{1.10cm}
+  {\fontsize{21}{26}\selectfont
+  \begin{itemize}
+    \setlength{\itemsep}{0.75cm}
+    \item Linear Algebra Review
+    \item Probability Review
+  \end{itemize}}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 3
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Outline}
+  \vspace{1.10cm}
+  {\fontsize{21}{26}\selectfont
+  \begin{itemize}
+    \setlength{\itemsep}{0.75cm}
+    \item Linear Algebra Review
+    \item \textcolor{fadedgray}{Probability Review}
+  \end{itemize}}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 4
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Basic Notation}
+  \vspace{-0.10cm}
+  {\small
+  \begin{itemize}
+    \tightitems
+    \item By $x\in\mathbb{R}^{n}$, we denote a vector with $n$ entries (we use column vectors by default).
+  \end{itemize}
+  \[
+    x=\begin{bmatrix}x_1\\x_2\\\vdots\\x_n\end{bmatrix}.
+  \]
+  \begin{itemize}
+    \tightitems
+    \item By $A\in\mathbb{R}^{m\times n}$ we denote a matrix with $m$ rows and $n$ columns,
+          where the entries of $A$ are real numbers.
+  \end{itemize}
+  \vspace{-0.12cm}
+  \[
+  \begin{aligned}
+  A
+  &=\begin{bmatrix}
+      a_{11}&a_{12}&\cdots&a_{1n}\\
+      a_{21}&a_{22}&\cdots&a_{2n}\\
+      \vdots&\vdots&\ddots&\vdots\\
+      a_{m1}&a_{m2}&\cdots&a_{mn}
+    \end{bmatrix}
+   =\begin{bmatrix}a^1&a^2&\cdots&a^n\end{bmatrix}
+   =\begin{bmatrix}a_1^T\\a_2^T\\\vdots\\a_m^T\end{bmatrix}.
+  \end{aligned}
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 5
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Identity Matrix}
+  \vspace{0.42cm}
+  {\large
+  The \emph{identity matrix}, denoted $I\in\mathbb{R}^{n\times n}$, is a square matrix
+  with ones on the diagonal and zeros everywhere else. That is,
+  \[
+    I_{ij}=\begin{cases}
+      1 & i=j,\\
+      0 & i\ne j.
+    \end{cases}
+  \]
+  It has the property that for all $A\in\mathbb{R}^{m\times n}$,
+  \[
+    AI=A=IA.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 6
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Diagonal Matrix}
+  \vspace{0.52cm}
+  {\large
+  A \emph{diagonal matrix} is a matrix where all non-diagonal elements are $0$.
+  This is typically denoted
+  \[
+    D=\diag(d_1,d_2,\ldots,d_n),
+  \]
+  with
+  \[
+    D_{ij}=\begin{cases}
+      d_i & i=j,\\
+      0 & i\ne j.
+    \end{cases}
+  \]
+  Clearly, $I=\diag(1,1,\ldots,1)$.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 7
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Vector-Vector Product}
+  \vspace{-0.10cm}
+  {\small
+  \begin{itemize}
+    \item \emph{inner product} or \emph{dot product}
+  \end{itemize}
+  \[
+    x^Ty\in\mathbb{R}
+    =\begin{bmatrix}x_1&x_2&\cdots&x_n\end{bmatrix}
+     \begin{bmatrix}y_1\\y_2\\\vdots\\y_n\end{bmatrix}
+    =\sum_{i=1}^{n}x_i y_i.
+  \]
+  \vspace{0.18cm}
+  \begin{itemize}
+    \item \emph{outer product}
+  \end{itemize}
+  \[
+    xy^T\in\mathbb{R}^{m\times n}
+    =\begin{bmatrix}x_1\\x_2\\\vdots\\x_m\end{bmatrix}
+     \begin{bmatrix}y_1&y_2&\cdots&y_n\end{bmatrix}
+    =\begin{bmatrix}
+      x_1y_1&x_1y_2&\cdots&x_1y_n\\
+      x_2y_1&x_2y_2&\cdots&x_2y_n\\
+      \vdots&\vdots&\ddots&\vdots\\
+      x_my_1&x_my_2&\cdots&x_my_n
+    \end{bmatrix}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 8
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Vector Product}
+  \vspace{0.95cm}
+  {\large
+  \begin{itemize}
+    \item If we write $A$ by rows, then we can express $Ax$ as,
+  \end{itemize}
+  \[
+    y=Ax=
+    \begin{bmatrix}a_1^T\\a_2^T\\\vdots\\a_m^T\end{bmatrix}x
+    =\begin{bmatrix}a_1^Tx\\a_2^Tx\\\vdots\\a_m^Tx\end{bmatrix}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 9
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Vector Product}
+  \vspace{0.55cm}
+  {\large
+  \begin{itemize}
+    \item If we write $A$ by columns, then we have:
+  \end{itemize}
+  \begin{equation}
+    y=Ax=\begin{bmatrix}a^1&a^2&\cdots&a^n\end{bmatrix}
+       \begin{bmatrix}x_1\\x_2\\\vdots\\x_n\end{bmatrix}
+      =a^1x_1+a^2x_2+\cdots+a^nx_n.
+    \tag{1}
+  \end{equation}
+  \vspace{0.35cm}
+  $y$ is a \emph{linear combination} of the columns of $A$.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 10
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Vector Product}
+  \vspace{0.90cm}
+  {\large
+  It is also possible to multiply on the left by a row vector.
+  \begin{itemize}
+    \item If we write $A$ by columns, then we can express $x^TA$ as,
+  \end{itemize}
+  \[
+    y^T=x^TA=x^T\begin{bmatrix}a^1&a^2&\cdots&a^n\end{bmatrix}
+       =\begin{bmatrix}x^Ta^1&x^Ta^2&\cdots&x^Ta^n\end{bmatrix}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 11. The source slide contained a full-slide linear-transformation image.
+% -----------------------------------------------------------------------------
+% -----------------------------------------------------------------------------
+% 12
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Matrix Multiplication}
+  \vspace{0.55cm}
+  {\large
+  1. As a set of vector-vector products (dot product)
+  \[
+    C=AB=
+    \begin{bmatrix}a_1^T\\a_2^T\\\vdots\\a_m^T\end{bmatrix}
+    \begin{bmatrix}b^1&b^2&\cdots&b^p\end{bmatrix}
+    =\begin{bmatrix}
+      a_1^Tb^1&a_1^Tb^2&\cdots&a_1^Tb^p\\
+      a_2^Tb^1&a_2^Tb^2&\cdots&a_2^Tb^p\\
+      \vdots&\vdots&\ddots&\vdots\\
+      a_m^Tb^1&a_m^Tb^2&\cdots&a_m^Tb^p
+    \end{bmatrix}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 13
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Matrix Multiplication}
+  \vspace{0.78cm}
+  {\large
+  2. As a sum of outer products
+  \[
+    C=AB=
+    \begin{bmatrix}a^1&a^2&\cdots&a^p\end{bmatrix}
+    \begin{bmatrix}b_1^T\\b_2^T\\\vdots\\b_p^T\end{bmatrix}
+    =\sum_{i=1}^{p}a^i b_i^T.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 14
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Matrix Multiplication}
+  \vspace{0.18cm}
+  {\small
+  3. As a set of matrix-vector products.
+  \begin{equation}
+    C=AB=A\begin{bmatrix}b^1&b^2&\cdots&b^n\end{bmatrix}
+      =\begin{bmatrix}Ab^1&Ab^2&\cdots&Ab^n\end{bmatrix}.
+    \tag{2}
+  \end{equation}
+  \vspace{0.28cm}
+  Here the $i$th column of $C$ is given by the matrix-vector product with the vector
+  on the right, $c_i=Ab_i$. These matrix-vector products can in turn be interpreted
+  using both viewpoints given in the previous subsection.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 15
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Matrix Multiplication}
+  \vspace{0.82cm}
+  {\large
+  4. As a set of vector-matrix products.
+  \[
+    C=AB=
+    \begin{bmatrix}a_1^T\\a_2^T\\\vdots\\a_m^T\end{bmatrix}B
+    =\begin{bmatrix}a_1^TB\\a_2^TB\\\vdots\\a_m^TB\end{bmatrix}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 16
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Matrix-Matrix Multiplication}
+  \vspace{0.45cm}
+  {\large
+  \begin{itemize}
+    \setlength{\itemsep}{0.43cm}
+    \item Associative: $(AB)C=A(BC)$.
+    \item Distributive: $A(B+C)=AB+AC$.
+    \item In general, \emph{not} commutative; that is, it can be the case that
+          $AB\ne BA$. (For example, if $A\in\mathbb{R}^{m\times n}$ and
+          $B\in\mathbb{R}^{n\times q}$, the matrix product $BA$ does not even
+          exist if $m$ and $q$ are not equal!)
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 17
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The Transpose}
+  \vspace{0.20cm}
+  {\small
+  The \emph{transpose} of a matrix results from ``flipping'' the rows and columns.
+  Given a matrix $A\in\mathbb{R}^{m\times n}$, its transpose, written
+  $A^T\in\mathbb{R}^{n\times m}$, is the $n\times m$ matrix whose entries are
+  given by
+  \[
+    (A^T)_{ij}=A_{ji}.
+  \]
+  The following properties of transposes are easily verified:
+  \begin{itemize}
+    \setlength{\itemsep}{0.18cm}
+    \item $(A^T)^T=A$
+    \item $(AB)^T=B^TA^T$
+    \item $(A+B)^T=A^T+B^T$
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 18
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Trace}
+  \vspace{1.05cm}
+  {\large
+  The \emph{trace} of a square matrix $A\in\mathbb{R}^{n\times n}$, denoted
+  $\tr A$, is the sum of diagonal elements in the matrix:
+  \[
+    \tr A=\sum_{i=1}^{n}A_{ii}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 19
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Norms}
+  \vspace{0.22cm}
+  {\large
+  A \emph{norm} of a vector $\|x\|$ is informally a measure of the ``length'' of
+  the vector.
+
+  \vspace{0.32cm}
+  The commonly-used Euclidean or $\ell_2$ norm,
+  \[
+    \|x\|_2=\sqrt{\sum_{i=1}^{n}x_i^2}.
+  \]
+
+  The $\ell_1$ norm,
+  \[
+    \|x\|_1=\sum_{i=1}^{n}|x_i|.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 20
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Norms}
+  \vspace{0.55cm}
+  {\large
+  A \emph{norm} of a vector $\|x\|$ is informally a measure of the ``length'' of
+  the vector.
+
+  \vspace{1.15cm}
+  \begin{center}
+  The $\ell_\infty$ norm,
+  \[
+    \|x\|_\infty=\max_i|x_i|.
+  \]
+  \end{center}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 21
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Norms}
+  \vspace{1.05cm}
+  {\large
+  In fact, all three norms presented so far are examples of the family of $\ell_p$
+  norms, which are parameterized by a real number $p\ge 1$, and defined as
+  \[
+    \|x\|_p=\left(\sum_{i=1}^{n}|x_i|^p\right)^{1/p}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 22
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Linear Independence}
+  \vspace{0.55cm}
+  {\small
+  A set of vectors $\{x_1,x_2,\ldots,x_n\}\subset\mathbb{R}^{m}$ is said to be
+  (linearly) \emph{dependent} if one vector belonging to the set can be represented
+  as a linear combination of the remaining vectors; that is, if
+  \[
+    x_n=\sum_{i=1}^{n-1}\alpha_i x_i
+  \]
+  for some scalar values $\alpha_1,\ldots,\alpha_{n-1}\in\mathbb{R}$; otherwise,
+  the vectors are (linearly) \emph{independent}.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 23
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Linear Independence}
+  \vspace{0.88cm}
+  {\large
+  \textbf{Example:}
+  \[
+    x_1=\begin{bmatrix}1\\2\\3\end{bmatrix},\qquad
+    x_2=\begin{bmatrix}4\\1\\5\end{bmatrix},\qquad
+    x_3=\begin{bmatrix}2\\-3\\-1\end{bmatrix}
+  \]
+  are linearly dependent because $x_3=-2x_1+x_2$.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 24
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Rank of a Matrix}
+  \vspace{0.12cm}
+  {\small
+  \begin{itemize}
+    \setlength{\itemsep}{0.32cm}
+    \item The \emph{column rank} of a matrix $A\in\mathbb{R}^{m\times n}$ is the
+          largest number of columns of $A$ that constitute a linearly independent set.
+    \item The \emph{row rank} is the largest number of rows of $A$ that constitute a
+          linearly independent set.
+    \item For any matrix $A\in\mathbb{R}^{m\times n}$, it turns out that the column
+          rank of $A$ is equal to the row rank of $A$ (prove it yourself!), and so both
+          quantities are referred to collectively as the \emph{rank} of $A$, denoted
+          as $\rank(A)$.
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 25
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Properties of Rank}
+  \vspace{0.23cm}
+  {\small
+  \begin{itemize}
+    \setlength{\itemsep}{0.36cm}
+    \item For $A\in\mathbb{R}^{m\times n}$, $\rank(A)\le\min(m,n)$. If
+          $\rank(A)=\min(m,n)$, then $A$ is said to be \emph{full rank}.
+    \item For $A\in\mathbb{R}^{m\times n}$, $\rank(A)=\rank(A^T)$.
+    \item For $A\in\mathbb{R}^{m\times p}$, $B\in\mathbb{R}^{p\times n}$,
+          $\rank(AB)\le\min(\rank(A),\rank(B))$.
+    \item For $A,B\in\mathbb{R}^{m\times n}$,
+          $\rank(A+B)\le\rank(A)+\rank(B)$.
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 26
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The Inverse of a Square Matrix}
+  \vspace{-0.08cm}
+  {\scriptsize
+  \begin{itemize}
+    \setlength{\itemsep}{0.15cm}
+    \item The \emph{inverse} of a square matrix $A\in\mathbb{R}^{n\times n}$ is
+          denoted $A^{-1}$, and is the unique matrix such that
+          \[
+            A^{-1}A=I=AA^{-1}.
+          \]
+    \item We say that $A$ is \emph{invertible} or \emph{non-singular} if $A^{-1}$
+          exists and \emph{non-invertible} or \emph{singular} otherwise.
+    \item In order for a square matrix $A$ to have an inverse $A^{-1}$, then $A$
+          must be full rank.
+    \item Properties (Assuming $A,B\in\mathbb{R}^{n\times n}$ are non-singular):
+      \begin{itemize}
+        \setlength{\itemsep}{0.05cm}
+        \item $(A^{-1})^{-1}=A$
+        \item $(AB)^{-1}=B^{-1}A^{-1}$
+        \item $(A^{-1})^T=(A^T)^{-1}$. For this reason this matrix is often
+              denoted $A^{-T}$.
+      \end{itemize}
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 27
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Orthogonal Matrices}
+  \vspace{-0.10cm}
+  {\scriptsize
+  \begin{itemize}
+    \setlength{\itemsep}{0.12cm}
+    \item Two vectors $x,y\in\mathbb{R}^{n}$ are \emph{orthogonal} if $x^Ty=0$.
+    \item A vector $x\in\mathbb{R}^{n}$ is \emph{normalized} if $\|x\|_2=1$.
+    \item A square matrix $U\in\mathbb{R}^{n\times n}$ is \emph{orthogonal} if all
+          its columns are orthogonal to each other and are normalized (the columns
+          are then referred to as being \emph{orthonormal}).
+  \end{itemize}
+  \vspace{0.08cm}
+  \textbf{Properties:}
+  \begin{itemize}
+    \setlength{\itemsep}{0.13cm}
+    \item The inverse of an orthogonal matrix is its transpose.
+      \[
+        U^TU=I=UU^T.
+      \]
+    \item Operating on a vector with an orthogonal matrix will not change its
+          Euclidean norm, i.e.,
+      \[
+        \|Ux\|_2=\|x\|_2
+      \]
+      for any $x\in\mathbb{R}^{n}$, $U\in\mathbb{R}^{n\times n}$ orthogonal.
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 28
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Span and Projection}
+  \vspace{-0.10cm}
+  {\scriptsize
+  \begin{itemize}
+    \setlength{\itemsep}{0.20cm}
+    \item The \emph{span} of a set of vectors $\{x_1,x_2,\ldots,x_n\}$ is the set
+          of all vectors that can be expressed as a linear combination of
+          $\{x_1,\ldots,x_n\}$. That is,
+  \end{itemize}
+  \[
+    \spanop(\{x_1,\ldots,x_n\})
+    =\left\{v:v=\sum_{i=1}^{n}\alpha_i x_i,\ \alpha_i\in\mathbb{R}\right\}.
+  \]
+  \begin{itemize}
+    \setlength{\itemsep}{0.10cm}
+    \item The \emph{projection} of a vector $y\in\mathbb{R}^{m}$ onto the span of
+          $\{x_1,\ldots,x_n\}$ is the vector
+          $v\in\spanop(\{x_1,\ldots,x_n\})$, such that $v$ is as close as possible
+          to $y$, as measured by the Euclidean norm $\|v-y\|_2$.
+  \end{itemize}
+  \[
+    \Proj(y;\{x_1,\ldots,x_n\})
+    =\argmin_{v\in\spanop(\{x_1,\ldots,x_n\})}\|y-v\|_2.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 29
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Range}
+  \vspace{0.08cm}
+  {\small
+  \begin{itemize}
+    \setlength{\itemsep}{0.34cm}
+    \item The \emph{range} or the column space of a matrix
+          $A\in\mathbb{R}^{m\times n}$, denoted $\mathcal{R}(A)$, is the span of
+          the columns of $A$. In other words,
+          \[
+            \mathcal{R}(A)=\{v\in\mathbb{R}^{m}:v=Ax,\ x\in\mathbb{R}^{n}\}.
+          \]
+    \item Assuming $A$ is full rank and $n<m$, the projection of a vector
+          $y\in\mathbb{R}^{m}$ onto the range of $A$ is given by,
+          \[
+            \Proj(y;A)=\argmin_{v\in\mathcal{R}(A)}\|v-y\|_2.
+          \]
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 30
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Null Space}
+  \vspace{1.10cm}
+  {\large
+  The \emph{nullspace} of a matrix $A\in\mathbb{R}^{m\times n}$, denoted
+  $\mathcal{N}(A)$ is the set of all vectors that equal $0$ when multiplied by
+  $A$, i.e.,
+  \[
+    \mathcal{N}(A)=\{x\in\mathbb{R}^{n}:Ax=0\}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 31
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Determinant}
+  \vspace{0.20cm}
+  {\small
+  Let $A\in\mathbb{R}^{n\times n}$,
+  $A_{\backslash i,\backslash j}\in\mathbb{R}^{(n-1)\times(n-1)}$ be the matrix
+  that results from deleting the $i$th row and $j$th column from $A$.
+
+  The general (recursive) formula for the determinant is
+  \[
+    |A|=\sum_{i=1}^{n}(-1)^{i+j}a_{ij}|A_{\backslash i,\backslash j}|
+    \qquad (\text{for any }j\in\{1,\ldots,n\})
+  \]
+  \[
+    =\sum_{j=1}^{n}(-1)^{i+j}a_{ij}|A_{\backslash i,\backslash j}|
+    \qquad (\text{for any }i\in\{1,\ldots,n\}).
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 32
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Determinant: Example}
+  \vspace{0.16cm}
+  {\scriptsize
+  However, the equations for determinants of matrices up to size $3\times 3$ are
+  fairly common, and it is good to know them:
+  \[
+    \left|\begin{bmatrix}a_{11}\end{bmatrix}\right|=a_{11}
+  \]
+  \[
+    \left|\begin{bmatrix}a_{11}&a_{12}\\a_{21}&a_{22}\end{bmatrix}\right|
+    =a_{11}a_{22}-a_{12}a_{21}
+  \]
+  \[
+  \begin{aligned}
+    \left|\begin{bmatrix}
+      a_{11}&a_{12}&a_{13}\\
+      a_{21}&a_{22}&a_{23}\\
+      a_{31}&a_{32}&a_{33}
+    \end{bmatrix}\right|
+    ={}&a_{11}a_{22}a_{33}+a_{12}a_{23}a_{31}+a_{13}a_{21}a_{32}\\
+      &-a_{11}a_{23}a_{32}-a_{12}a_{21}a_{33}-a_{13}a_{22}a_{31}.
+  \end{aligned}
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 33
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The Determinant}
+  \vspace{-0.06cm}
+  {\scriptsize
+  The \emph{determinant} of a square matrix $A\in\mathbb{R}^{n\times n}$, is a
+  function $\det:\mathbb{R}^{n\times n}\to\mathbb{R}$, and is denoted $|A|$ or
+  $\det A$.
+
+  \vspace{0.15cm}
+  Given a matrix
+  \[
+    A=\begin{bmatrix}a_1^T\\a_2^T\\\vdots\\a_n^T\end{bmatrix},
+  \]
+  consider the set of points $S\subset\mathbb{R}^{n}$ as follows:
+  \[
+    S=\left\{v\in\mathbb{R}^{n}:v=\sum_{i=1}^{n}\alpha_i a_i
+      \text{ where }0\le\alpha_i\le1,\ i=1,\ldots,n\right\}.
+  \]
+  The absolute value of the determinant of $A$ is a measure of the ``volume'' of
+  the set $S$.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 34. The geometric plot in the source is intentionally omitted.
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The Determinant}
+  \vspace{0.52cm}
+  {\large
+  For example, consider the $2\times2$ matrix,
+  \begin{equation}
+    A=\begin{bmatrix}1&3\\3&2\end{bmatrix}.
+    \tag{3}
+  \end{equation}
+  Here, the rows of the matrix are
+  \[
+    a_1=\begin{bmatrix}1\\3\end{bmatrix},\qquad
+    a_2=\begin{bmatrix}3\\2\end{bmatrix}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 35
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The Determinant: Properties}
+  \vspace{-0.02cm}
+  {\scriptsize
+  Algebraically, the determinant satisfies the following three properties:
+  \begin{enumerate}
+    \setlength{\itemsep}{0.22cm}
+    \item The determinant of the identity is $1$, $|I|=1$. (Geometrically, the
+          volume of a unit hypercube is $1$).
+    \item Given a matrix $A\in\mathbb{R}^{n\times n}$, if we multiply a single row
+          in $A$ by a scalar $t\in\mathbb{R}$, then the determinant of the new
+          matrix is $t|A|$. (Geometrically, multiplying one of the sides of the set
+          $S$ by a factor $t$ causes the volume to increase by a factor $t$.)
+    \item If we exchange any two rows $a_i^T$ and $a_j^T$ of $A$, then the
+          determinant of the new matrix is $-|A|$, for example
+  \end{enumerate}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 36
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The Determinant: Properties}
+  \vspace{0.18cm}
+  {\small
+  \begin{itemize}
+    \setlength{\itemsep}{0.31cm}
+    \item For $A\in\mathbb{R}^{n\times n}$, $|A|=|A^T|$.
+    \item For $A,B\in\mathbb{R}^{n\times n}$, $|AB|=|A||B|$.
+    \item For $A\in\mathbb{R}^{n\times n}$, $|A|=0$ if and only if $A$ is
+          singular (i.e., non-invertible). (If $A$ is singular then it does not
+          have full rank, and hence its columns are linearly dependent. In this
+          case, the set $S$ corresponds to a ``flat sheet'' within the
+          $n$-dimensional space and hence has zero volume.)
+    \item For $A\in\mathbb{R}^{n\times n}$ and $A$ non-singular,
+          $|A^{-1}|=1/|A|$.
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 37
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Eigenvalues and Eigenvectors}
+  \vspace{0.72cm}
+  {\large
+  Given a square matrix $A\in\mathbb{R}^{n\times n}$, we say that
+  $\lambda\in\mathbb{C}$ is an \emph{eigenvalue} of $A$ and $x\in\mathbb{C}^{n}$
+  is the corresponding \emph{eigenvector} if
+  \[
+    Ax=\lambda x,\qquad x\ne0.
+  \]
+  \vspace{0.45cm}
+  Intuitively, this definition means that multiplying $A$ by the vector $x$
+  results in a new vector that points in the same direction as $x$, but scaled by
+  a factor $\lambda$.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 38
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Gradient over Matrix}
+  \vspace{-0.12cm}
+  {\scriptsize
+  Suppose that $f:\mathbb{R}^{m\times n}\to\mathbb{R}$ is a function that takes
+  as input a matrix $A$ of size $m\times n$ and returns a real value. Then the
+  gradient of $f$ (with respect to $A\in\mathbb{R}^{m\times n}$) is the matrix of
+  partial derivatives, defined as:
+  \[
+    \nabla_A f(A)\in\mathbb{R}^{m\times n}
+    =\begin{bmatrix}
+      \dfrac{\partial f(A)}{\partial A_{11}}&
+      \dfrac{\partial f(A)}{\partial A_{12}}&\cdots&
+      \dfrac{\partial f(A)}{\partial A_{1n}}\\[0.55em]
+      \dfrac{\partial f(A)}{\partial A_{21}}&
+      \dfrac{\partial f(A)}{\partial A_{22}}&\cdots&
+      \dfrac{\partial f(A)}{\partial A_{2n}}\\
+      \vdots&\vdots&\ddots&\vdots\\[0.20em]
+      \dfrac{\partial f(A)}{\partial A_{m1}}&
+      \dfrac{\partial f(A)}{\partial A_{m2}}&\cdots&
+      \dfrac{\partial f(A)}{\partial A_{mn}}
+    \end{bmatrix}.
+  \]
+  i.e., an $m\times n$ matrix with
+  \[
+    (\nabla_A f(A))_{ij}=\frac{\partial f(A)}{\partial A_{ij}}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 39
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Gradient over Vector}
+  \vspace{-0.02cm}
+  {\scriptsize
+  Note that the size of $\nabla_A f(A)$ is always the same as the size of $A$.
+  So if, in particular, $A$ is just a vector $x\in\mathbb{R}^{n}$,
+  \[
+    \nabla_x f(x)=
+    \begin{bmatrix}
+      \dfrac{\partial f(x)}{\partial x_1}\\[0.45em]
+      \dfrac{\partial f(x)}{\partial x_2}\\
+      \vdots\\[0.20em]
+      \dfrac{\partial f(x)}{\partial x_n}
+    \end{bmatrix}.
+  \]
+  It follows directly from the equivalent properties of partial derivatives that:
+  \begin{itemize}
+    \setlength{\itemsep}{0.10cm}
+    \item $\nabla_x(f(x)+g(x))=\nabla_x f(x)+\nabla_x g(x)$.
+    \item For $t\in\mathbb{R}$, $\nabla_x(tf(x))=t\nabla_x f(x)$.
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 40
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The Hessian}
+  \vspace{-0.15cm}
+  {\scriptsize
+  Suppose that $f:\mathbb{R}^{n}\to\mathbb{R}$ is a function that takes a vector
+  in $\mathbb{R}^{n}$ and returns a real number. Then the \emph{Hessian} matrix
+  with respect to $x$, written $\nabla_x^2f(x)$ or simply as $H$ is the
+  $n\times n$ matrix of partial derivatives,
+  \[
+    \nabla_x^2f(x)\in\mathbb{R}^{n\times n}
+    =\begin{bmatrix}
+      \dfrac{\partial^2f(x)}{\partial x_1^2}&
+      \dfrac{\partial^2f(x)}{\partial x_1\partial x_2}&\cdots&
+      \dfrac{\partial^2f(x)}{\partial x_1\partial x_n}\\[0.45em]
+      \dfrac{\partial^2f(x)}{\partial x_2\partial x_1}&
+      \dfrac{\partial^2f(x)}{\partial x_2^2}&\cdots&
+      \dfrac{\partial^2f(x)}{\partial x_2\partial x_n}\\
+      \vdots&\vdots&\ddots&\vdots\\[0.20em]
+      \dfrac{\partial^2f(x)}{\partial x_n\partial x_1}&
+      \dfrac{\partial^2f(x)}{\partial x_n\partial x_2}&\cdots&
+      \dfrac{\partial^2f(x)}{\partial x_n^2}
+    \end{bmatrix}.
+  \]
+  Note that the Hessian is always symmetric, since
+  \[
+    \frac{\partial^2f(x)}{\partial x_i\partial x_j}
+    =\frac{\partial^2f(x)}{\partial x_j\partial x_i}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 41
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Gradients of Linear Functions}
+  \vspace{0.36cm}
+  {\small
+  For $x\in\mathbb{R}^{n}$, let $f(x)=b^Tx$ for some known vector
+  $b\in\mathbb{R}^{n}$. Then
+  \[
+    f(x)=\sum_{i=1}^{n}b_i x_i
+  \]
+  so
+  \[
+    \frac{\partial f(x)}{\partial x_k}
+    =\frac{\partial}{\partial x_k}\sum_{i=1}^{n}b_i x_i=b_k.
+  \]
+  From this we can easily see that $\nabla_x b^Tx=b$. This should be compared to
+  the analogous situation in single variable calculus, where
+  $\partial(ax)/\partial x=a$.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 42
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Common Gradient Formula}
+  \vspace{0.45cm}
+  {\fontsize{18}{23}\selectfont
+  \begin{itemize}
+    \setlength{\itemsep}{0.52cm}
+    \item $\nabla_x b^Tx=b$
+    \item $\nabla_x^2 b^Tx=0$
+    \item $\nabla_x x^TAx=2Ax$ (if $A$ symmetric)
+    \item $\nabla_x^2 x^TAx=2A$ (if $A$ symmetric)
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 43
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Least Squares}
+  \vspace{0.62cm}
+  {\large
+  \begin{itemize}
+    \item Given a full rank matrix $A\in\mathbb{R}^{m\times n}$, and a vector
+          $b\in\mathbb{R}^{m}$ such that $b\notin\mathcal{R}(A)$, we want to find
+          a vector $x$ such that $Ax$ is as close as possible to $b$, as measured
+          by the square of the Euclidean norm $\|Ax-b\|_2^2$.
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 44
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Outline}
+  \vspace{1.10cm}
+  {\fontsize{21}{26}\selectfont
+  \begin{itemize}
+    \setlength{\itemsep}{0.75cm}
+    \item \textcolor{fadedgray}{Linear Algebra Review}
+    \item Probability Review
+  \end{itemize}}
+\end{frame}
+
+
+
+\begin{frame}[t]{Basic Concepts}
+	\vspace{-0.10cm}
+	
+	{\small
+		\begin{itemize}
+			\setlength{\itemsep}{0.12cm}
+			\item Performing an \textbf{experiment}
+			$\longrightarrow$ an \textbf{outcome}
+			\item Sample space ($S$): the set of all possible outcomes
+			of an experiment
+			\item Event ($E$): a subset of $S$, that is, $E\subseteq S$
+		\end{itemize}
+		
+		\vspace{0.28cm}
+		
+		\begin{itemize}
+			\setlength{\itemsep}{0.12cm}
+			
+			\item \textbf{Non-negativity:}
+			$P(E)\geq 0$ for every $E\subseteq S$.
+			
+			\item \textbf{Normalization:}
+			$P(S)=1$.
+			
+			\item \textbf{Countable additivity:}
+			For every sequence of pairwise disjoint events
+			$E_1,E_2,\ldots$,
+			\[
+			P\left(\bigcup_{i=1}^{\infty}E_i\right)
+			=
+			\sum_{i=1}^{\infty}P(E_i).
+			\]
+		\end{itemize}
+	}
+\end{frame}
+
+\begin{frame}
+	If $E\subseteq F$, then $
+P(E)\leq P(F).$
+
+The inclusion-exclusion principle for two events is
+\[
+P(E\cup F)
+=
+P(E)+P(F)-P(E\cap F).
+\]
+\vspace{0.15cm}
+
+\textbf{General inclusion-exclusion principle:}
+\[
+P\left(\bigcup_{i=1}^{n}E_i\right)
+=
+\sum_{r=1}^{n}(-1)^{r+1}
+\sum_{1\leq i_1<\cdots<i_r\leq n}
+P\left(
+E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
+\right).
+\]
+
+
+
+\end{frame}
+
+
+\begin{frame}[t]{Conditional Probability and Bayes' Rule}
+  \vspace{-0.12cm}
+  {\scriptsize
+  For any events $A,B$ such that $P(B)\ne0$, we define:
+  \[
+    P(A\mid B):=\frac{P(A\cap B)}{P(B)}.
+  \]
+  Let's apply conditional probability to obtain Bayes' Rule!
+  \[
+  \begin{aligned}
+    P(B\mid A)
+      &=\frac{P(B\cap A)}{P(A)}
+       =\frac{P(A\cap B)}{P(A)}\\
+      &=\boxed{\frac{P(B)P(A\mid B)}{P(A)}}.
+  \end{aligned}
+  \]
+  \textbf{Conditioned Bayes' Rule:} given events $A,B,C$,
+  \[
+    P(A\mid B,C)=\frac{P(B\mid A,C)P(A\mid C)}{P(B\mid C)}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 48
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Law of Total Probability}
+  \vspace{-0.10cm}
+  {\scriptsize
+  Let $B_1,\ldots,B_n$ be $n$ disjoint events whose union is the entire sample
+  space. Then, for any event $A$,
+  \[
+  \begin{aligned}
+    P(A)&=\sum_{i=1}^{n}P(A\cap B_i)\\
+        &=\sum_{i=1}^{n}P(A\mid B_i)P(B_i).
+  \end{aligned}
+  \]
+  We can then write Bayes' Rule as:
+  \[
+  \begin{aligned}
+    P(B_k\mid A)
+      &=\frac{P(B_k)P(A\mid B_k)}{P(A)}\\
+      &=\boxed{\frac{P(B_k)P(A\mid B_k)}
+        {\sum_{i=1}^{n}P(A\mid B_i)P(B_i)}}.
+  \end{aligned}
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 49
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Chain Rule}
+  \vspace{1.05cm}
+  {\large
+  For any $n$ events $A_1,\ldots,A_n$, the joint probability can be expressed as
+  a product of conditionals:
+  \[
+  \begin{aligned}
+  P(A_1\cap A_2\cap\cdots\cap A_n)
+  ={}&P(A_1)P(A_2\mid A_1)P(A_3\mid A_2\cap A_1)\cdots\\
+     &P(A_n\mid A_{n-1}\cap A_{n-2}\cap\cdots\cap A_1).
+  \end{aligned}
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 50
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Independence}
+  \vspace{0.05cm}
+  {\scriptsize
+  Events $A,B$ are independent if
+  \[
+    P(AB)=P(A)P(B).
+  \]
+  We denote this as $A\perp B$. From this, we know that if $A\perp B$,
+  \[
+    P(A\mid B)=\frac{P(A\cap B)}{P(B)}
+      =\frac{P(A)P(B)}{P(B)}=P(A).
+  \]
+  \textbf{Implication:} If two events are independent, observing one event does
+  not change the probability that the other event occurs.
+
+  In general: events $A_1,\ldots,A_n$ are \textbf{mutually independent} if
+  \[
+    P\left(\bigcap_{i\in S}A_i\right)=\prod_{i\in S}P(A_i).
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 51
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Random Variable}
+  \vspace{1.08cm}
+  {\large
+  A \textbf{random variable} $X$ is a variable that probabilistically takes on
+  different values. It maps outcomes to real values.
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 52
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Probability Mass Function (PMF)}
+  \vspace{0.95cm}
+  {\large
+  Given a discrete RV $X$, a PMF maps values of $X$ to probabilities.
+  \[
+    p_X(x):=p(x):=P(X=x)
+  \]
+  For a valid PMF,
+  \[
+    \sum_{x\in\Val(X)}p_X(x)=1.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 53
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Cumulative Distribution Function (CDF)}
+  \vspace{0.02cm}
+  {\small
+  A CDF maps a continuous RV to a probability (i.e. $\mathbb{R}\to[0,1]$)
+  \[
+    F_X(a):=F(a):=P(X\le a).
+  \]
+  A CDF must fulfill the following:
+  \begin{itemize}
+    \setlength{\itemsep}{0.14cm}
+    \item $\lim_{x\to-\infty}F_X(x)=0$
+    \item $\lim_{x\to\infty}F_X(x)=1$
+    \item If $a\le b$, then $F_X(a)\le F_X(b)$ (i.e. CDF must be nondecreasing)
+  \end{itemize}
+  Also note:
+  \[
+    P(a\le X\le b)=F_X(b)-F_X(a).
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 54
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Probability Density Function (PDF)}
+  \vspace{1.15cm}
+  {\large
+  PDF of a continuous RV is simply the derivative of the CDF.
+  \[
+    f_X(x):=f(x):=\frac{dF_X(x)}{dx}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 55
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Expectation}
+  \vspace{-0.08cm}
+  {\scriptsize
+  Let $g$ be an arbitrary real-valued function.
+  \begin{itemize}
+    \setlength{\itemsep}{0.15cm}
+    \item If $X$ is a discrete RV with PMF $p_X$:
+      \[
+        \mathbb{E}[g(X)]:=\sum_{x\in\Val(X)}g(x)p_X(x)
+      \]
+    \item If $X$ is a continuous RV with PDF $f_X$:
+      \[
+        \mathbb{E}[g(X)]:=\int_{-\infty}^{\infty}g(x)f_X(x)\,dx
+      \]
+  \end{itemize}
+  Intuitively, expectation is a weighted average of the values of $g(x)$,
+  weighted by the probability of $x$. 
+  }
+  
+  
+\end{frame}
+
+
+\begin{frame}{Markov's Inequality}
+	Let $X$ be a \textcolor{blue}{non-negative} RV. Then  for any $\tau>0$,
+	
+	$$P(X>\tau)\leq \frac{E[X]}{\tau}.$$
+	
+\end{frame}
+% -----------------------------------------------------------------------------
+% 56
+% -----------------------------------------------------------------------------
+
+
+% -----------------------------------------------------------------------------
+% 57
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Properties of Expectation}
+  \vspace{0.18cm}
+  {\small
+  For any constant $a\in\mathbb{R}$ and arbitrary real function $f$:
+  \begin{itemize}
+    \setlength{\itemsep}{0.10cm}
+    \item $\mathbb{E}[a]=a$
+    \item $\mathbb{E}[af(X)]=a\mathbb{E}[f(X)]$
+  \end{itemize}
+
+  \vspace{0.45cm}
+  \textbf{Linearity of Expectation}
+
+  Given $n$ real-valued functions $f_1(X),\ldots,f_n(X)$,
+  \[
+    \mathbb{E}\!\left[\sum_{i=1}^{n}f_i(X)\right]
+      =\sum_{i=1}^{n}\mathbb{E}[f_i(X)].
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 58
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% 59
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Variance}
+  \vspace{0.08cm}
+  {\small
+  The \textbf{variance} of a RV $X$ measures how concentrated the distribution of
+  $X$ is around its mean.
+  \[
+  \begin{aligned}
+    \Var(X)&:=\mathbb{E}[(X-\mathbb{E}[X])^2]\\
+           &=\mathbb{E}[X^2]-\mathbb{E}[X]^2.
+  \end{aligned}
+  \]
+  \textbf{Interpretation:} $\Var(X)$ is the expected deviation of $X$ from
+  $\mathbb{E}[X]$.
+
+  \textbf{Properties:} For any constant $a\in\mathbb{R}$, real-valued function
+  $f(X)$
+  \begin{itemize}
+    \setlength{\itemsep}{0.10cm}
+    \item $\Var[a]=0$
+    \item $\Var[af(X)]=a^2\Var[f(X)]$
+  \end{itemize}
+  }
+\end{frame}
+
+
+% -----------------------------------------------------------------------------
+% 60
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Example Distributions}
+  \vspace{-0.16cm}
+  \centering
+  {\fontsize{7.7}{9.3}\selectfont
+  \renewcommand{\arraystretch}{1.38}
+  \begin{tabular}{>{\raggedright\arraybackslash}p{2.35cm}
+                  >{\centering\arraybackslash}p{6.20cm}
+                  >{\centering\arraybackslash}p{1.45cm}
+                  >{\centering\arraybackslash}p{1.65cm}}
+    \toprule
+    \textbf{Distribution} & \textbf{PDF or PMF} & \textbf{Mean} & \textbf{Variance}\\
+    \midrule
+    $\operatorname{Bernoulli}(p)$ &
+      $\begin{cases}p,&x=1\\1-p,&x=0\end{cases}$ &
+      $p$ & $p(1-p)$\\
+    $\operatorname{Binomial}(n,p)$ &
+      $\binom{n}{k}p^k(1-p)^{n-k}$ for $k=0,1,\ldots,n$ &
+      $np$ & $np(1-p)$\\
+    $\operatorname{Geometric}(p)$ &
+      $p(1-p)^{k-1}$ for $k=1,2,\ldots$ &
+      $\dfrac{1}{p}$ & $\dfrac{1-p}{p^2}$\\
+    $\operatorname{Uniform}(a,b)$ &
+      $\dfrac{1}{b-a}$ for all $x\in(a,b)$ &
+      $\dfrac{a+b}{2}$ & $\dfrac{(b-a)^2}{12}$\\
+    $\operatorname{Gaussian}(\mu,\sigma^2)$ &
+      $\dfrac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$
+      for all $x\in(-\infty,\infty)$ &
+      $\mu$ & $\sigma^2$\\
+    $\operatorname{Exponential}(\lambda)$ &
+      $\lambda e^{-\lambda x}$ for all $x\ge0,\lambda\ge0$ &
+      $\dfrac{1}{\lambda}$ & $\dfrac{1}{\lambda^2}$\\
+    \bottomrule
+  \end{tabular}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 61
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Joint and Marginal Distributions}
+  \vspace{0.18cm}
+  {\small
+  \begin{itemize}
+    \setlength{\itemsep}{0.22cm}
+    \item Joint PMF for discrete RV's $X,Y$:
+      \[
+        p_{XY}(x,y)=P(X=x,Y=y)
+      \]
+      Note that
+      \[
+        \sum_{x\in\Val(X)}\sum_{y\in\Val(Y)}p_{XY}(x,y)=1.
+      \]
+    \item Marginal PMF of $X$, given joint PMF of $X,Y$:
+      \[
+        p_X(x)=\sum_y p_{XY}(x,y).
+      \]
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 62
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Joint and Marginal Distributions}
+  \vspace{0.12cm}
+  {\scriptsize
+  \begin{itemize}
+    \setlength{\itemsep}{0.18cm}
+    \item Joint PDF for continuous RV's $X_1,\ldots,X_n$:
+      \[
+        f(x_1,\ldots,x_n)
+        =\frac{\partial^nF(x_1,\ldots,x_n)}
+        {\partial x_1\partial x_2\cdots\partial x_n}
+      \]
+      Note that
+      \[
+        \int_{x_1}\int_{x_2}\cdots\int_{x_n}
+        f(x_1,\ldots,x_n)\,dx_1\cdots dx_n=1.
+      \]
+    \item Marginal PDF of $X_1$, given joint PDF of $X_1,\ldots,X_n$:
+      \[
+        f_{X_1}(x_1)
+        =\int_{x_2}\cdots\int_{x_n}f(x_1,\ldots,x_n)\,dx_2\cdots dx_n.
+      \]
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 63
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Expectation for multiple random variables}
+  \vspace{0.10cm}
+  {\small
+  Given two RV's $X,Y$ and a function $g:\mathbb{R}^2\to\mathbb{R}$ of $X,Y$,
+  \begin{itemize}
+    \setlength{\itemsep}{0.24cm}
+    \item for discrete $X,Y$:
+      \[
+        \mathbb{E}[g(X,Y)]:=
+        \sum_{x\in\Val(X)}\sum_{y\in\Val(Y)}g(x,y)p_{XY}(x,y)
+      \]
+    \item for continuous $X,Y$:
+      \[
+        \mathbb{E}[g(X,Y)]:=
+        \int_{-\infty}^{\infty}\int_{-\infty}^{\infty}
+        g(x,y)f_{XY}(x,y)\,dx\,dy.
+      \]
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 64
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Covariance}
+  \vspace{0.14cm}
+  {\small
+  \textbf{Intuitively:} measures how much one RV's value tends to move with
+  another RV's value. For RV's $X,Y$:
+  \[
+  \begin{aligned}
+    \Cov[X,Y]&:=\mathbb{E}[(X-\mathbb{E}[X])(Y-\mathbb{E}[Y])]\\
+             &=\mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y].
+  \end{aligned}
+  \]
+  \begin{itemize}
+    \setlength{\itemsep}{0.10cm}
+    \item If $\Cov[X,Y]<0$, then $X$ and $Y$ are negatively correlated
+    \item If $\Cov[X,Y]>0$, then $X$ and $Y$ are positively correlated
+    \item If $\Cov[X,Y]=0$, then $X$ and $Y$ are uncorrelated
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 65
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Variance of two variables}
+  \vspace{1.55cm}
+  {\fontsize{21}{26}\selectfont
+  \[
+    \Var[X+Y]=\Var[X]+\Var[Y]+2\Cov[X,Y]
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 66
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Conditional distributions for RVs}
+  \vspace{-0.10cm}
+  {
+  Works the same way with RV's as with events:
+  \begin{itemize}
+    \setlength{\itemsep}{0.15cm}
+    \item For discrete $X,Y$:
+      \[
+        p_{Y\mid X}(y\mid x)=\frac{p_{XY}(x,y)}{p_X(x)}
+      \]
+    \item For continuous $X,Y$:
+      \[
+        f_{Y\mid X}(y\mid x)=\frac{f_{XY}(x,y)}{f_X(x)}
+      \]
+    \item In general, for continuous $X_1,\ldots,X_n$:
+      \[
+        f_{X_1\mid X_2,\ldots,X_n}(x_1\mid x_2,\ldots,x_n)
+        =\frac{f_{X_1,X_2,\ldots,X_n}(x_1,x_2,\ldots,x_n)}
+        {f_{X_2,\ldots,X_n}(x_2,\ldots,x_n)}.
+      \]
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 67
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Bayes' Rule for RVs}
+  \vspace{0.08cm}
+  {
+  Also works the same way for RV's as with events:
+  \begin{itemize}
+    \setlength{\itemsep}{0.18cm}
+    \item For discrete $X,Y$:
+      \[
+        p_{Y\mid X}(y\mid x)
+        =\frac{p_{X\mid Y}(x\mid y)p_Y(y)}
+        {\sum_{y'\in\Val(Y)}p_{X\mid Y}(x\mid y')p_Y(y')}
+      \]
+    \item For continuous $X,Y$:
+      \[
+        f_{Y\mid X}(y\mid x)
+        =\frac{f_{X\mid Y}(x\mid y)f_Y(y)}
+        {\int_{-\infty}^{\infty}f_{X\mid Y}(x\mid y')f_Y(y')\,dy'}.
+      \]
+  \end{itemize}
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 68
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Random Vectors}
+  \vspace{-0.08cm}
+  {
+  Given $n$ RV's $X_1,\ldots,X_n$, we can define a random vector $X$ s.t.
+  \[
+    X=\begin{bmatrix}X_1\\X_2\\\vdots\\X_n\end{bmatrix}.
+  \]
+  Note: all the notions of joint PDF/CDF will apply to $X$.
+
+  Given $g:\mathbb{R}^{n}\to\mathbb{R}^{m}$, we have:
+  \[
+    g(X)=\begin{bmatrix}g_1(X)\\g_2(X)\\\vdots\\g_m(X)\end{bmatrix},\qquad
+    \mathbb{E}[g(X)]=
+    \begin{bmatrix}
+      \mathbb{E}[g_1(X)]\\
+      \mathbb{E}[g_2(X)]\\
+      \vdots\\
+      \mathbb{E}[g_m(X)]
+    \end{bmatrix}.
+  \]
+  }
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% 69
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Covariance Matrices}
+  \vspace{-0.15cm}
+  {\fontsize{8.8}{10.5}\selectfont
+  For a random vector $X\in\mathbb{R}^{n}$, we define its covariance matrix
+  $\Sigma$ as the $n\times n$ matrix whose $ij$-th entry contains the covariance
+  between $X_i$ and $X_j$.
+  \[
+    \Sigma=
+    \begin{bmatrix}
+      \Cov[X_1,X_1]&\cdots&\Cov[X_1,X_n]\\
+      \vdots&\ddots&\vdots\\
+      \Cov[X_n,X_1]&\cdots&\Cov[X_n,X_n]
+    \end{bmatrix}.
+  \]
+  applying linearity of expectation and the fact that
+  $\Cov[X_i,X_j]=\mathbb{E}[(X_i-\mathbb{E}[X_i])(X_j-\mathbb{E}[X_j])]$, we
+  obtain
+  \[
+    \Sigma=\mathbb{E}[(X-\mathbb{E}[X])(X-\mathbb{E}[X])^T].
+  \]
+  \textbf{Properties:}
+  \begin{itemize}
+    \setlength{\itemsep}{0.05cm}
+    \item $\Sigma$ is symmetric and PSD
+    \item If $X_i\perp X_j$ for all $i,j$, then
+          $\Sigma=\diag(\Var[X_1],\ldots,\Var[X_n])$
+  \end{itemize}
+  }
+\end{frame}
+
+
+
+\begin{frame}[t]{Multivariate Gaussian}
+  \vspace{0.1cm}
+  {
+  The multivariate Gaussian $X\sim\mathcal{N}(\mu,\Sigma)$, $X\in\mathbb{R}^{n}$:
+  \[
+    p(x;\mu,\Sigma)
+    =\frac{1}{\det(\Sigma)^{1/2}(2\pi)^{n/2}}
+      \exp\!\left(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)\right)
+  \]
+  Gaussian when $n=1$.
+  \[
+    p(x;\mu,\sigma^2)
+    =\frac{1}{\sigma(2\pi)^{1/2}}
+      \exp\!\left(-\frac{1}{2\sigma^2}(x-\mu)^2\right)
+  \]
+  Notice that if $\Sigma\in\mathbb{R}^{1\times1}$, then
+  $\Sigma=\Var[X_1]=\sigma^2$, and so $\Sigma^{-1}=1/\sigma^2$ and
+  $\det(\Sigma)^{1/2}=\sigma$.
+  }
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}[t]{Information and Entropy}
+	\vspace{0.2cm}
+	
+	
+	
+	\begin{block}{Entropy}
+		The entropy of a discrete random variable $X$ is (we take 2 as the base of $log$ operator)
+		\[
+		H(X)
+		=
+		\mathbb{E}\bigl[\mathcal{I}(X)\bigr]
+		=
+		-\sum_{x\in\mathcal{X}}p(x)\log p(x).
+		\]
+		Entropy measures the average uncertainty in $X$.
+	\end{block}
+	
+
+	
+	\[
+	0\leq H(X)\leq \log |\mathcal{X}|,
+	\]
+	with maximum entropy when $X$ is uniformly distributed.
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}[t]{Joint and Conditional Entropy}
+	\vspace{0.2cm}
+	
+	\begin{block}{Joint entropy}
+		The uncertainty associated with two random variables is
+		\[
+		H(X,Y)
+		=
+		-\sum_{x,y}p(x,y)\log p(x,y).
+		\]
+	\end{block}
+	
+	\begin{block}{Conditional entropy}
+		The uncertainty remaining in $Y$ after observing $X$ is
+		\[
+		H(Y\mid X)
+		=
+		-\sum_{x,y}p(x,y)\log p(y\mid x).
+		\]
+	\end{block}
+	
+	\begin{exampleblock}{Chain rule}
+		\[
+		H(X,Y)=H(X)+H(Y\mid X)
+		=H(Y)+H(X\mid Y).
+		\]
+	\end{exampleblock}
+	
+	Important properties:
+	\[
+	H(Y\mid X)\leq H(Y),
+	\]
+	and if $X$ and $Y$ are independent,
+	\[
+	H(X,Y)=H(X)+H(Y).
+	\]
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}[t]{Mutual Information}
+	\vspace{0.2cm}
+	
+	\begin{block}{Definition}
+		Mutual information measures how much knowing one random variable
+		reduces uncertainty about another:
+		\[
+		I(X;Y)
+		=
+		\sum_{x,y}p(x,y)
+		\log
+		\frac{p(x,y)}{p(x)p(y)}.
+		\]
+	\end{block}
+	
+	\begin{exampleblock}{Equivalent expressions}
+		\[
+		I(X;Y)
+		=
+		H(X)+H(Y)-H(X,Y),
+		\]
+		\[
+		I(X;Y)
+		=
+		H(Y)-H(Y\mid X)
+		=
+		H(X)-H(X\mid Y).
+		\]
+	\end{exampleblock}
+	
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}[t]
+	\vspace{0.2cm}
+	
+	\begin{block}{Cross-entropy}
+		\[
+		H(p,q)
+		=
+		-\sum_x p(x)\log q(x)
+		\]
+for two distributions $p$ and $q$.
+	\end{block}
+	
+	\begin{block}{Kullback--Leibler divergence}
+		\[
+		D_{\mathrm{KL}}(p\Vert q)
+		=
+		\sum_x p(x)\log\frac{p(x)}{q(x)}.
+		\]
+	\end{block}
+
+	
+	\begin{itemize}
+		\item 	$H(p,q)
+		=
+		H(p)+D_{\mathrm{KL}}(p\Vert q)$.
+		\item $D_{\mathrm{KL}}(p\Vert q)\geq 0$.
+		\item In general,
+		$D_{\mathrm{KL}}(p\Vert q)\neq D_{\mathrm{KL}}(q\Vert p)$.
+		\item Cross-entropy is commonly used as a classification loss.
+	\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}[t]{Examples}
+	\vspace{0.2cm}
+	
+	Suppose $X$ is a fair binary random variable: $
+	P(X=0)=P(X=1)=\frac{1}{2}$.
+	Therefore, $
+	H(X)=1\text{ bit}$.
+	
+	\begin{columns}[T,onlytextwidth]
+		
+		\begin{column}{0.47\textwidth}
+			\begin{block}{Case 1: $Y=X$}
+				Knowing $X$ completely determines $Y$:
+				\[
+				H(Y\mid X)=0,
+				\]
+				\[
+				I(X;Y)=H(Y)=1\text{ bit}.
+				\]
+			\end{block}
+		\end{column}
+		
+		\begin{column}{0.47\textwidth}
+			\begin{block}{Case 2: $X$ and $Y$ independent}
+				Knowing $X$ provides no information about $Y$:
+				\[
+				H(Y\mid X)=H(Y)=1,
+				\]
+				\[
+				I(X;Y)=0.
+				\]
+			
+			\end{block}
+		\end{column}
+		
+	\end{columns}
+	
+	\vspace{0.25cm}
+	
+	\begin{center}
+		\small
+		Mutual information measures the reduction in uncertainty
+		produced by observing another variable.
+	\end{center}
+\end{frame}
+
+
+
+
+%------------------------------------------------------
+\begin{frame}
+  \centering
+  \vfill
+  {\color{slideorange}\fontsize{31}{37}\selectfont\bfseries Thank You!\par}
+  \vspace{0.55cm}
+  {\fontsize{25}{30}\selectfont Questions?\par}
+  \vfill
+\end{frame}
+
+\end{document}

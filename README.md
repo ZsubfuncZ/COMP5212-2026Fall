@@ -9,7 +9,6 @@ Website for:
 - `index.html` — homepage
 - `syllabus.html` — syllabus
 - `schedule.html` — course schedule
-- `lectures.html` — lecture notes
 - `assets/css/style.css` — website styling
 - `homework/` — homework assignments
 
