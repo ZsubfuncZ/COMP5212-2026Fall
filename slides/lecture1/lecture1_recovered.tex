@@ -119,6 +119,7 @@
     \setlength{\itemsep}{0.75cm}
     \item Linear Algebra Review
     \item Probability Review
+    \item Calculus Review
   \end{itemize}}
 \end{frame}
 
@@ -132,6 +133,7 @@
     \setlength{\itemsep}{0.75cm}
     \item Linear Algebra Review
     \item \textcolor{fadedgray}{Probability Review}
+        \item \textcolor{fadedgray}{Calculus Review}
   \end{itemize}}
 \end{frame}
 
@@ -995,6 +997,7 @@
     \setlength{\itemsep}{0.75cm}
     \item \textcolor{fadedgray}{Linear Algebra Review}
     \item Probability Review
+    \item  \textcolor{fadedgray}{Calculus Review}
   \end{itemize}}
 \end{frame}
 
@@ -1604,7 +1607,7 @@ E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
 	
 	
 	
-	\begin{block}{Entropy}
+\textbf{Entropy.} 
 		The entropy of a discrete random variable $X$ is (we take 2 as the base of $log$ operator)
 		\[
 		H(X)
@@ -1614,7 +1617,7 @@ E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
 		-\sum_{x\in\mathcal{X}}p(x)\log p(x).
 		\]
 		Entropy measures the average uncertainty in $X$.
-	\end{block}
+
 	
 
 	
@@ -1628,30 +1631,29 @@ E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
 \begin{frame}[t]{Joint and Conditional Entropy}
 	\vspace{0.2cm}
 	
-	\begin{block}{Joint entropy}
+	\textbf{Joint entropy.}
 		The uncertainty associated with two random variables is
 		\[
 		H(X,Y)
 		=
 		-\sum_{x,y}p(x,y)\log p(x,y).
 		\]
-	\end{block}
+
 	
-	\begin{block}{Conditional entropy}
+\textbf{Conditional entropy.}
 		The uncertainty remaining in $Y$ after observing $X$ is
 		\[
 		H(Y\mid X)
 		=
 		-\sum_{x,y}p(x,y)\log p(y\mid x).
 		\]
-	\end{block}
+
 	
-	\begin{exampleblock}{Chain rule}
+\textbf{Chain rule.}
 		\[
 		H(X,Y)=H(X)+H(Y\mid X)
 		=H(Y)+H(X\mid Y).
 		\]
-	\end{exampleblock}
 	
 	Important properties:
 	\[
@@ -1667,7 +1669,7 @@ E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
 \begin{frame}[t]{Mutual Information}
 	\vspace{0.2cm}
 	
-	\begin{block}{Definition}
+
 		Mutual information measures how much knowing one random variable
 		reduces uncertainty about another:
 		\[
@@ -1677,9 +1679,7 @@ E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
 		\log
 		\frac{p(x,y)}{p(x)p(y)}.
 		\]
-	\end{block}
 	
-	\begin{exampleblock}{Equivalent expressions}
 		\[
 		I(X;Y)
 		=
@@ -1692,7 +1692,7 @@ E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
 		=
 		H(X)-H(X\mid Y).
 		\]
-	\end{exampleblock}
+
 	
 \end{frame}
 
@@ -1700,22 +1700,21 @@ E_{i_1}\cap E_{i_2}\cap\cdots\cap E_{i_r}
 \begin{frame}[t]
 	\vspace{0.2cm}
 	
-	\begin{block}{Cross-entropy}
+\textbf{Cross-entropy.}
 		\[
 		H(p,q)
 		=
 		-\sum_x p(x)\log q(x)
 		\]
 for two distributions $p$ and $q$.
-	\end{block}
+
 	
-	\begin{block}{Kullback--Leibler divergence}
+\textbf{Kullback--Leibler divergence.}
 		\[
 		D_{\mathrm{KL}}(p\Vert q)
 		=
 		\sum_x p(x)\log\frac{p(x)}{q(x)}.
 		\]
-	\end{block}
 
 	
 	\begin{itemize}
@@ -1777,8 +1776,214 @@ for two distributions $p$ and $q$.
 \end{frame}
 
 
+\begin{frame}[t]{Outline}
+	\vspace{1.10cm}
+	{\fontsize{21}{26}\selectfont
+		\begin{itemize}
+			\setlength{\itemsep}{0.75cm}
+			\item \textcolor{fadedgray}{Linear Algebra Review}
+			\item  \textcolor{fadedgray}{Probability Review}
+			\item  Calculus Review
+	\end{itemize}}
+\end{frame}
 
 
+\begin{frame}[t]{Partial Derivative}
+	
+	For a multivariable function
+	\[
+	f(\mathbf{x}) = f(x_1,\ldots,x_d),
+	\]
+	the partial derivative with respect to $x_i$ is
+	\[
+	\frac{\partial f}{\partial x_i}
+	=
+	\lim_{\delta \to 0}
+	\frac{
+		f(x_1,\ldots,x_i+\delta,\ldots,x_d)
+		-
+		f(x_1,\ldots,x_i,\ldots,x_d)
+	}{\delta}.
+	\]
+	
+	\vspace{0.3cm}
+	
+	Collecting all partial derivatives gives the \textbf{gradient}:
+	\[
+	\nabla f(\mathbf{x})
+	=
+	\begin{bmatrix}
+		\frac{\partial f}{\partial x_1} \\
+		\vdots \\
+		\frac{\partial f}{\partial x_d}
+	\end{bmatrix}.
+	\]
+	
+\end{frame}
+
+\begin{frame}[t]{Chain Rule}
+	
+	\begin{columns}[T]
+		
+		% Left side
+		\begin{column}{0.53\textwidth}
+			
+			\textbf{Single variable:}
+			\[
+			y = f(z), \qquad z = g(x),
+			\]
+			\[
+			\frac{dy}{dx}
+			=
+			\frac{dy}{dz}
+			\frac{dz}{dx}.
+			\]
+			
+			\vspace{0.3cm}
+			
+			\textbf{Multiple variables:}
+			
+			\[
+			y = f(\mathbf{z}),
+			\qquad
+			\mathbf{z} = g(\mathbf{x}),
+			\]
+			
+			\[
+			\nabla_{\mathbf{x}} y
+			=
+			J_g(\mathbf{x})^\top
+			\nabla_{\mathbf{z}} f(\mathbf{z}).
+			\]
+			
+		\end{column}
+		
+		% Right side
+		\begin{column}{0.44\textwidth}
+			
+			\small
+			
+			Let
+			\[
+			\mathbf{x} =
+			\begin{bmatrix}
+				x_1 \\ \vdots \\ x_d
+			\end{bmatrix},
+			\qquad
+			\mathbf{z} =
+			\begin{bmatrix}
+				z_1 \\ \vdots \\ z_m
+			\end{bmatrix}.
+			\]
+			
+			The Jacobian of $g$ is
+			
+			\[
+			J_g(\mathbf{x})
+			=
+			\begin{bmatrix}
+				\frac{\partial z_1}{\partial x_1}
+				&
+				\cdots
+				&
+				\frac{\partial z_1}{\partial x_d}
+				\\[4pt]
+				\vdots
+				&
+				\ddots
+				&
+				\vdots
+				\\[4pt]
+				\frac{\partial z_m}{\partial x_1}
+				&
+				\cdots
+				&
+				\frac{\partial z_m}{\partial x_d}
+			\end{bmatrix}.
+			\]
+			
+		\end{column}
+		
+	\end{columns}
+	
+\end{frame}
+
+
+\begin{frame}[t]{Tylor Expansion}
+	
+	\textbf{Single variable case.}
+	\[
+	f(x_0+\delta)
+	\approx
+	f(x_0)
+	+\delta f'(x_0)
+	+\frac{\delta^2}{2!}f''(x_0)
+	+\cdots
+	+\frac{\delta^n}{n!}f^{(n)}(x_0).
+	\]
+	
+	\textbf{Multi variable case.}
+	
+	\[
+	f(\mathbf{x}_0+\boldsymbol{\delta})
+	\approx
+	f(\mathbf{x}_0)
+	+
+	\nabla f(\mathbf{x}_0)^\top \boldsymbol{\delta}
+	+
+	\frac{1}{2}
+	\boldsymbol{\delta}^\top
+	\nabla^2 f(\mathbf{x}_0)
+	\boldsymbol{\delta}.
+	\]
+\end{frame}
+
+
+\begin{frame}[t]{Convexity}
+	
+	A function $f:\mathbb{R}^d \rightarrow \mathbb{R}$ is \textbf{convex} if, for any
+	$\mathbf{x},\mathbf{y}$ and $\lambda \in [0,1]$,
+	
+	\[
+	f\bigl(\lambda \mathbf{x} + (1-\lambda)\mathbf{y}\bigr)
+	\leq
+	\lambda f(\mathbf{x})
+	+
+	(1-\lambda)f(\mathbf{y}).
+	\]
+	
+	\vspace{0.25cm}
+	
+	For a differentiable function,
+	\[
+	f(\mathbf{y})
+	\geq
+	f(\mathbf{x})
+	+
+	\nabla f(\mathbf{x})^\top(\mathbf{y}-\mathbf{x}).
+	\]
+	
+	\vspace{0.25cm}
+	
+	For a twice differentiable function,
+	\[
+	\nabla^2 f(\mathbf{x}) \succeq 0,
+	\qquad
+	\text{for all } \mathbf{x}.
+	\]
+	
+	\vspace{0.3cm}
+	
+	\textbf{Examples:}
+	\[
+	f(x)=x^2,
+	\qquad
+	f(\mathbf{x})=\|\mathbf{x}\|_2^2,
+	\qquad
+	f(x)=-\log x \;\;(x>0).
+	\]
+	
+\end{frame}
 %------------------------------------------------------
 \begin{frame}
   \centering
@@ -1788,5 +1993,7 @@ for two distributions $p$ and $q$.
   {\fontsize{25}{30}\selectfont Questions?\par}
   \vfill
 \end{frame}
+
+
 
 \end{document}

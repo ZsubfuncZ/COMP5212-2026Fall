@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.20)  26 AUG 2026 14:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.20)  1 SEP 2026 07:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1113,20 +1113,20 @@ al/texlive/2024/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc} <./image/logo.png>] [2
 <image/machine_learning.png, id=59, 1258.7025pt x 1258.7025pt>
 File: image/machine_learning.png Graphic file (type png)
 <use image/machine_learning.png>
-Package pdftex.def Info: image/machine_learning.png  used on input line 285.
+Package pdftex.def Info: image/machine_learning.png  used on input line 286.
 (pdftex.def)             Requested size: 183.95726pt x 183.95726pt.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 285.
+(Font)              <12> on input line 286.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 285.
+(Font)              <8> on input line 286.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 285.
+(Font)              <6> on input line 286.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <12> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 285.
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 286.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <8> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 285.
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 286.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <6> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 285.
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 286.
  [8
 
  <./image/machine_learning.png (PNG copy)>] [9
@@ -1136,182 +1136,192 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <6> not available
 ] [11
 
 ]
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <17.28> on input line 356.
-LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <17.28> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 356.
-
 [12
+
+] [13
+
+] [14
+
+] [15
+
+]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <17.28> on input line 488.
+LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <17.28> not available
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 488.
+ [16
 
 {/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/loca
 l/texlive/2024/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2024
 /texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
-<image/housing-price-linear.png, id=91, 1806.75pt x 1806.75pt>
+<image/housing-price-linear.png, id=112, 1806.75pt x 1806.75pt>
 File: image/housing-price-linear.png Graphic file (type png)
 <use image/housing-price-linear.png>
-Package pdftex.def Info: image/housing-price-linear.png  used on input line 379
+Package pdftex.def Info: image/housing-price-linear.png  used on input line 511
 .
 (pdftex.def)             Requested size: 188.68051pt x 188.68051pt.
-<image/housing-price-nonlinear.png, id=92, 1806.75pt x 1806.75pt>
+<image/housing-price-nonlinear.png, id=113, 1806.75pt x 1806.75pt>
 File: image/housing-price-nonlinear.png Graphic file (type png)
 <use image/housing-price-nonlinear.png>
 Package pdftex.def Info: image/housing-price-nonlinear.png  used on input line 
-379.
+511.
 (pdftex.def)             Requested size: 188.68051pt x 188.68051pt.
 
-Overfull \vbox (16.79057pt too high) detected at line 379
+Overfull \vbox (16.79057pt too high) detected at line 511
  []
 
-[13
+[17
 
  <./image/housing-price-linear.png (PNG copy)> <./image/housing-price-nonlinear
-.png (PNG copy)>] [14
+.png (PNG copy)>] [18
 
 ]
-<image/housing-price-3d.png, id=104, 260.975pt x 256.96pt>
+<image/housing-price-3d.png, id=124, 260.975pt x 256.96pt>
 File: image/housing-price-3d.png Graphic file (type png)
 <use image/housing-price-3d.png>
-Package pdftex.def Info: image/housing-price-3d.png  used on input line 443.
+Package pdftex.def Info: image/housing-price-3d.png  used on input line 575.
 (pdftex.def)             Requested size: 136.71127pt x 134.60802pt.
 
-Overfull \hbox (2.61104pt too wide) detected at line 443
+Overfull \hbox (2.61104pt too wide) detected at line 575
 [][][][][][][][][]  [][] [][][][][][][]
  []
 
-[15
+[19
 
 {/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc} <./image/
 housing-price-3d.png>]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 501.
+(Font)              <10.95> on input line 633.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <10.95> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 501.
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 633.
 File: image/housing-price-3d.png Graphic file (type png)
 <use image/housing-price-3d.png>
-Package pdftex.def Info: image/housing-price-3d.png  used on input line 501.
+Package pdftex.def Info: image/housing-price-3d.png  used on input line 633.
 (pdftex.def)             Requested size: 136.71127pt x 134.60802pt.
 
-Overfull \hbox (2.61104pt too wide) detected at line 501
+Overfull \hbox (2.61104pt too wide) detected at line 633
 [][][][][][][][][]  [][] [][][][][][][]
  []
 
-[16
+[20
 
 ]
-LaTeX Font Info:    Calculating math sizes for size <18> on input line 535.
+LaTeX Font Info:    Calculating math sizes for size <18> on input line 667.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <18> on input line 535.
+(Font)              <18> on input line 667.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12.59995> on input line 535.
+(Font)              <12.59995> on input line 667.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 535.
+(Font)              <9> on input line 667.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <18> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 535.
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 667.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <12.59995> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 535.
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 667.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <9> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 535.
- [17
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 667.
+ [21
 
 ]
-<image/house_or_thouse.png, id=129, 517.935pt x 206.7725pt>
+<image/house_or_thouse.png, id=150, 517.935pt x 206.7725pt>
 File: image/house_or_thouse.png Graphic file (type png)
 <use image/house_or_thouse.png>
-Package pdftex.def Info: image/house_or_thouse.png  used on input line 563.
+Package pdftex.def Info: image/house_or_thouse.png  used on input line 695.
 (pdftex.def)             Requested size: 223.78197pt x 89.33952pt.
- [18
-
- <./image/house_or_thouse.png>] [19
-
-]
-<image/s_us_com.png, id=142, 588.1975pt x 201.75375pt>
-File: image/s_us_com.png Graphic file (type png)
-<use image/s_us_com.png>
-Package pdftex.def Info: image/s_us_com.png  used on input line 590.
-(pdftex.def)             Requested size: 305.15553pt x 104.66934pt.
- [20
-
- <./image/s_us_com.png>]
-<image/clustering.png, id=149, 461.725pt x 252.945pt>
-File: image/clustering.png Graphic file (type png)
-<use image/clustering.png>
-Package pdftex.def Info: image/clustering.png  used on input line 601.
-(pdftex.def)             Requested size: 305.15553pt x 167.17194pt.
-
-[21
-
- <./image/clustering.png>]
-<image/wtv.png, id=156, 691.58376pt x 291.0875pt>
-File: image/wtv.png Graphic file (type png)
-<use image/wtv.png>
-Package pdftex.def Info: image/wtv.png  used on input line 612.
-(pdftex.def)             Requested size: 305.15553pt x 128.4431pt.
  [22
 
- <./image/wtv.png>] [23
+ <./image/house_or_thouse.png>] [23
 
 ]
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 64
-7.
+<image/s_us_com.png, id=162, 588.1975pt x 201.75375pt>
+File: image/s_us_com.png Graphic file (type png)
+<use image/s_us_com.png>
+Package pdftex.def Info: image/s_us_com.png  used on input line 722.
+(pdftex.def)             Requested size: 305.15553pt x 104.66934pt.
+ [24
+
+ <./image/s_us_com.png>]
+<image/clustering.png, id=169, 461.725pt x 252.945pt>
+File: image/clustering.png Graphic file (type png)
+<use image/clustering.png>
+Package pdftex.def Info: image/clustering.png  used on input line 733.
+(pdftex.def)             Requested size: 305.15553pt x 167.17194pt.
+
+[25
+
+ <./image/clustering.png>]
+<image/wtv.png, id=178, 691.58376pt x 291.0875pt>
+File: image/wtv.png Graphic file (type png)
+<use image/wtv.png>
+Package pdftex.def Info: image/wtv.png  used on input line 744.
+(pdftex.def)             Requested size: 305.15553pt x 128.4431pt.
+ [26
+
+ <./image/wtv.png>] [27
+
+]
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 77
+9.
 
 (/usr/local/texlive/2024/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 6
-47.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 7
+79.
 
 (/usr/local/texlive/2024/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [24
+) [28
 
-] [25
+] [29
 
-] [26
+] [30
 
 ]
-<image/alphago.png, id=188, 499.8675pt x 298.11375pt>
+<image/alphago.png, id=208, 499.8675pt x 298.11375pt>
 File: image/alphago.png Graphic file (type png)
 <use image/alphago.png>
-Package pdftex.def Info: image/alphago.png  used on input line 718.
+Package pdftex.def Info: image/alphago.png  used on input line 850.
 (pdftex.def)             Requested size: 325.51257pt x 194.131pt.
 
-Overfull \vbox (11.39604pt too high) detected at line 718
+Overfull \vbox (11.39604pt too high) detected at line 850
  []
 
-[27
+[31
 
  <./image/alphago.png>]
-<image/atari.png, id=195, 576.1525pt x 324.21124pt>
+<image/atari.png, id=216, 576.1525pt x 324.21124pt>
 File: image/atari.png Graphic file (type png)
 <use image/atari.png>
-Package pdftex.def Info: image/atari.png  used on input line 730.
+Package pdftex.def Info: image/atari.png  used on input line 862.
 (pdftex.def)             Requested size: 325.50047pt x 183.1698pt.
 
-Overfull \vbox (0.43484pt too high) detected at line 730
+Overfull \vbox (0.43484pt too high) detected at line 862
  []
 
-[28
+[32
 
  <./image/atari.png>]
-<image/rl.png, id=202, 408.52625pt x 292.09125pt>
+<image/rl.png, id=223, 408.52625pt x 292.09125pt>
 File: image/rl.png Graphic file (type png)
 <use image/rl.png>
-Package pdftex.def Info: image/rl.png  used on input line 746.
+Package pdftex.def Info: image/rl.png  used on input line 878.
 (pdftex.def)             Requested size: 244.1269pt x 174.54742pt.
 
-Overfull \vbox (15.03474pt too high) detected at line 746
+Overfull \vbox (15.03474pt too high) detected at line 878
  []
 
-[29
+[33
 
- <./image/rl.png>]
+ <./image/rl.png>] [34
+
+]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 791.
+(Font)              <5> on input line 931.
 LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 791.
- [30
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 931.
+ [35
 
-] [31
+] [36
 
 ]
 \tf@nav=\write6
@@ -1332,10 +1342,10 @@ Package rerunfilecheck Info: File `lecture0_recovered.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 26746 strings out of 474116
- 531303 string characters out of 5743681
- 1939187 words of memory out of 5000000
- 48480 multiletter control sequences out of 15000+600000
+ 26766 strings out of 474116
+ 531478 string characters out of 5743681
+ 1938187 words of memory out of 5000000
+ 48490 multiletter control sequences out of 15000+600000
  724414 words of font info for 144 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  128i,15n,123p,393b,1074s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1355,10 +1365,10 @@ fonts/type1/public/lm/lmsso8.pfb></usr/local/texlive/2024/texmf-dist/fonts/type
 m/lmsy8.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/lm/lmtt10.pf
 b></usr/local/texlive/2024/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></usr/lo
 cal/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on lecture0_recovered.pdf (31 pages, 3478196 bytes).
+Output written on lecture0_recovered.pdf (36 pages, 3483390 bytes).
 PDF statistics:
- 324 PDF objects out of 1000 (max. 8388607)
- 221 compressed objects within 3 object streams
- 63 named destinations out of 1000 (max. 500000)
+ 352 PDF objects out of 1000 (max. 8388607)
+ 244 compressed objects within 3 object streams
+ 73 named destinations out of 1000 (max. 500000)
  103 words of extra memory for PDF output out of 10000 (max. 10000000)
 
