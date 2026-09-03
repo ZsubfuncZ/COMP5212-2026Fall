@@ -150,87 +150,129 @@
   By the end of this lecture, you should be able to:
   \begin{itemize}
     \setlength{\itemsep}{0.18cm}
-    \item understand the concept of a \textbf{hypothesis set}.
+    \item define a \textbf{hypothesis set} and explain its inductive bias;
     \item distinguish \textbf{empirical} from \textbf{generalization} error;
     \item state the basic \textbf{PAC-learning guarantee};
     \item derive the finite-class sample bound using a union bound;
+    \item explain why infinite classes need a richer capacity measure.
   \end{itemize}}
 \end{frame}
 
-
-\begin{frame}[t]{Binary Classification}
-\textbf{Case 1: Near-deterministic label --- Is there a dog?}
-	
-	\begin{columns}[T]
-		\begin{column}{0.55\textwidth}
-			\begin{itemize}
-				\item Given input $x$, the label $y \in \{0,1\}$ is almost completely determined.
-				\item The same $x$ essentially always maps to the same $y$.
-				\item Noise structure: low uncertainty;
-				\item Model implication: a deterministic hypothesis $h:\mathcal{X}\to\{0,1\}$ is appropriate.
-				\item We can learn a sharp decision boundary and minimise classification error.
-			\end{itemize}
-		\end{column}
-		\hspace{2ex}
-		\begin{column}{0.4\textwidth}
-			% Replace with your own images, e.g. dog and non-dog photos
-			\includegraphics[width=0.6\textwidth]{../source/dog}\\[2mm]
-			\includegraphics[width=0.6\textwidth]{../source/cat}
-		\end{column}
-	\end{columns}
+% -----------------------------------------------------------------------------
+% 3. Motivation: an application case
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Application: Build a Spam Filter}
+  \vspace{0.10cm}
+  \centering
+  {\fontsize{15}{18}\selectfont A new message arrives. Predict its label before it is seen.}
+  \vspace{0.18cm}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.45\textwidth}
+      \begin{beamercolorbox}[rounded=true,sep=0.23cm,wd=\linewidth]{block body}
+        \centering
+        {\bfseries\large Incoming message}\par
+        \vspace{0.12cm}
+        \begin{beamercolorbox}[rounded=true,sep=0.13cm,wd=0.94\linewidth]{block body}
+          \centering
+          \normalsize
+          \textbf{Subject:} FREE prize --- claim now!\\[0.08cm]
+          \textbf{From:} news@shop.example
+        \end{beamercolorbox}
+        \vspace{0.14cm}
+        \renewcommand{\arraystretch}{1.12}
+        \begin{tabular}{@{}ll@{}}
+          contains ``free'' & 1\\
+          contains ``prize'' & 1\\
+          known sender & 0
+        \end{tabular}
+      \end{beamercolorbox}
+    \end{column}
+    \begin{column}{0.51\textwidth}
+      \begin{beamercolorbox}[rounded=true,sep=0.23cm,wd=\linewidth]{block body}
+        {\bfseries\large Learning task}\par
+        \vspace{0.10cm}
+        \begin{itemize}
+          \tightitems
+          \item $x$: a feature vector describing the message;
+          \item $y\in\{0,1\}$: not spam or spam;
+          \item $S$: labeled messages collected in the past.
+        \end{itemize}
+        \vspace{0.05cm}
+        \begin{beamercolorbox}[rounded=true,sep=0.13cm,wd=0.96\linewidth,center]{block body}
+          \normalsize What kinds of rules should the learner be allowed to use?
+        \end{beamercolorbox}
+      \end{beamercolorbox}
+    \end{column}
+  \end{columns}
+  \vspace{0.18cm}
+  \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=0.94\linewidth,center]{block body}
+    \centering
+    Data will choose a rule, but we choose the \textbf{menu of allowable rules} first.
+  \end{beamercolorbox}
+  \note{[Sources] Application framing inspired by Avrim Blum, CMU 15-859(B), Lecture 1 (spam-filtering setup): https://www.cs.cmu.edu/~avrim/ML09a/lect0112.pdf}
 \end{frame}
 
-
-\begin{frame}[t]{Binary Classification}
-\textbf{Case 2: Stochastic label --- Will it rain today?}
-	
-	\begin{columns}[T]
-		\begin{column}{0.55\textwidth}
-			\begin{itemize}
-				\item The same cloudy sky $x$ can occur on both rainy and non-rainy days.
-				\item Input $x$ misses important predictors: humidity, pressure, wind, etc.
-				\item Noise structure: high  uncertainty;
-				\item Model implication: use a probabilistic hypothesis
-				$h:\mathcal{X}\to[0,1]$, giving $P(y=1 \mid x)$.
-				\item Optimise proper scoring rules (log loss, Brier score); calibration matters.
-			\end{itemize}
-		\end{column}
-		\hspace{3ex}
-		\begin{column}{0.4\textwidth}
-			\begin{tikzpicture}[node distance=0.8cm]   % shorter vertical gap
-				% Cloudy image at top
-				\node (cloudy) {\includegraphics[width=0.45\linewidth]{../source/cloudy}};
-				% Rainy image below
-				\node (rainy) [below=of cloudy] {\includegraphics[width=0.45\linewidth]{../source/rainy}};
-				% Short vertical arrow from cloudy to rainy
-				\draw[->, thick] (cloudy.south) -- (rainy.north);
-				% Question mark beside the rainy image
-				\node[right=0.3cm of rainy.east, font=\Large] {?};
-			\end{tikzpicture}
-		\end{column}
-	\end{columns}
+% -----------------------------------------------------------------------------
+% 4. Motivation: make the menu explicit
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{One Data Set, Three Rule Families}
+  \vspace{0.05cm}
+  \centering
+  {\normalsize The training messages are fixed; the menu of allowed rules is a modeling choice.}
+  \vspace{0.16cm}
+  \begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.32\textwidth}
+      \begin{beamercolorbox}[rounded=true,sep=0.20cm,wd=\linewidth]{block body}
+        \centering
+        {\bfseries\textcolor{deepblue}{Keyword threshold}}\par
+        \vspace{0.12cm}
+        \[
+          \Hc_1=\{\text{score thresholds}\}
+        \]
+        \small One score, one cut.\\[0.08cm]
+        Simple and easy to estimate.
+      \end{beamercolorbox}
+    \end{column}
+    \begin{column}{0.34\textwidth}
+      \begin{beamercolorbox}[rounded=true,sep=0.20cm,wd=\linewidth]{block body}
+        \centering
+        {\bfseries\textcolor{darkgreen}{Conjunctions}}\par
+        \vspace{0.12cm}
+        \[
+          \Hc_2=\{\text{word conjunctions}\}
+        \]
+        \small Example: ``free'' $\land$ ``prize''.\\[0.08cm]
+        Encodes a sparse, interpretable rule.
+      \end{beamercolorbox}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{beamercolorbox}[rounded=true,sep=0.20cm,wd=\linewidth]{block body}
+        \centering
+        {\bfseries\textcolor{slideorange}{Memorization}}\par
+        \vspace{0.12cm}
+        \[
+          \Hc_3=\{h:\X\to\{0,1\}\}
+        \]
+        \small Can fit every observed message.\\[0.08cm]
+        Flexible, but prone to overfitting.
+      \end{beamercolorbox}
+    \end{column}
+  \end{columns}
+  \vspace{0.20cm}
+  \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=0.94\linewidth,center]{block body}
+    \centering
+    The learner returns one $h_S\in\Hc$; the choice of $\Hc$ is the \textbf{inductive bias}.
+  \end{beamercolorbox}
+  \note{[Sources] Hypothesis-class framing follows Cornell CS4780 Lecture 1 (https://www.cs.cornell.edu/courses/cs4780/2018sp/lectures/lecturenote01_MLsetup.html) and MIT 6.036 Chapter 2 (https://openlearninglibrary.mit.edu/assets/courseware/v1/dc2ca4ef11bd7be3faec0efc56f46cca/asset-v1\%3AMITx\%2B6.036\%2B1T2019\%2Btype\%40asset\%2Bblock/notes_chapter_Linear_classifers.pdf).}
 \end{frame}
 
-
-\begin{frame}[t]{Binary Classification}
-	\begin{itemize}
-		\item \large This lecture introduces the foundational theory of \textbf{deterministic} binary classification.
-		\vspace{0.45cm}
-		\item Why start with this case?
-		\vspace{0.2cm}
-		\begin{itemize}
-			        \setlength{\itemsep}{0.20cm}
-		\normalsize	\item Cleaner mathematical structure $\Rightarrow$ easier to derive sharp learning guarantees.
-			\item Serves as the essential building block for more complex stochastic and probabilistic settings.
-		\end{itemize}
-	\end{itemize}
-\end{frame}
-
-
+% -----------------------------------------------------------------------------
+% 5. Section
+% -----------------------------------------------------------------------------
 \SectionSlide{Hypothesis Sets}{What predictors may the learning algorithm choose?}
 
 % -----------------------------------------------------------------------------
-% 4. Learning pipeline
+% 6. Learning pipeline
 % -----------------------------------------------------------------------------
 \begin{frame}[t]{From Data to a Predictor}
   \vspace{0.28cm}
@@ -248,9 +290,12 @@
     \draw[arr] (dist) -- node[above,midway]{i.i.d.} (sample);
     \draw[arr] (sample) -- (learner);
     \draw[arr] (learner) -- (hyp);
+    \node[below=0.58cm of learner,align=center,text width=8.0cm] {
+      \normalsize The hypothesis set $\Hc$ is the learner's \textbf{menu of allowable predictors}.
+    };
   \end{tikzpicture}
   \end{center}
-  \vspace{2cm}
+  \vspace{0.18cm}
   \begin{beamercolorbox}[rounded=true,sep=0.20cm,wd=0.94\linewidth,center]{block body}
     \centering
     Data select a predictor; the hypothesis set determines what can be selected.
@@ -266,7 +311,7 @@
     \begin{column}{0.42\textwidth}
       \begin{itemize}
         \setlength{\itemsep}{0.20cm}
-        \item $\X$: sample space.
+        \item $\X$: instance space.
         \item $\Y=\{0,1\}$: label space.
         \item $c:\X\to\Y$: target concept.
         \item $\C$: possible target concepts.
@@ -287,7 +332,7 @@
         The learner sees $S$, but not $c$ or $\D$.
       \end{beamercolorbox}
       \vspace{0.18cm}
-      Training and test inputs are assumed to follow the same distribution $\D$.
+      Training and test inputs are assumed to follow the same $\D$.
     \end{column}
   \end{columns}
 \end{frame}
@@ -382,9 +427,6 @@
   \end{beamercolorbox}
 \end{frame}
 
-
-
-
 % -----------------------------------------------------------------------------
 % 8. Concept vs hypothesis set
 % -----------------------------------------------------------------------------
@@ -430,28 +472,8 @@
 % -----------------------------------------------------------------------------
 % 9. Bias and capacity
 % -----------------------------------------------------------------------------
-
-\begin{frame}[t]{Inductive Bias}
-	\vspace{0.08cm}
-	\textbf{Inductive bias:} How much prior knowledge or experience is used to constrain the set of plausible models?
-	
-	\vspace{0.3cm}
-	\textbf{Example: Line v.s. Circle}
-	
-	\vspace{0.2cm}
-	% Placeholder for image
-	\centering
-	\includegraphics[width=0.5\textwidth]{../source/linear_no.png}
-	
-	% Download link (see below):
-	% https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Svm_separating_hyperplanes.png/250px-Svm_separating_hyperplanes.png
-\end{frame}
-
-
-
-\begin{frame}[t]{Inductive Bias}
+\begin{frame}[t]{Hypothesis Sets Encode Inductive Bias}
   \vspace{0.08cm}
- \textbf{Inductive bias:} How much prior knowledge or experience is used to constrain the set of plausible models?
   \begin{center}
   \begin{tikzpicture}[scale=0.84]
     \draw[very thick,fill=softorange,slideorange] (0,0) ellipse (3.15cm and 1.95cm);
@@ -479,13 +501,12 @@
       \end{beamercolorbox}
     \end{column}
   \end{columns}
-
 \end{frame}
 
 % -----------------------------------------------------------------------------
 % 10. Learning rules
 % -----------------------------------------------------------------------------
-\begin{frame}[t]{ERM and Consistency}
+\begin{frame}[t]{Learning Rules: ERM and Consistency}
   \vspace{0.06cm}
   A learning algorithm maps a sample to a hypothesis:
   \[
@@ -549,7 +570,35 @@
   \end{beamercolorbox}
 \end{frame}
 
-
+% -----------------------------------------------------------------------------
+% 12. Version space
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Many Hypotheses Can Fit the Same Sample}
+  \vspace{0.02cm}
+  \begin{center}
+  \begin{tikzpicture}[x=1.35cm,y=0.85cm]
+    \draw[->,thick] (0,0)--(7.1,0);
+    \foreach \x in {0.8,1.7,2.55}{\fill[pointred] (\x,0) circle (3pt);}
+    \foreach \x in {4.55,5.45,6.45}{\fill[pointblue] (\x,0) circle (3pt);}
+    \draw[dashed,very thick,darkgreen] (3.05,-0.55)--(3.05,0.95);
+    \draw[dashed,very thick,deepblue] (3.55,-0.55)--(3.55,0.95);
+    \draw[dashed,very thick,slideorange] (4.05,-0.55)--(4.05,0.95);
+    \node[darkgreen,above] at (3.05,0.95) {$h_{t_1}$};
+    \node[deepblue,above] at (3.55,0.95) {$h_{t_2}$};
+    \node[slideorange,above] at (4.05,0.95) {$h_{t_3}$};
+    \node[pointred,below] at (1.7,-0.16) {negative examples};
+    \node[pointblue,below] at (5.45,-0.16) {positive examples};
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.12cm}
+  \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=0.90\linewidth,center]{block body}
+    The \textbf{version space} is
+    \[
+      V_S=\{h\in\Hc:\widehat R_S(h)=0\}.
+    \]
+    PAC analysis asks whether every member of $V_S$ is likely to generalize.
+  \end{beamercolorbox}
+\end{frame}
 
 % -----------------------------------------------------------------------------
 % 13. Realizable case
@@ -561,8 +610,6 @@
   \[
     c\in\Hc.
   \]}
-  \vspace{0.2cm}
-  For example, $\C = \mathcal{H}$.
   \vspace{0.08cm}
   \begin{columns}[T,totalwidth=\textwidth]
     \begin{column}{0.48\textwidth}
@@ -630,7 +677,7 @@
 \begin{frame}[t]{PAC-Learnability: Formal Definition}
   \vspace{0.04cm}
   \begin{beamercolorbox}[rounded=true,sep=0.22cm,wd=\linewidth]{block body}
-    A concept class $\mathcal{C}$ is \textbf{PAC-learnable} w.r.t. a hypothesis set $\mathcal{H}$, if there exist a learner $\Aalg$ and a polynomial sample bound $m_{\C}$ such that, for every $c\in\C$, distribution $\D$, and $\eps,\delta\in(0,1)$, whenever $m\ge m_{\C}(\eps,\delta)$, it holds that $\mathcal{A}(S)\in \mathcal{H}$ and 
+    A concept class $\C$ is \textbf{PAC-learnable} if there exist a learner $\Aalg$ and a polynomial sample bound $m_{\C}$ such that, for every $c\in\C$, distribution $\D$, and $\eps,\delta\in(0,1)$, whenever $m\ge m_{\C}(\eps,\delta)$,
     \[
       \Pr_{S\sim\D^m}\!\left[R\bigl(\Aalg(S)\bigr)\le\eps\right]\ge 1-\delta.
     \]
@@ -650,6 +697,7 @@
       The returned error is at most $\eps$.
     \end{column}
   \end{columns}
+  \SourceNote{Basic realizable PAC definition; Valiant (1984); Mohri et al. (2018), Chapter 2.}
 \end{frame}
 
 % -----------------------------------------------------------------------------
@@ -836,7 +884,7 @@
 % -----------------------------------------------------------------------------
 % 23. Interpretation
 % -----------------------------------------------------------------------------
-\begin{frame}[t]{ Finite-Class Bound }
+\begin{frame}[t]{What the Finite-Class Bound Tells Us}
   \vspace{0.04cm}
   \renewcommand{\arraystretch}{1.28}
   \begin{center}
@@ -854,14 +902,14 @@
   \end{center}
   \vspace{0.16cm}
   \begin{beamercolorbox}[rounded=true,sep=0.16cm,wd=0.94\linewidth,center]{block body}
-    $\ln_2|\Hc|$ is the number of bits needed to identify a hypothesis: a formal version of \textbf{Occam's razor}.
+    $\log_2|\Hc|$ is the number of bits needed to identify a hypothesis: a formal version of \textbf{Occam's razor}.
   \end{beamercolorbox}
 \end{frame}
 
 % -----------------------------------------------------------------------------
 % 24. Numerical example
 % -----------------------------------------------------------------------------
-\begin{frame}[t]{Example: Discretized Thresholds}
+\begin{frame}[t]{Numerical Example: Discretized Thresholds}
   \vspace{0.05cm}
   Suppose $|\Hc|=1001$ candidate thresholds and we want $\eps=0.05$, $\delta=0.05$.
   \vspace{0.12cm}
@@ -874,7 +922,7 @@
   \end{beamercolorbox}
   \vspace{0.20cm}
   \centering
-  
+  {\fontsize{18}{22}\selectfont\bfseries Therefore $m=199$ examples suffice under the theorem's assumptions.}
   \vspace{0.10cm}
   \begin{beamercolorbox}[rounded=true,sep=0.10cm,wd=0.88\linewidth,center]{block body}
     This is a worst-case guarantee, not a prediction of the exact data needed in a particular dataset.
@@ -947,9 +995,9 @@
 % -----------------------------------------------------------------------------
 % 28. Hoeffding fixed h
 % -----------------------------------------------------------------------------
-\begin{frame}[t]{Hoeffding's Inequality}
+\begin{frame}[t]{Hoeffding's Inequality for a Fixed Hypothesis}
   \vspace{0.14cm}
-  {\normalsize For a fixed $h$, the $0$--$1$ losses are independent Bernoulli random variables. Hoeffding's inequality:}
+  {\normalsize For a fixed $h$, the $0$--$1$ losses are independent Bernoulli random variables. Hoeffding's inequality gives}
   \begin{beamercolorbox}[rounded=true,sep=0.25cm,wd=0.84\linewidth,center]{block body}
     \centering
     {\fontsize{16}{20}\selectfont
@@ -959,7 +1007,7 @@
     \]}
   \end{beamercolorbox}
   \vspace{0.25cm}
-  \begin{alertblock}{Caution}
+  \begin{alertblock}{Why this is not yet enough}
     The output $h_S$ is \textbf{not fixed}; it depends on the same sample $S$ used to compute $\widehat R_S(h_S)$.
   \end{alertblock}
   \vspace{0.12cm}
@@ -970,85 +1018,28 @@
 % -----------------------------------------------------------------------------
 % 29. Uniform convergence
 % -----------------------------------------------------------------------------
-
-
-\begin{frame}[t]{Concentration Inequalities}
-	\vspace{0.2cm}
-	\begin{itemize}
-		        \setlength{\itemsep}{0.4cm}
-	\item \large Concentration inequalities is a class of probability bounds for sequential independent random variables.
-	
-	\item \large Why ``Concentration''?  As sample size grows, random variables cluster tightly around their expected value.
-	
-\item 	\large \textbf{Core Usage:} Bounds the probability that a sample average deviates from its true mean. Essential for proving generalization bounds in PAC learning.
-\end{itemize}
+\begin{frame}[t]{Uniform Convergence for Finite $\Hc$}
+  \vspace{0.04cm}
+  Apply Hoeffding to every $h\in\Hc$ and use a union bound.
+  \vspace{0.10cm}
+  \begin{beamercolorbox}[rounded=true,sep=0.20cm,wd=0.92\linewidth,center]{block body}
+    With probability at least $1-\delta$,
+    \[
+      \forall h\in\Hc,\qquad
+      \left|R(h)-\widehat R_S(h)\right|
+      \le
+      \sqrt{\frac{\ln\!\left(2|\Hc|/\delta\right)}{2m}}.
+    \]
+  \end{beamercolorbox}
+  \vspace{0.18cm}
+  \centering
+  Uniform convergence lets us compare all hypotheses using the same training sample.
 \end{frame}
-
-\begin{frame}[t]{Concentration Inequalities}
-		\begin{itemize}
-		\item \textbf{Hoeffding's Inequality} (For bounded independent variables $X_i \in [a_i, b_i]$)
-		\[ \mathbb{P}\left( \frac{1}{n}\sum_{i=1}^n X_i - \mathbb{E}[X] \ge \epsilon \right) \le \exp\left( -\frac{2n^2\epsilon^2}{\sum_{i=1}^n (b_i - a_i)^2} \right) \]
-		
-		\item \textbf{Chernoff Bound} (For independent binary or multiplicative variables; sharper tails)
-		\[ \mathbb{P}\left( \frac{1}{n}\sum_{i=1}^n X_i \ge (1+\delta)\mu \right) \le \left( \frac{e^\delta}{(1+\delta)^{(1+\delta)}} \right)^{n\mu} \]
-		
-		\item \textbf{McDiarmid's Inequality} (For general functions with bounded differences $c_i$)
-		\[ \mathbb{P}\left( f(X_1, \dots, X_n) - \mathbb{E}[f] \ge \epsilon \right) \le \exp\left( -\frac{2\epsilon^2}{\sum_{i=1}^n c_i^2} \right) \]
-	\end{itemize}
-\end{frame}
-
-
-
-
-\begin{frame}[t]{Examples: Gaussian Noise}
-	\vspace{0.2cm}
-	Assume $X_1, X_2,\dots, X_n$ are i.i.d.\ Gaussian variables with mean $\mu$ and variance $\sigma^2$, then $\frac{1}{n} \sum_{i=1}^n X_i$ is a Gaussian variable with mean $\mu$ and variance $\sigma^2/n$. Then 
-	
-	$$ \mathbb{P} \left[\left|\frac{1}{n} \sum_{i=1}^n X_i - \mu\right| \geq \epsilon \right] \leq 2 \exp\left( -\frac{n\epsilon^2}{2\sigma^2} \right) $$
-	
-	\vspace{0.1cm}
-	\begin{columns}[c]
-		\begin{column}{0.48\textwidth}
-			\small \textbf{Visualizing the Collapse of Variance:}
-			\begin{itemize}
-				\item As $n$ increases, the peak grows taller and narrower.
-				\item The probability mass outside the $\pm\epsilon$ boundaries drops to zero exponentially fast.
-				\item This captures the physical essence of the ``concentration of measure.''
-			\end{itemize}
-		\end{column}
-		\begin{column}{0.48\textwidth}
-			\centering
-			% Replace 'gaussian_concentration.png' with your generated chart or image file
-			\includegraphics[width=\textwidth]{../source/gaussian.png}
-		\end{column}
-	\end{columns}
-\end{frame}
-
 
 % -----------------------------------------------------------------------------
 % 30. ERM guarantee
 % -----------------------------------------------------------------------------
-
-\begin{frame}[t]{Uniform Convergence for Finite $\Hc$}
-	\vspace{0.04cm}
-	Apply Hoeffding to every $h\in\Hc$  with $  \gamma = \sqrt{\ln(2|\mathcal{H}/\delta)/(2m)}$ and use a union bound.
-	\vspace{0.10cm}
-	\begin{beamercolorbox}[rounded=true,sep=0.20cm,wd=0.92\linewidth,center]{block body}
-		With probability at least $1-\delta$,
-		\[
-		\forall h\in\Hc,\qquad
-		\left|R(h)-\widehat R_S(h)\right|
-		\le
-		\sqrt{\frac{\ln\!\left(2|\Hc|/\delta\right)}{2m}}.
-		\]
-	\end{beamercolorbox}
-	\vspace{0.18cm}
-	\centering
-	Uniform convergence lets us compare all hypotheses using the same training sample.
-\end{frame}
-
-
-\begin{frame}[t]{ERM Guarantee}
+\begin{frame}[t]{ERM Guarantee in the Agnostic Setting}
   \vspace{0.02cm}
   Let $\widehat h$ minimize empirical risk, let $h^*$ minimize true risk over $\Hc$, and define
   \[
@@ -1084,8 +1075,8 @@
     \node[box,fill=softblue,draw=deepblue] (estim) at (3.15,0) {\Large Estimation error\\[0.08cm]\normalsize Price of selecting from finite data};
     \node[below=1.2cm of approx,align=center,text width=5.0cm] {Reduce by enlarging or redesigning $\Hc$.};
     \node[below=1.2cm of estim,align=center,text width=5.0cm] {Reduce with more data or lower-capacity $\Hc$.};
-  %  \draw[arr,slideorange] (approx.south)--(-3.15,-0.95);
-  %  \draw[arr,deepblue] (estim.south)--(3.15,-0.95);
+    \draw[arr,slideorange] (approx.south)--(-3.15,-0.95);
+    \draw[arr,deepblue] (estim.south)--(3.15,-0.95);
   \end{tikzpicture}
   \end{center}
   \vspace{0.20cm}
@@ -1113,146 +1104,11 @@
   \end{alertblock}
   \vspace{0.10cm}
   \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=0.92\linewidth,center]{block body}
-    Measure how many distinct labelings $\Hc$ can realize on finite samples. This leads to lecture 3: \textbf{growth functions}, \textbf{VC dimension}, and \textbf{Rademacher complexity}.
+    Measure how many distinct labelings $\Hc$ can realize on finite samples. This leads to \textbf{growth functions}, \textbf{VC dimension}, and \textbf{Rademacher complexity}.
   \end{beamercolorbox}
 \end{frame}
 
-
-\begin{frame}[t]{Proper Learning}
-	\vspace{0.08cm}
-	\textbf{Definition:} The learner must output a hypothesis \(h\) from the \emph{same} class as the target concept class \(C\), i.e., \(H = C\).
-	
-	\vspace{0.2cm}
-	\textbf{Example:} Learning axis-aligned rectangles in \(\mathbb{R}^2\)
-	\begin{itemize}
-		\item Target concept is an axis-aligned rectangle.
-		\item Learner must output an axis-aligned rectangle that fits the training data.
-	\end{itemize}
-	
-	\vspace{0.2cm}
-	\begin{center}
-		\begin{tikzpicture}[scale=0.6]
-			% Axes
-			\draw[->] (-0.5,0) -- (5,0) node[right] {$x_1$};
-			\draw[->] (0,-0.5) -- (0,5) node[above] {$x_2$};
-			
-			% Positive points (inside rectangle) - blue filled circles
-			\filldraw[blue] (1,1) circle (3pt);
-			\filldraw[blue] (2,2) circle (3pt);
-			\filldraw[blue] (3,1.5) circle (3pt);
-			\filldraw[blue] (1.5,2.5) circle (3pt);
-			\filldraw[blue] (2.5,1) circle (3pt);
-			
-			% Negative points (outside) - red crosses
-			\foreach \x/\y in {0.5/3.5, 4/0.5, 4.2/4, 0.5/0.5, 0.5/1.5} {
-				\draw[red, thick] (\x-0.15,\y-0.15) -- (\x+0.15,\y+0.15);
-				\draw[red, thick] (\x-0.15,\y+0.15) -- (\x+0.15,\y-0.15);
-			}
-			
-			% Learned rectangle (smallest rectangle containing positive points)
-			\draw[blue, thick, dashed] (1,1) rectangle (3,2.5);
-		\end{tikzpicture}
-	\end{center}
-\end{frame}
-
-
-\begin{frame}[t]{Improper Learning}
-	\vspace{0.08cm}
-	\textbf{Definition:} The learner may output a hypothesis \(h\) from a \emph{different} (often larger) class \(H \neq C\).
-	
-	\vspace{0.2cm}
-	\textbf{Example:} Target concept is a circle, but learner outputs an axis-aligned rectangle
-	\begin{itemize}
-		\item \(C\) = circles in \(\mathbb{R}^2\).
-		\item \(H\) = axis-aligned rectangles.
-		\item The rectangle separates the data equally well, even though \(H \neq C\).
-	\end{itemize}
-	
-	\vspace{0.2cm}
-	\begin{center}
-		\begin{tikzpicture}[scale=0.6]
-			% Axes
-			\draw[->] (-0.5,0) -- (5,0) node[right] {$x_1$};
-			\draw[->] (0,-0.5) -- (0,5) node[above] {$x_2$};
-			
-			% Positive points (inside both shapes) - blue filled circles
-			\filldraw[blue] (1,1) circle (3pt);
-			\filldraw[blue] (2,2) circle (3pt);
-			\filldraw[blue] (3,1.5) circle (3pt);
-			\filldraw[blue] (1.5,2.5) circle (3pt);
-			\filldraw[blue] (2.5,1) circle (3pt);
-			
-			% Negative points (outside both shapes) - red crosses
-			\foreach \x/\y in {0.5/3.5, 4/0.5, 4.2/4, 0.5/0.5, 0.5/1.5} {
-				\draw[red, thick] (\x-0.15,\y-0.15) -- (\x+0.15,\y+0.15);
-				\draw[red, thick] (\x-0.15,\y+0.15) -- (\x+0.15,\y-0.15);
-			}
-			
-			% True target concept: circle (solid green)
-			\draw[green, thick] (2,1.5) circle (1.2);
-			\node[green, above] at (2,2.7) {\small $C$: circle};
-			
-			% Learned hypothesis: rectangle (dashed blue)
-			\draw[blue, thick, dashed] (1,1) rectangle (3,2.5);
-			\node[blue, below] at (2,0.2) {\small $H$: rectangle};
-		\end{tikzpicture}
-	\end{center}
-\end{frame}
-
-
-\begin{frame}[t]{Proper vs.\ Improper Learning}
-	\vspace{0.08cm}
-	
-	\large Trade-off between \emph{computational tractability} and \emph{generalization performance}.
-	
-	\vspace{0.4cm} % Increased spacing slightly for better visual balance
-	\begin{columns}[T]
-		\begin{column}{0.48\textwidth}
-			\setbeamercolor{block title}{bg=blue!80!black, fg=white} % Highlight proper learning
-			\begin{block}{\textbf{Proper Learning}}
-				\vspace{0.1cm}
-				\begin{itemize}
-					\item Higher interpretability
-					\item Matches domain constraints
-					\item Easier to validate
-					\item Can be computationally harder (NP-hard)
-				\end{itemize}
-			\end{block}
-		\end{column}
-		
-		\begin{column}{0.48\textwidth}
-			\setbeamercolor{block title}{bg=blue!80!black, fg=white} % Contrast improper learning
-			\begin{block}{\textbf{Improper Learning}}
-				\vspace{0.1cm}
-				\begin{itemize}
-					\item Greater computational efficiency
-					\item Can bypass representation barriers
-					\item Larger hypothesis space complexity
-					\item Lower model interpretability
-				\end{itemize}
-			\end{block}
-		\end{column}
-	\end{columns}
-	
-	\vspace{0.4cm}
-	\small \textbf{Core Takeaway:} Improper learning expands the search space to find solutions faster, while proper learning keeps the model strictly interpretable.
-\end{frame}
-
-\begin{frame}[t]{Proper vs.\ Improper Learning}
-
-	\vspace{0.4cm}
-	\begin{block}{\textbf{Intersections of Halfspaces}}
-	\vspace{0.1cm}
-	\textbf{The Target:} A bounded geometric polygon.
-	\begin{itemize}
-		\item \textbf{Proper Approach:} Forces exact linear boundary equations. Brutal and \textbf{NP-hard} to solve.
-		\item \textbf{Improper Approach:} Outputs a \textbf{Decision Tree} approximating the shape. Efficient and fast.
-	\end{itemize}
-\end{block}
-	\vspace{0.4cm}
-	\small \textbf{Core Takeaway:} Forcing a model to output the exact mathematical structure of the target concept often makes learning impossible in practice.
-\end{frame}
-
+% -----------------------------------------------------------------------------
 % 33. Takeaways
 % -----------------------------------------------------------------------------
 \begin{frame}[t]{Key Takeaways}
@@ -1283,10 +1139,10 @@
     \item Give an example with $c\notin\Hc$. What is the correct comparison target?
     \item Which is more expensive in the consistent bound: dividing $\eps$ by $10$, or dividing $\delta$ by $10$?
   \end{enumerate}}
-
+  \vfill
+  \centering
+  {\small\color{midgray}Next: VC dimension and guarantees for infinite hypothesis sets.}
 \end{frame}
-
-
 
 % -----------------------------------------------------------------------------
 % 35. References

@@ -148,46 +148,24 @@
 
 % 1 ---------------------------------------------------------------------------
 \begin{frame}
-  \centering
-  \vspace*{0.70cm}
-  {\fontsize{33}{39}\selectfont\bfseries Rademacher Complexity and VC Dimension\par}
-  \vspace{0.34cm}
-  {\fontsize{16}{20}\selectfont COMP 5212 -- Machine Learning\par}
-  \vspace{0.14cm}
-  {\fontsize{15}{19}\selectfont Fall 2026\par}
-  \vspace{0.72cm}
-  {\fontsize{14}{18}\selectfont
-  Based on Chapter 3 of \emph{Foundations of Machine Learning}, 2nd ed.\par}
-  \vfill
-  {\small Mehryar Mohri, Afshin Rostamizadeh, and Ameet Talwalkar\par}
+	\begin{tikzpicture}[remember picture, overlay]
+		\node[anchor=north west, inner sep=10pt] at (current page.north west)
+		{\includegraphics[width=6cm]{../source/logo.png}};
+	\end{tikzpicture}
+	
+	\centering
+	\vspace*{1.15cm}
+	{\fontsize{28}{32}\selectfont COMP 5212\par}
+	\vspace{0.35cm}
+	{\fontsize{30}{33}\selectfont Machine Learning\par}
+	\vspace{0.75cm}
+	{\Large Instructor: Zihan Zhang\par}
+	\vspace{0.35cm}
+	{\large Lecture 3: Rademacher Complexity and VC Dimension\par}
+	\vspace{0.2cm}
+	
 \end{frame}
 
-% 2 ---------------------------------------------------------------------------
-\begin{frame}[t]{Where This Lecture Fits}
-  \vspace{0.06cm}
-  \begin{center}
-  \begin{tikzpicture}[
-      box/.style={draw=black,rounded corners=4pt,minimum width=3.25cm,minimum height=1.08cm,align=center,fill=softgray},
-      focus/.style={draw=deepblue,very thick,rounded corners=4pt,minimum width=3.45cm,minimum height=1.18cm,align=center,fill=softblue},
-      arr/.style={-{Latex[length=3mm]},very thick,deepblue},
-      node distance=0.72cm
-    ]
-    \node[box] (finite) {Finite hypothesis sets\\union bound};
-    \node[focus,right=of finite] (infinite) {Infinite hypothesis sets\\capacity measures};
-    \node[box,right=of infinite] (model) {Model selection, margins,\\kernels, boosting};
-    \draw[arr] (finite) -- (infinite);
-    \draw[arr] (infinite) -- (model);
-  \end{tikzpicture}
-  \end{center}
-  \vspace{0.20cm}
-  \begin{itemize}
-    \setlength{\itemsep}{0.13cm}
-    \item Lecture 2 handled finite $\Hc$ using $\log\abs{\Hc}$.
-    \item Lecture 3 replaces cardinality by notions that remain useful when $\abs{\Hc}=\infty$.
-    \item The main tools are \textbf{Rademacher complexity}, the \textbf{growth function}, and \textbf{VC dimension}.
-  \end{itemize}
-  \SourceNote{Core chapter organization follows Mohri, Rostamizadeh, and Talwalkar (2018), Chapter 3.}
-\end{frame}
 
 % 3 ---------------------------------------------------------------------------
 \begin{frame}[t]{Learning Goals}
@@ -195,18 +173,17 @@
   {\fontsize{13.2}{16.2}\selectfont
   By the end of the lecture, you should be able to:
   \begin{itemize}
-    \setlength{\itemsep}{0.07cm}
+    \setlength{\itemsep}{0.18cm}
     \item define empirical and expected Rademacher complexity;
     \item explain the symmetrization argument behind Rademacher bounds;
     \item connect growth functions to Rademacher complexity via Massart's lemma;
     \item compute or bound the VC dimension of common hypothesis classes;
-    \item use Sauer's lemma to derive distribution-free generalization guarantees;
-    \item interpret lower bounds in the realizable and agnostic settings.
+    \item use Sauer's lemma to derive distribution-free generalization guarantees.
   \end{itemize}}
 \end{frame}
 
 
-\begin{frame}[t]{Motivation: Infinite Hypothesis Sets}
+\begin{frame}[t]{Infinite Hypothesis Sets}
   \vspace{0.04cm}
   \begin{columns}[T,totalwidth=\textwidth]
     \begin{column}{0.52\textwidth}
@@ -279,7 +256,7 @@
 \end{frame}
 
 % 8 ---------------------------------------------------------------------------
-\SectionSlide{Part I: Rademacher Complexity}{A data-dependent measure of the ability to fit random noise}
+\SectionSlide{Part I: Rademacher Complexity}
 
 % 9 ---------------------------------------------------------------------------
 \begin{frame}[t]{Random Signs as a Stress Test}
@@ -739,24 +716,10 @@
   \textbf{This motivates the growth function.}
 \end{frame}
 
-% 30 --------------------------------------------------------------------------
-\begin{frame}[t]{Checkpoint I}
-  \vspace{0.04cm}
-  Discuss briefly with a neighbor:
-  \begin{enumerate}
-    \setlength{\itemsep}{0.20cm}
-    \item Why is the supremum \emph{inside} the expectation over signs?
-    \item What happens if we use only one fixed hypothesis instead of a class?
-    \item Why does a class realizing every labeling of $m$ points have complexity $1$?
-    \item Which proof step uses boundedness of the loss in $[0,1]$?
-  \end{enumerate}
-  \vspace{0.10cm}
-  
-\end{frame}
 
 
 % 32 --------------------------------------------------------------------------
-\SectionSlide{Part II: Growth Functions and VC Dimension}{Turn an infinite class into finitely many sample-level behaviors}
+\SectionSlide{Part II: Growth Functions and VC Dimension}
 
 % 33 --------------------------------------------------------------------------
 \begin{frame}[t]{Restriction of a Class to a Sample}
@@ -881,15 +844,13 @@
   For any $\lambda>0$, Jensen's inequality and the union bound give
   \begin{align*}
     \exp\!\left(\lambda\E_\sigma\sup_{a\in A}\angles{\sigma,a}\right)
-    &\le \E_\sigma\exp\!\left(\lambda\sup_{a\in A}\angles{\sigma,a}\right)\\
-    &\le \sum_{a\in A}\E_\sigma e^{\lambda\angles{\sigma,a}}.
+    &\le \E_\sigma\exp\!\left(\lambda\sup_{a\in A}\angles{\sigma,a}\right)\le \sum_{a\in A}\E_\sigma e^{\lambda\angles{\sigma,a}}.
   \end{align*}
   Independence and Hoeffding's lemma imply
   \begin{align*}
     \E_\sigma e^{\lambda\angles{\sigma,a}}
     &=\prod_{i=1}^m\E e^{\lambda\sigma_i a_i}
-    \le \exp\!\left(\frac{\lambda^2\norm{a}_2^2}{2}\right)\\
-    &\le \exp\!\left(\frac{\lambda^2r^2}{2}\right).
+    \le \exp\!\left(\frac{\lambda^2\norm{a}_2^2}{2}\right)\le \exp\!\left(\frac{\lambda^2r^2}{2}\right).
   \end{align*}}
 \end{frame}
 
@@ -959,7 +920,7 @@
 \end{frame}
 
 % 42 --------------------------------------------------------------------------
-\SectionSlide{VC Dimension}{The largest sample on which a class realizes every binary labeling}
+\SectionSlide{VC Dimension}
 
 % 43 --------------------------------------------------------------------------
 \begin{frame}[t]{Shattering and VC Dimension}
@@ -1149,7 +1110,6 @@
 % 50 --------------------------------------------------------------------------
 \begin{frame}[t]{Finite and Infinite VC Dimension}
   \vspace{0.01cm}
-  Chapter 3 gives two polygon examples in the plane:
   \begin{itemize}
     \setlength{\itemsep}{0.10cm}
     \item Convex polygons with at most $d$ sides have $\vcdim=2d+1$.
@@ -1170,28 +1130,12 @@
 \end{frame}
 
 % 51 --------------------------------------------------------------------------
-\begin{frame}[t]{Checkpoint II: Compute a VC Dimension}
-  \vspace{0.02cm}
-  Consider unions of at most $k$ disjoint intervals on the real line:
-  \[
-    h(x)=1\quad\Longleftrightarrow\quad
-    x\in\bigcup_{j=1}^{k}[a_j,b_j].
-  \]
-  \begin{enumerate}
-    \setlength{\itemsep}{0.15cm}
-    \item Propose a configuration giving a lower bound.
-    \item Identify a labeling yielding an upper bound.
-    \item What VC dimension do you conjecture?
-  \end{enumerate}
-  \vspace{0.08cm}
-  \KeyBox{Answer: $2k$. A labeling on $2k$ ordered points has at most $k$ positive runs; the alternating labeling on $2k+1$ points has $k+1$.}
-\end{frame}
 
 % 52 --------------------------------------------------------------------------
 
 
 % 53 --------------------------------------------------------------------------
-\SectionSlide{Part III: Sauer's Lemma and Learning Bounds}{Finite VC dimension forces polynomial growth}
+\SectionSlide{Part III: Sauer's Lemma and Learning Bounds}
 
 % 54 --------------------------------------------------------------------------
 \begin{frame}[t]{Sauer's Lemma}
@@ -1450,7 +1394,7 @@
 \end{frame}
 
 % 66 --------------------------------------------------------------------------
-\SectionSlide{Lower Bounds}{Why the dependence on VC dimension cannot be removed}
+\SectionSlide{Lower Bounds}
 
 % 67 --------------------------------------------------------------------------
 \begin{frame}[t]{Lower Bound: Realizable Case}
@@ -1549,17 +1493,17 @@
   \end{tabular}
   \end{center}}
   \vspace{0.06cm}
-  \KeyBox{\small Chapter 3's central chain is
+  \KeyBox{\small 
   \[
     \text{VC dimension}\Rightarrow\text{growth bound}\Rightarrow\text{Rademacher bound}\Rightarrow\text{generalization}.
   \]
-  Lower bounds show that dependence on $d$ is necessary.}
+  }
 \end{frame}
 
 % 72 --------------------------------------------------------------------------
 \begin{frame}[t]{References and Questions}
   \vspace{0.01cm}
-  {\scriptsize
+  {\small
   \begin{itemize}
     \setlength{\itemsep}{0.07cm}
     \item M. Mohri, A. Rostamizadeh, and A. Talwalkar. \emph{Foundations of Machine Learning}, 2nd ed., Chapter 3. MIT Press, 2018.
@@ -1573,8 +1517,6 @@
   \begin{beamercolorbox}[rounded=true,sep=0.22cm,wd=\linewidth,center]{block body}
     {\fontsize{23}{28}\selectfont\bfseries Questions?}
   \end{beamercolorbox}
-  \vspace{0.08cm}
-  {\scriptsize\color{midgray}Core mathematical content follows Chapter 3; diagrams, timing, checkpoints, and numerical illustrations are instructor-created.}
 \end{frame}
 
 \end{document}
