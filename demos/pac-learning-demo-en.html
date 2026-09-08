@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="PAC Learning Lab: Watch random samples rule out high-error hypotheses in a disk-shaped sample space.">
+  <title>PAC Learning Lab</title>
+  <style>
+    :root {
+      --paper: #f3f0e7;
+      --paper-deep: #e8e3d7;
+      --ink: #17262d;
+      --ink-soft: #536169;
+      --line: #d6d0c3;
+      --white: #fffdf8;
+      --orange: #e85d3f;
+      --teal: #16877d;
+      --blue: #1769a9;
+      --green: #1f8f63;
+      --danger: #b5473b;
+      --shadow: 0 18px 46px rgba(36, 45, 42, .08);
+      --math-font: "Latin Modern Math", "STIX Two Math", "Cambria Math", "STIXGeneral", "Times New Roman", serif;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(232, 93, 63, .07), transparent 30rem),
+        linear-gradient(115deg, rgba(255,255,255,.42), transparent 45%),
+        var(--paper);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, .hyp-row:focus-visible, .region:focus-visible {
+      outline: 3px solid rgba(23, 105, 169, .34);
+      outline-offset: 3px;
+    }
+    .app { max-width: 1420px; margin: 0 auto; padding: 28px 30px 44px; }
+    .masthead {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: end;
+      padding-bottom: 25px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brandline { display: flex; align-items: center; gap: 11px; color: var(--ink-soft); font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .15em; text-transform: uppercase; }
+    .brandmark { width: 17px; height: 17px; border: 2px solid var(--ink); border-radius: 50%; position: relative; display: inline-block; }
+    .brandmark::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--orange); position: absolute; inset: 4px; }
+    h1 { margin: 10px 0 7px; max-width: 780px; font: 600 clamp(38px, 6vw, 76px)/.98 Georgia, "Songti SC", "Noto Serif CJK SC", serif; letter-spacing: -.045em; }
+    .subtitle { max-width: 650px; margin: 0; color: var(--ink-soft); font-size: 16px; }
+    .header-note { max-width: 215px; color: var(--ink-soft); text-align: right; font-size: 12px; }
+    .header-note strong { display: block; color: var(--ink); font: 700 23px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .lab-link { display: inline-block; margin-top: 10px; color: var(--blue); font-size: 11px; font-weight: 700; text-decoration: none; }
+    .lab-link:hover { text-decoration: underline; }
+    .flow {
+      display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 21px 0 0; padding: 0; list-style: none;
+      color: var(--ink-soft); font-size: 12px; font-weight: 650;
+    }
+    .flow li { display: flex; align-items: center; gap: 8px; }
+    .flow li + li::before { content: "→"; color: var(--orange); font-size: 17px; font-weight: 400; }
+    .step { width: 22px; height: 22px; display: inline-grid; place-items: center; border-radius: 50%; color: var(--white); background: var(--ink); font: 700 11px ui-monospace, monospace; }
+    .lab-grid { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 23px; margin-top: 25px; align-items: start; }
+    .surface { background: rgba(255, 253, 248, .88); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); }
+    .experiment { padding: clamp(18px, 2.5vw, 30px); }
+    .section-kicker { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; color: var(--ink-soft); font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 999px; background: #e9eee9; color: var(--green); font: 700 11px/1.1 ui-monospace, monospace; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+    .status-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .status-pill.warn { color: #a46a1d; background: #f5ead4; }
+    .status-pill.alert { color: var(--danger); background: #f7e1dd; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; margin-bottom: 18px; }
+    .metric { min-height: 83px; padding: 13px 14px 11px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.55); }
+    .metric-label { display: block; color: var(--ink-soft); font-size: 11px; font-weight: 650; }
+    .metric-value { display: block; margin-top: 4px; color: var(--ink); font: 700 clamp(20px, 3vw, 31px)/1.08 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.07em; }
+    .metric-value small { font-size: 13px; letter-spacing: 0; }
+    .metric-note { display: block; margin-top: 4px; color: var(--ink-soft); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .progress-line { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; margin: 0 1px 17px; color: var(--ink-soft); font-size: 11px; }
+    .progress-track { height: 8px; overflow: hidden; border-radius: 999px; background: #e3e0d6; }
+    .progress-fill { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, var(--orange), #f2ad50); transition: width .25s ease; }
+    .disk-panel { position: relative; max-width: 690px; margin: 0 auto; }
+    .disk-caption { display: flex; justify-content: space-between; gap: 14px; margin: 0 2px 8px; color: var(--ink-soft); font-size: 12px; }
+    .disk-caption strong { color: var(--ink); }
+    #disk { display: block; width: 100%; height: auto; overflow: visible; border-radius: 50%; }
+    .disk-bg { fill: #fbfaf5; stroke: var(--ink); stroke-width: 3; }
+    .disk-inner-ring { fill: none; stroke: rgba(23,38,45,.11); stroke-width: 1; stroke-dasharray: 3 8; }
+    .region { cursor: pointer; transition: opacity .22s ease, filter .22s ease, stroke-width .22s ease; }
+    .region:hover, .region.focused, .region:focus { filter: saturate(1.18) brightness(1.03); stroke: var(--ink); stroke-width: 2.7; }
+    .region.acceptable { opacity: .18; }
+    .region.eliminated { opacity: .11; filter: grayscale(.82); stroke: #737b7d; stroke-width: 1.3; stroke-dasharray: 7 6; }
+    .hatch { pointer-events: none; opacity: 0; }
+    .hatch.visible { opacity: .72; }
+    .region-label { pointer-events: none; fill: var(--ink); font: 700 12px ui-monospace, monospace; text-anchor: middle; dominant-baseline: middle; }
+    .region-label.faded { opacity: .42; }
+    .sample-mark { stroke: var(--white); stroke-width: 2.2; vector-effect: non-scaling-stroke; }
+    .sample-mark.neutral { fill: var(--ink); }
+    .sample-mark.hit { stroke: var(--ink); }
+    .sample-mark.latest { animation: pop .55s ease-out both; }
+    .sample-halo { fill: none; stroke: var(--orange); stroke-width: 2; opacity: .8; animation: ring .8s ease-out both; pointer-events: none; }
+    @keyframes pop { 0% { r: 1; opacity: .2; } 60% { r: 7; opacity: 1; } 100% { r: 4.4; opacity: 1; } }
+    @keyframes ring { 0% { r: 6; opacity: .85; } 100% { r: 27; opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+    .center-mark { pointer-events: none; }
+    .center-mark circle { fill: rgba(255,253,248,.87); stroke: rgba(23,38,45,.22); stroke-width: 1.5; }
+    .center-mark text { text-anchor: middle; fill: var(--ink); }
+    .center-mark .target { font-family: var(--math-font); font-size: 25px; font-weight: 500; }
+    .center-mark .target-note { font: 700 10px ui-monospace, monospace; letter-spacing: .08em; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+    .btn { min-height: 45px; padding: 0 15px; border: 1px solid var(--ink); border-radius: 11px; color: var(--ink); background: transparent; font-weight: 700; transition: background .18s ease, transform .18s ease; }
+    .btn:hover { background: #ece8de; }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { color: var(--white); background: var(--ink); }
+    .btn.primary:hover { background: #2a3b43; }
+    .btn.secondary { color: var(--white); border-color: var(--orange); background: var(--orange); }
+    .btn:disabled { cursor: not-allowed; opacity: .43; transform: none; }
+    .keyboard-hint { margin-left: auto; color: var(--ink-soft); font-size: 11px; }
+    .live-message { min-height: 26px; margin: 12px 2px 0; color: var(--ink-soft); font-size: 13px; }
+    .live-message strong { color: var(--ink); }
+    .event-strip { margin-top: 16px; padding-top: 15px; border-top: 1px solid var(--line); }
+    .event-strip h2, .hypotheses h2, .controls-title, .explain h2 { margin: 0; color: var(--ink); font-size: 14px; letter-spacing: -.01em; }
+    .events { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .event { padding: 6px 8px; border-radius: 8px; background: #ece9e0; color: var(--ink-soft); font-size: 11px; }
+    .event.hit { color: #8a3e2f; background: #f7e6df; }
+    .control-panel { padding: 22px; position: sticky; top: 18px; }
+    .controls-title { font-size: 18px; font-weight: 700; }
+    .controls-subtitle { margin: 4px 0 20px; color: var(--ink-soft); font-size: 12px; }
+    .control { padding: 15px 0; border-top: 1px solid var(--line); }
+    .control:first-of-type { border-top: 0; padding-top: 0; }
+    .control-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .control-label { font-weight: 700; }
+    .control-symbol { color: var(--orange); font: 700 13px ui-monospace, monospace; }
+    .control-row { display: grid; grid-template-columns: 1fr 82px; gap: 10px; align-items: center; margin-top: 8px; }
+    input[type="range"] { width: 100%; height: 5px; accent-color: var(--orange); cursor: pointer; }
+    input[type="number"] { width: 100%; min-height: 38px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: #fff; font: 700 14px ui-monospace, monospace; }
+    .control-help { display: block; margin-top: 7px; color: var(--ink-soft); font-size: 11px; }
+    .auto-box { margin: 5px 0 17px; padding: 13px; border-radius: 12px; background: #ecefe9; }
+    .auto-box h3 { margin: 0 0 5px; font-size: 12px; }
+    .auto-box p { margin: 0 0 10px; color: var(--ink-soft); font-size: 11px; }
+    .auto-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .auto-btn { min-height: 36px; padding: 0 8px; border: 1px solid #aebdb4; border-radius: 8px; color: var(--ink); background: rgba(255,255,255,.55); font-size: 11px; font-weight: 700; }
+    .auto-btn:hover { background: #fff; }
+    .auto-btn:disabled { cursor: not-allowed; opacity: .42; }
+    .derived { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 19px; }
+    .derived-item { padding: 10px; border-left: 3px solid var(--teal); background: #f1f2eb; }
+    .derived-label { display: block; color: var(--ink-soft); font-size: 10px; }
+    .derived-value { display: block; margin-top: 3px; font: 700 17px ui-monospace, monospace; }
+    .derived-note { display: block; margin-top: 2px; color: var(--ink-soft); font-size: 10px; }
+    .hypotheses { margin-top: 21px; border-top: 1px solid var(--line); padding-top: 17px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 7px 0 10px; color: var(--ink-soft); font-size: 10px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+    .legend-swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--orange); }
+    .legend-swatch.accept { opacity: .25; }
+    .legend-swatch.dead { background: repeating-linear-gradient(135deg, #9aa0a0 0 2px, #e4e2db 2px 4px); }
+    .hyp-list { display: grid; gap: 5px; max-height: 365px; overflow: auto; padding-right: 2px; }
+    .hyp-row { width: 100%; display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; min-height: 43px; padding: 6px 8px; border: 1px solid transparent; border-radius: 9px; color: var(--ink); background: transparent; text-align: left; }
+    .hyp-row:hover, .hyp-row.selected { border-color: var(--line); background: #f4f1e8; }
+    .hyp-row.eliminated { opacity: .56; }
+    .hyp-swatch { width: 12px; height: 24px; border-radius: 3px; }
+    .hyp-row.eliminated .hyp-swatch { background: repeating-linear-gradient(135deg, #9aa0a0 0 2px, #e4e2db 2px 4px) !important; }
+    .hyp-main { min-width: 0; }
+    .hyp-name { display: block; font: 700 12px ui-monospace, monospace; }
+    .hyp-detail { display: block; overflow: hidden; color: var(--ink-soft); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .hyp-state { display: inline-flex; align-items: center; gap: 4px; color: var(--green); font-size: 10px; white-space: nowrap; }
+    .hyp-state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .hyp-row.eliminated .hyp-state { color: var(--danger); }
+    .hyp-row.eliminated .hyp-state::before { border-radius: 1px; transform: rotate(45deg); }
+    .explain { margin-top: 23px; padding: 22px 25px 24px; }
+    .explain-head { display: flex; justify-content: space-between; gap: 15px; align-items: baseline; }
+    .explain h2 { font: 600 27px/1.1 Georgia, "Songti SC", serif; }
+    .explain-intro { margin: 5px 0 0; color: var(--ink-soft); font-size: 12px; }
+    .explain-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 20px; }
+    .explain-card { padding-top: 12px; border-top: 2px solid var(--ink); }
+    .explain-card:nth-child(2) { border-color: var(--orange); }
+    .explain-card:nth-child(3) { border-color: var(--teal); }
+    .explain-card h3 { margin: 0 0 5px; font-size: 13px; }
+    .explain-card p { margin: 0; color: var(--ink-soft); font-size: 12px; }
+    .formula-band { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 21px; }
+    .formula { padding: 13px 15px; border-radius: 11px; background: #17262d; color: var(--white); }
+    .formula.secondary { background: #e7ece6; color: var(--ink); }
+    .formula-label { display: block; margin-bottom: 5px; opacity: .7; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .formula code { display: block; font-family: var(--math-font); font-size: clamp(15px, 2vw, 20px); font-weight: 400; line-height: 1.28; letter-spacing: 0; font-synthesis: none; text-rendering: geometricPrecision; white-space: normal; }
+    .caveat { margin: 18px 0 0; padding: 11px 13px; border-left: 3px solid var(--orange); color: var(--ink-soft); background: #f7eee4; font-size: 11px; }
+    .footer-note { margin: 20px 2px 0; color: var(--ink-soft); font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 1080px) {
+      .lab-grid { grid-template-columns: minmax(0, 1fr) 340px; }
+      .app { padding-inline: 20px; }
+    }
+    @media (max-width: 820px) {
+      .masthead { grid-template-columns: 1fr; align-items: start; }
+      .header-note { max-width: none; text-align: left; }
+      .header-note strong { display: inline; margin-right: 7px; }
+      .lab-grid { grid-template-columns: 1fr; }
+      .control-panel { position: static; order: -1; }
+      .explain-grid { grid-template-columns: 1fr; gap: 14px; }
+    }
+    @media (max-width: 520px) {
+      .app { padding: 18px 13px 30px; }
+      .masthead { padding-bottom: 18px; }
+      h1 { font-size: clamp(38px, 13vw, 58px); }
+      .subtitle { font-size: 14px; }
+      .flow { display: grid; gap: 8px; }
+      .flow li + li::before { display: none; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric { min-height: 76px; }
+      .experiment, .control-panel, .explain { padding: 17px; }
+      .actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .actions .primary { grid-column: 1 / -1; }
+      .keyboard-hint { grid-column: 1 / -1; margin-left: 0; }
+      .formula-band { grid-template-columns: 1fr; }
+      .progress-line { grid-template-columns: 1fr auto; }
+      .progress-line .progress-track { grid-column: 1 / -1; grid-row: 2; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <div>
+        <div class="brandline"><span class="brandmark" aria-hidden="true"></span> PAC / FINITE HYPOTHESIS CLASS</div>
+        <h1>PAC Learning Lab</h1>
+        <p class="subtitle">Watch random samples rule out high-error hypotheses in a disk-shaped sample space.</p>
+        <ol class="flow" aria-label="Experiment steps">
+          <li><span class="step">1</span>Adjust |H|, ε, δ</li>
+          <li><span class="step">2</span>Draw a uniform sample</li>
+          <li><span class="step">3</span>Hit an error region → eliminate hᵢ</li>
+        </ol>
+      </div>
+      <div class="header-note"><strong>REALIZABLE</strong> True label fixed at 0 · Error regions are pairwise disjoint<a class="lab-link" href="infinite-classes-demo.html">Explore infinite classes →</a></div>
+    </header>
+
+    <main class="lab-grid">
+      <section class="surface experiment" aria-labelledby="experiment-title">
+        <div class="section-kicker"><span id="experiment-title">Experiment / SAMPLE SPACE D</span><span id="statusPill" class="status-pill">Ready to sample</span></div>
+        <div class="metrics" aria-label="Live experiment metrics">
+          <div class="metric"><span class="metric-label">Samples n</span><strong id="sampleCount" class="metric-value">0</strong><span class="metric-note">Independent uniform draws</span></div>
+          <div class="metric"><span class="metric-label">PAC sample size</span><strong id="pacTarget" class="metric-value">—</strong><span class="metric-note">Exact finite-class bound</span></div>
+          <div class="metric"><span class="metric-label">Version space |Vₙ|</span><strong id="aliveCount" class="metric-value">—</strong><span class="metric-note">Includes target h*</span></div>
+          <div class="metric"><span class="metric-label">ε-bad hypotheses alive</span><strong id="badAlive" class="metric-value">—</strong><span class="metric-note">err(h) ≥ ε</span></div>
+        </div>
+        <div class="progress-line" aria-label="PAC sample-size progress"><span>PAC sample-size progress</span><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div><strong id="progressText">0%</strong></div>
+
+        <figure class="disk-panel" aria-labelledby="diskCaption">
+          <figcaption id="diskCaption" class="disk-caption"><span><strong>Disk D</strong> · area normalized to 1</span><span id="regionInfo">Hover a colored region for details</span></figcaption>
+          <svg id="disk" viewBox="0 0 620 620" role="img" aria-labelledby="diskTitle diskDesc">
+            <title id="diskTitle">Disk sample space and error regions</title>
+            <desc id="diskDesc">Each colored sector represents the error region of one wrong hypothesis; its area fraction is that hypothesis's true error rate. Click a sampling button to generate a uniform point inside the disk.</desc>
+            <defs>
+              <pattern id="hatchPattern" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                <line x1="0" y1="0" x2="0" y2="9" stroke="#667276" stroke-width="2"></line>
+              </pattern>
+            </defs>
+            <circle class="disk-bg" cx="310" cy="310" r="265"></circle>
+            <circle class="disk-inner-ring" cx="310" cy="310" r="197"></circle>
+            <g id="regionsLayer"></g>
+            <g id="hatchLayer"></g>
+            <g id="labelsLayer"></g>
+            <g id="pointsLayer"></g>
+            <g class="center-mark" aria-hidden="true">
+              <circle cx="310" cy="310" r="48"></circle>
+              <text class="target" x="310" y="307">h*</text>
+              <text class="target-note" x="310" y="325">ERR = 0</text>
+            </g>
+          </svg>
+        </figure>
+
+        <div class="actions">
+          <button id="sampleOne" class="btn primary" type="button">Draw 1 uniform sample <span aria-hidden="true">↵</span></button>
+          <button id="sampleTen" class="btn secondary" type="button">Draw 10 samples</button>
+          <button id="sampleToBound" class="btn" type="button">Sample to PAC bound</button>
+          <button id="resetExperiment" class="btn" type="button">Reset experiment</button>
+          <span class="keyboard-hint">Tip: press Space / Enter to sample</span>
+        </div>
+        <p id="liveMessage" class="live-message" role="status" aria-live="polite">Ready—click “Draw 1 uniform sample” to begin.</p>
+
+        <section class="event-strip" aria-labelledby="eventsTitle">
+          <h2 id="eventsTitle">Recent events</h2>
+          <div id="eventLog" class="events"><span class="event">No samples yet · waiting for the first draw</span></div>
+        </section>
+      </section>
+
+      <aside class="surface control-panel" aria-labelledby="controlsTitle">
+        <h2 id="controlsTitle" class="controls-title">Parameters</h2>
+        <p class="controls-subtitle">Changing values recomputes the theoretical guarantee in real time. Changing |H| rebuilds the regions and clears samples; changing ε or δ keeps the current samples.</p>
+
+        <div class="control">
+          <div class="control-head"><label class="control-label" for="hypRange">Total hypotheses |H|</label><span class="control-symbol">M</span></div>
+          <div class="control-row"><input id="hypRange" type="range" min="2" max="21" step="1" value="9"><input id="hypNumber" type="number" min="2" max="21" step="1" value="9" aria-label="Total hypotheses"></div>
+          <span class="control-help">Includes one true target h*; colored wrong hypotheses K = |H| − 1.</span>
+        </div>
+        <div class="control">
+          <div class="control-head"><label class="control-label" for="epsRange">Error threshold ε</label><span class="control-symbol">epsilon</span></div>
+          <div class="control-row"><input id="epsRange" type="range" min="0.01" max="0.50" step="0.01" value="0.10"><input id="epsNumber" type="number" min="0.01" max="0.50" step="0.01" value="0.10" aria-label="Error threshold"></div>
+          <span class="control-help">Hypotheses with err(h) ≥ ε are marked “ε-bad”; ε changes the classification, not the regions.</span>
+        </div>
+        <div class="control">
+          <div class="control-head"><label class="control-label" for="deltaRange">Failure probability δ</label><span class="control-symbol">delta</span></div>
+          <div class="control-row"><input id="deltaRange" type="range" min="0.001" max="0.50" step="0.001" value="0.05"><input id="deltaNumber" type="number" min="0.001" max="0.50" step="0.001" value="0.05" aria-label="Failure probability"></div>
+          <span class="control-help">The PAC failure upper bound—not the probability that a particular hypothesis is wrong.</span>
+        </div>
+
+        <section class="auto-box" aria-labelledby="autoTitle">
+          <h3 id="autoTitle">Auto-link</h3>
+          <p>Given n, back-solve a parameter that matches the current PAC bound (within the available numeric range).</p>
+          <div class="auto-actions">
+            <button id="autoEpsilon" class="auto-btn" type="button">ε ← current n</button>
+            <button id="autoDelta" class="auto-btn" type="button">δ ← current bound</button>
+          </div>
+        </section>
+
+        <div class="derived" aria-label="Derived values">
+          <div class="derived-item"><span class="derived-label">Exact mPAC</span><strong id="derivedPac" class="derived-value">—</strong><span class="derived-note">K(1−ε)ⁿ ≤ δ</span></div>
+          <div class="derived-item"><span class="derived-label">Current failure upper bound</span><strong id="derivedFailure" class="derived-value">—</strong><span class="derived-note">min(1, K(1−ε)ⁿ)</span></div>
+        </div>
+
+        <section class="hypotheses" aria-labelledby="hypothesesTitle">
+          <h2 id="hypothesesTitle">Hypothesis space & status</h2>
+          <div class="legend" aria-label="Legend">
+            <span class="legend-item"><i class="legend-swatch"></i>ε-bad / alive</span>
+            <span class="legend-item"><i class="legend-swatch accept"></i>Acceptable</span>
+            <span class="legend-item"><i class="legend-swatch dead"></i>Eliminated</span>
+          </div>
+          <div id="hypList" class="hyp-list" role="list"></div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="surface explain" aria-labelledby="explainTitle">
+      <div class="explain-head"><div><h2 id="explainTitle">What are you seeing?</h2><p class="explain-intro">A small experiment with a finite hypothesis class in the realizable, consistent-learner setting.</p></div><span class="status-pill">theoretical + simulation</span></div>
+      <div class="explain-grid">
+        <article class="explain-card"><h3>① Region area is error rate</h3><p>The distribution on the disk is uniform. The colored region Eᵢ for hᵢ occupies fraction pᵢ of the disk, which is its true error rate err(hᵢ).</p></article>
+        <article class="explain-card"><h3>② A hit eliminates</h3><p>The true label is fixed at 0. When a sample lands in Eᵢ, hᵢ predicts incorrectly, so it is inconsistent with the training sample and is removed from the version space Vₙ.</p></article>
+        <article class="explain-card"><h3>③ Large regions disappear sooner</h3><p>A hypothesis with error rate p has probability (1−p)ⁿ of avoiding a hit after n draws. The larger p is, the faster its survival probability falls.</p></article>
+      </div>
+      <div class="formula-band">
+        <div class="formula"><span class="formula-label">Finite-class PAC bound</span><code>mPAC = ⌈ ln(K / δ) / −ln(1 − ε) ⌉</code></div>
+        <div class="formula secondary"><span class="formula-label">Failure upper bound for this run</span><code>P(∃ ε-bad hypothesis still alive) ≤ min(1, K · (1 − ε)ⁿ)</code></div>
+      </div>
+      <p class="caveat">Important: n ≥ mPAC means that, over repeated fresh experiments, with probability at least 1−δ, every hypothesis still consistent with the samples has err(h) &lt; ε. It does not force the last bad hypothesis to disappear in one run; keep sampling if one remains.</p>
+      <p class="footer-note">Construction: error regions are pairwise disjoint, occupy 72% of the disk, and are ordered from largest to smallest. Each sample can hit at most one error region, making the rule-out process easy to see.</p>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      var NS = "http://www.w3.org/2000/svg";
+      var CX = 310;
+      var CY = 310;
+      var R = 265;
+      var TAU = Math.PI * 2;
+      var START = -Math.PI / 2;
+      var ERROR_MASS = 0.72;
+      var palette = [
+        "#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7",
+        "#56B4E9", "#8A63D2", "#4E79A7", "#59A14F", "#E15759",
+        "#B07AA1", "#76B7B2", "#EDC948", "#FF9DA7", "#9C755F",
+        "#264653", "#E76F51", "#2A9D8F", "#7A5195", "#BC5090"
+      ];
+      var state = {
+        totalH: 9,
+        epsilon: 0.10,
+        delta: 0.05,
+        sampleCount: 0,
+        samples: [],
+        hypotheses: [],
+        focused: -1,
+        selected: -1,
+        lastEvent: null
+      };
+      var els = {
+        disk: document.getElementById("disk"),
+        regions: document.getElementById("regionsLayer"),
+        hatch: document.getElementById("hatchLayer"),
+        labels: document.getElementById("labelsLayer"),
+        points: document.getElementById("pointsLayer"),
+        regionInfo: document.getElementById("regionInfo"),
+        sampleCount: document.getElementById("sampleCount"),
+        pacTarget: document.getElementById("pacTarget"),
+        aliveCount: document.getElementById("aliveCount"),
+        badAlive: document.getElementById("badAlive"),
+        progressFill: document.getElementById("progressFill"),
+        progressText: document.getElementById("progressText"),
+        statusPill: document.getElementById("statusPill"),
+        liveMessage: document.getElementById("liveMessage"),
+        eventLog: document.getElementById("eventLog"),
+        hypList: document.getElementById("hypList"),
+        derivedPac: document.getElementById("derivedPac"),
+        derivedFailure: document.getElementById("derivedFailure"),
+        sampleOne: document.getElementById("sampleOne"),
+        sampleTen: document.getElementById("sampleTen"),
+        sampleToBound: document.getElementById("sampleToBound"),
+        resetExperiment: document.getElementById("resetExperiment"),
+        autoEpsilon: document.getElementById("autoEpsilon"),
+        autoDelta: document.getElementById("autoDelta")
+      };
+      var inputPairs = [
+        { range: "hypRange", number: "hypNumber", min: 2, max: 21, digits: 0, kind: "h" },
+        { range: "epsRange", number: "epsNumber", min: 0.01, max: 0.50, digits: 2, kind: "epsilon" },
+        { range: "deltaRange", number: "deltaNumber", min: 0.001, max: 0.50, digits: 3, kind: "delta" }
+      ];
+
+      function node(name, attrs) {
+        var el = document.createElementNS(NS, name);
+        Object.keys(attrs || {}).forEach(function (key) { el.setAttribute(key, attrs[key]); });
+        return el;
+      }
+      function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+      function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+      function fmtPct(value) {
+        if (!isFinite(value)) return "—";
+        if (value >= 0.9995) return "100%";
+        if (value < 0.001) return (value * 100).toExponential(1) + "%";
+        return (value * 100).toFixed(value < 0.1 ? 1 : 0) + "%";
+      }
+      function fmtErr(value) { return (value * 100).toFixed(value < 0.1 ? 1 : 0) + "%"; }
+      function fmtNum(value, digits) { return Number(value).toFixed(digits); }
+      function polar(angle, radius) { return [CX + radius * Math.cos(angle), CY + radius * Math.sin(angle)]; }
+      function sectorPath(start, end) {
+        var p1 = polar(start, R);
+        var p2 = polar(end, R);
+        var large = end - start > Math.PI ? 1 : 0;
+        return "M" + CX + " " + CY + "L" + p1[0].toFixed(3) + " " + p1[1].toFixed(3) + "A" + R + " " + R + " 0 " + large + " 1 " + p2[0].toFixed(3) + " " + p2[1].toFixed(3) + "Z";
+      }
+      function pathCenter(angle, radius) { return polar(angle, radius); }
+      function exactPac() {
+        var k = state.totalH - 1;
+        if (k <= 0) return 0;
+        return Math.max(0, Math.ceil(Math.log(k / state.delta) / (-Math.log1p(-state.epsilon))));
+      }
+      function textbookPac() {
+        var k = state.totalH - 1;
+        if (k <= 0) return 0;
+        return Math.max(0, Math.ceil((Math.log(state.totalH) + Math.log(1 / state.delta)) / state.epsilon));
+      }
+      function failureBound() {
+        var k = state.totalH - 1;
+        if (!k || !state.sampleCount) return k ? Math.min(1, k) : 0;
+        return Math.min(1, k * Math.exp(state.sampleCount * Math.log1p(-state.epsilon)));
+      }
+      function actualFailureBound() {
+        var total = 0;
+        state.hypotheses.forEach(function (h) {
+          if (h.kind === "wrong" && h.error >= state.epsilon) total += Math.pow(1 - h.error, state.sampleCount);
+        });
+        return Math.min(1, total);
+      }
+      function isBad(h) { return h.kind === "wrong" && h.error >= state.epsilon; }
+      function activeWrongCount() { return state.hypotheses.filter(function (h) { return h.kind === "wrong" && !h.eliminated; }).length; }
+      function badTotal() { return state.hypotheses.filter(isBad).length; }
+      function badAliveCount() { return state.hypotheses.filter(function (h) { return isBad(h) && !h.eliminated; }).length; }
+      function makeHypotheses() {
+        var k = state.totalH - 1;
+        var start = START;
+        state.hypotheses = [{
+          id: "h*",
+          kind: "target",
+          error: 0,
+          color: "#17262d",
+          start: 0,
+          end: 0,
+          eliminated: false,
+          path: null,
+          hatch: null,
+          label: null
+        }];
+        for (var i = 0; i < k; i += 1) {
+          var error = ERROR_MASS * 2 * (k - i) / (k * (k + 1));
+          var end = start + error * TAU;
+          state.hypotheses.push({
+            id: "h" + (i + 1),
+            kind: "wrong",
+            error: error,
+            color: palette[i % palette.length],
+            start: start,
+            end: end,
+            eliminated: false,
+            eliminatedAt: null,
+            path: null,
+            hatch: null,
+            label: null
+          });
+          start = end;
+        }
+      }
+      function drawHypotheses() {
+        clear(els.regions); clear(els.hatch); clear(els.labels);
+        var wrong = state.hypotheses.filter(function (h) { return h.kind === "wrong"; });
+        wrong.forEach(function (h, index) {
+          var path = node("path", {
+            d: sectorPath(h.start, h.end),
+            fill: h.color,
+            "fill-opacity": ".42",
+            stroke: h.color,
+            "stroke-width": "1.2",
+            "aria-label": h.id + " · error rate " + fmtErr(h.error),
+            tabindex: "0",
+            "data-index": index + 1,
+            "class": "region"
+          });
+          path.addEventListener("pointerenter", function () { focusHyp(h.id); });
+          path.addEventListener("pointerleave", function () { if (state.selected < 0) clearFocus(); });
+          path.addEventListener("focus", function () { focusHyp(h.id); });
+          path.addEventListener("blur", function () { if (state.selected < 0) clearFocus(); });
+          path.addEventListener("click", function () { selectHyp(h.id); });
+          els.regions.appendChild(path);
+          h.path = path;
+          var hatch = node("path", { d: sectorPath(h.start, h.end), fill: "url(#hatchPattern)", "class": "hatch" });
+          els.hatch.appendChild(hatch);
+          h.hatch = hatch;
+          var mid = (h.start + h.end) / 2;
+          var labelPoint = pathCenter(mid, 188);
+          var label = node("text", { x: labelPoint[0], y: labelPoint[1], "class": "region-label" });
+          label.textContent = h.id;
+          els.labels.appendChild(label);
+          h.label = label;
+        });
+        drawStateStyles();
+      }
+      function drawStateStyles() {
+        state.hypotheses.forEach(function (h) {
+          if (h.kind === "target") return;
+          if (h.path) {
+            h.path.classList.toggle("eliminated", h.eliminated);
+            h.path.classList.toggle("acceptable", !h.eliminated && !isBad(h));
+            h.path.classList.toggle("focused", state.hypotheses.indexOf(h) === state.focused || state.hypotheses.indexOf(h) === state.selected);
+          }
+          if (h.hatch) h.hatch.classList.toggle("visible", h.eliminated);
+          if (h.label) h.label.classList.toggle("faded", h.eliminated || !isBad(h));
+        });
+      }
+      function focusHyp(id) {
+        var h = state.hypotheses.find(function (item) { return item.id === id; });
+        if (!h) return;
+        state.focused = state.hypotheses.indexOf(h);
+        els.regionInfo.textContent = h.id + " · err = " + fmtErr(h.error) + " · " + (isBad(h) ? "ε-bad" : "Acceptable") + " · " + (h.eliminated ? "Eliminated" : "alive");
+        drawStateStyles();
+        updateHypRows();
+      }
+      function clearFocus() {
+        state.focused = -1;
+        els.regionInfo.textContent = "Hover a colored region for details";
+        drawStateStyles();
+        updateHypRows();
+      }
+      function selectHyp(id) {
+        var h = state.hypotheses.find(function (item) { return item.id === id; });
+        state.selected = h ? state.hypotheses.indexOf(h) : -1;
+        if (h) focusHyp(id);
+        updateHypRows();
+      }
+      function drawPoints() {
+        clear(els.points);
+        state.samples.forEach(function (sample, index) {
+          var circle = node("circle", {
+            cx: sample.x.toFixed(3),
+            cy: sample.y.toFixed(3),
+            r: index === state.samples.length - 1 ? "4.4" : "3.3",
+            class: "sample-mark " + (sample.hit >= 0 ? "hit" : "neutral") + (index === state.samples.length - 1 ? " latest" : ""),
+            fill: sample.hit >= 0 ? state.hypotheses[sample.hit].color : "#17262d",
+            "aria-label": "Sample " + sample.number + (sample.hit >= 0 ? ", hit " + state.hypotheses[sample.hit].id : ", missed all error regions")
+          });
+          els.points.appendChild(circle);
+        });
+        var last = state.samples[state.samples.length - 1];
+        if (last) {
+          els.points.appendChild(node("circle", { cx: last.x.toFixed(3), cy: last.y.toFixed(3), r: "7", class: "sample-halo" }));
+        }
+      }
+      function updateHypRows() {
+        clear(els.hypList);
+        state.hypotheses.forEach(function (h, index) {
+          var row = document.createElement("button");
+          row.type = "button";
+          row.className = "hyp-row" + (h.eliminated ? " eliminated" : "") + (index === state.selected ? " selected" : "");
+          row.setAttribute("role", "listitem");
+          row.setAttribute("aria-pressed", index === state.selected ? "true" : "false");
+          row.addEventListener("mouseenter", function () { if (h.kind === "wrong") focusHyp(h.id); });
+          row.addEventListener("mouseleave", function () { if (state.selected < 0) clearFocus(); });
+          row.addEventListener("focus", function () { if (h.kind === "wrong") focusHyp(h.id); });
+          row.addEventListener("click", function () { if (h.kind === "wrong") selectHyp(h.id); });
+          var swatch = document.createElement("span");
+          swatch.className = "hyp-swatch";
+          swatch.style.background = h.kind === "target" ? "#17262d" : h.color;
+          var main = document.createElement("span");
+          main.className = "hyp-main";
+          var name = document.createElement("span");
+          name.className = "hyp-name";
+          name.textContent = h.id;
+          var detail = document.createElement("span");
+          detail.className = "hyp-detail";
+          detail.textContent = h.kind === "target" ? "True target · err = 0" : "err = " + fmtErr(h.error) + " · " + (isBad(h) ? "ε-bad" : "Acceptable");
+          main.appendChild(name); main.appendChild(detail);
+          var status = document.createElement("span");
+          status.className = "hyp-state";
+          status.textContent = h.kind === "target" ? "target" : (h.eliminated ? "sample " + h.eliminatedAt : "alive");
+          row.appendChild(swatch); row.appendChild(main); row.appendChild(status);
+          els.hypList.appendChild(row);
+        });
+      }
+      function addEvent(text, kind) {
+        var event = document.createElement("span");
+        event.className = "event" + (kind ? " " + kind : "");
+        event.textContent = text;
+        els.eventLog.insertBefore(event, els.eventLog.firstChild);
+        while (els.eventLog.children.length > 5) els.eventLog.removeChild(els.eventLog.lastChild);
+      }
+      function updateEventLogEmpty() {
+        if (!state.sampleCount) {
+          clear(els.eventLog);
+          var empty = document.createElement("span");
+          empty.className = "event";
+          empty.textContent = "No samples yet · waiting for the first draw";
+          els.eventLog.appendChild(empty);
+        }
+      }
+      function updateMetrics() {
+        var m = exactPac();
+        var active = 1 + activeWrongCount();
+        var badAlive = badAliveCount();
+        var failure = failureBound();
+        els.sampleCount.textContent = String(state.sampleCount);
+        els.pacTarget.textContent = String(m);
+        els.aliveCount.textContent = String(active);
+        els.badAlive.textContent = String(badAlive);
+        els.derivedPac.textContent = String(m);
+        els.derivedFailure.textContent = fmtPct(failure);
+        var progress = m ? Math.min(1, state.sampleCount / m) : 1;
+        els.progressFill.style.width = (progress * 100).toFixed(1) + "%";
+        els.progressText.textContent = Math.round(progress * 100) + "%";
+        els.sampleToBound.disabled = state.sampleCount >= m;
+        var canAutoEps = state.sampleCount > 0 && state.totalH > 1;
+        var neededEps = canAutoEps ? 1 - Math.pow(state.delta / (state.totalH - 1), 1 / state.sampleCount) : Infinity;
+        els.autoEpsilon.disabled = !canAutoEps || neededEps > 0.50 || neededEps < 0.01;
+        var bound = failureBound();
+        els.autoDelta.disabled = state.sampleCount <= 0 || bound > 0.50 || bound < 0.001;
+        var statusText = "Observing";
+        var statusClass = "";
+        var message = "Each sample can hit at most one error region; a miss does not prove any hypothesis correct.";
+        if (!state.sampleCount) { statusText = "Ready to sample"; message = "Ready—click “Draw 1 uniform sample” to begin."; }
+        else if (!badTotal()) { statusText = "No ε-bad hypotheses"; statusClass = ""; message = "Under the current ε, this constructed hypothesis class contains no ε-bad hypotheses."; }
+        else if (!badAlive) { statusText = "Bad hypotheses cleared"; message = "This run has eliminated every ε-bad hypothesis; more samples will still add points."; }
+        else if (state.sampleCount >= m) { statusText = "PAC event"; statusClass = "alert"; message = "The theoretical sample size is reached, but " + badAlive + " ε-bad hypotheses remain alive; this is precisely the failure event whose probability is at most δ. Keep sampling."; }
+        else if (state.lastEvent && state.lastEvent.hit >= 0) { statusText = "Hit & eliminated"; statusClass = "warn"; message = "Sample " + state.sampleCount + " hit " + state.hypotheses[state.lastEvent.hit].id + "'s error region; the hypothesis has been removed from the version space."; }
+        els.statusPill.textContent = statusText;
+        els.statusPill.className = "status-pill" + (statusClass ? " " + statusClass : "");
+        els.liveMessage.innerHTML = "<strong>" + message.split(";")[0] + "</strong>" + (message.indexOf(";") >= 0 ? ";" + message.split(";").slice(1).join(";") : "");
+        updateHypRows();
+        drawStateStyles();
+      }
+      function drawAll() {
+        drawHypotheses();
+        drawPoints();
+        updateMetrics();
+        updateEventLogEmpty();
+      }
+      function resetExperiment(reason) {
+        state.sampleCount = 0;
+        state.samples = [];
+        state.focused = -1;
+        state.selected = -1;
+        state.lastEvent = null;
+        makeHypotheses();
+        drawAll();
+        if (reason) {
+          clear(els.eventLog);
+          addEvent(reason, "");
+        }
+      }
+      function sampleOne(silent) {
+        var offset = Math.random() * TAU;
+        var angle = START + offset;
+        var radius = R * Math.sqrt(Math.random());
+        var x = CX + radius * Math.cos(angle);
+        var y = CY + radius * Math.sin(angle);
+        var hit = -1;
+        for (var i = 1; i < state.hypotheses.length; i += 1) {
+          var h = state.hypotheses[i];
+          if (offset >= h.start - START && offset < h.end - START) { hit = i; break; }
+        }
+        state.sampleCount += 1;
+        var hHit = hit >= 0 ? state.hypotheses[hit] : null;
+        var wasEliminated = false;
+        if (hHit && !hHit.eliminated) {
+          hHit.eliminated = true;
+          hHit.eliminatedAt = state.sampleCount;
+          wasEliminated = true;
+        }
+        state.samples.push({ x: x, y: y, hit: hit, number: state.sampleCount });
+        if (state.samples.length > 1100) state.samples.shift();
+        state.lastEvent = { hit: hit, wasEliminated: wasEliminated };
+        if (!silent) {
+          if (hHit && wasEliminated) addEvent("#" + state.sampleCount + " · hit " + hHit.id + " → eliminated", "hit");
+          else if (hHit) addEvent("#" + state.sampleCount + " · hit an eliminated region " + hHit.id, "hit");
+          else addEvent("#" + state.sampleCount + " · missed all error regions");
+          drawPoints();
+          updateMetrics();
+        }
+        return { hit: hit, eliminated: wasEliminated };
+      }
+      function sampleMany(count) {
+        var n = Math.max(0, Math.floor(count));
+        var eliminated = 0;
+        var hitCount = 0;
+        var first = state.sampleCount + 1;
+        for (var i = 0; i < n; i += 1) {
+          var result = sampleOne(true);
+          if (result.hit >= 0) hitCount += 1;
+          if (result.eliminated) eliminated += 1;
+        }
+        if (n > 0) {
+          addEvent("Batch #" + first + "–#" + state.sampleCount + " · hits " + hitCount + ", eliminated " + eliminated, eliminated ? "hit" : "");
+          drawPoints();
+          updateMetrics();
+        }
+      }
+      function bindInputs() {
+        inputPairs.forEach(function (pair) {
+          var range = document.getElementById(pair.range);
+          var number = document.getElementById(pair.number);
+          function commit(raw) {
+            var value = Number(raw);
+            if (!isFinite(value)) return;
+            value = clamp(value, pair.min, pair.max);
+            var display = pair.digits === 0 ? String(Math.round(value)) : value.toFixed(pair.digits);
+            range.value = display;
+            number.value = display;
+            if (pair.kind === "h") {
+              state.totalH = Math.round(value);
+              resetExperiment("Hypothesis count changed · experiment rebuilt");
+            } else if (pair.kind === "epsilon") {
+              state.epsilon = value;
+              drawAll();
+            } else {
+              state.delta = value;
+              drawAll();
+            }
+          }
+          range.addEventListener("input", function () { commit(range.value); });
+          function commitNumber() {
+            if (number.value === "") {
+              number.value = range.value;
+              return;
+            }
+            commit(number.value);
+          }
+          number.addEventListener("change", commitNumber);
+          number.addEventListener("blur", commitNumber);
+        });
+      }
+      function updateInput(kind, value) {
+        var pair = inputPairs.find(function (item) { return item.kind === kind; });
+        if (!pair) return;
+        var display = pair.digits === 0 ? String(Math.round(value)) : Number(value).toFixed(pair.digits);
+        document.getElementById(pair.range).value = display;
+        document.getElementById(pair.number).value = display;
+      }
+      function autoEpsilon() {
+        if (!state.sampleCount || state.totalH <= 1) return;
+        var needed = 1 - Math.pow(state.delta / (state.totalH - 1), 1 / state.sampleCount);
+        if (needed >= 0.01 && needed <= 0.50) {
+          state.epsilon = Number(needed.toFixed(2));
+          needed = state.epsilon;
+          updateInput("epsilon", needed);
+          drawAll();
+          addEvent("Auto-link · ε set to " + needed.toFixed(3));
+        }
+      }
+      function autoDelta() {
+        var bound = failureBound();
+        if (!state.sampleCount || bound < 0.001 || bound > 0.50) return;
+        state.delta = Number(bound.toFixed(3));
+        bound = state.delta;
+        updateInput("delta", bound);
+        drawAll();
+        addEvent("Auto-link · δ set to " + bound.toFixed(3));
+      }
+      els.sampleOne.addEventListener("click", function () { sampleOne(); });
+      els.sampleTen.addEventListener("click", function () { sampleMany(10); });
+      els.sampleToBound.addEventListener("click", function () {
+        var remaining = exactPac() - state.sampleCount;
+        if (remaining > 0) sampleMany(Math.min(remaining, 1100));
+      });
+      els.resetExperiment.addEventListener("click", function () { resetExperiment("Experiment reset"); });
+      els.autoEpsilon.addEventListener("click", autoEpsilon);
+      els.autoDelta.addEventListener("click", autoDelta);
+      document.addEventListener("keydown", function (event) {
+        var tag = document.activeElement && document.activeElement.tagName;
+        if ((event.code === "Space" || event.code === "Enter") && tag !== "INPUT" && tag !== "BUTTON") {
+          event.preventDefault();
+          sampleOne();
+        }
+      });
+      bindInputs();
+      resetExperiment();
+    }());
+  </script>
+</body>
+</html>

@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Rotatable 3D demos of shattering, separating planes, and the geometry of Rademacher complexity, with exact finite-sample examples.">
+  <title>Infinite Classes Lab · PAC Learning</title>
+  <style>
+    :root {
+      --paper: #f3f0e7;
+      --paper-deep: #e8e3d7;
+      --ink: #17262d;
+      --ink-soft: #536169;
+      --line: #d6d0c3;
+      --white: #fffdf8;
+      --orange: #e85d3f;
+      --teal: #16877d;
+      --blue: #1769a9;
+      --green: #1f8f63;
+      --danger: #b5473b;
+      --purple: #7655a6;
+      --shadow: 0 18px 46px rgba(36, 45, 42, .08);
+      --math-font: "Latin Modern Math", "STIX Two Math", "Cambria Math", "STIXGeneral", "Times New Roman", serif;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(232, 93, 63, .07), transparent 30rem),
+        linear-gradient(115deg, rgba(255,255,255,.42), transparent 45%),
+        var(--paper);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button, select { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+      outline: 3px solid rgba(23, 105, 169, .34);
+      outline-offset: 3px;
+    }
+    .app { max-width: 1420px; margin: 0 auto; padding: 28px 30px 46px; }
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 25px;
+      align-items: end;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brandline {
+      display: flex; align-items: center; gap: 10px; color: var(--ink-soft);
+      font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .15em; text-transform: uppercase;
+    }
+    .brandmark { width: 17px; height: 17px; border: 2px solid var(--ink); border-radius: 50%; position: relative; display: inline-block; }
+    .brandmark::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--orange); position: absolute; inset: 4px; }
+    h1 { margin: 10px 0 7px; max-width: 850px; font: 600 clamp(38px, 6vw, 76px)/.98 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+    .subtitle { max-width: 700px; margin: 0; color: var(--ink-soft); font-size: 16px; }
+    .header-note { max-width: 250px; color: var(--ink-soft); text-align: right; font-size: 12px; }
+    .header-note strong { display: block; color: var(--ink); font: 500 22px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .lab-nav { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 19px; }
+    .lab-nav a {
+      display: inline-flex; align-items: center; min-height: 32px; padding: 0 11px;
+      border: 1px solid var(--line); border-radius: 999px; color: var(--ink-soft);
+      background: rgba(255,255,255,.38); font-size: 11px; font-weight: 700; text-decoration: none;
+    }
+    .lab-nav a:hover { color: var(--ink); background: var(--white); }
+    .lab-nav a.active { color: var(--white); border-color: var(--ink); background: var(--ink); }
+    .surface { background: rgba(255, 253, 248, .88); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); }
+    .concepts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; margin-top: 24px; }
+    .concept-card { min-height: 164px; padding: 15px; border-top: 3px solid var(--ink); background: rgba(255,255,255,.38); }
+    .concept-card:nth-child(2) { border-color: var(--orange); }
+    .concept-card:nth-child(3) { border-color: var(--teal); }
+    .concept-card:nth-child(4) { border-color: var(--purple); }
+    .concept-eyebrow { color: var(--ink-soft); font: 700 10px/1.2 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .concept-card h2 { margin: 11px 0 6px; font: 500 19px/1.12 Georgia, "Times New Roman", serif; }
+    .concept-card p { margin: 0; color: var(--ink-soft); font-size: 12px; }
+    .concept-card code { display: block; margin-top: 10px; color: var(--ink); font-family: var(--math-font); font-size: 14px; }
+    .lab-grid { display: grid; grid-template-columns: minmax(0, 1.16fr) minmax(0, .84fr); gap: 22px; margin-top: 22px; align-items: start; }
+    .panel { padding: clamp(18px, 2.4vw, 28px); }
+    .panel-kicker { display: flex; justify-content: space-between; gap: 12px; align-items: center; color: var(--ink-soft); font: 700 10px/1.2 ui-monospace, monospace; letter-spacing: .13em; text-transform: uppercase; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; min-height: 25px; padding: 0 8px; border-radius: 999px; color: var(--ink); background: #e9eee9; font: 700 10px/1 ui-monospace, monospace; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+    .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .panel h2 { margin: 12px 0 5px; font: 500 clamp(24px, 3vw, 34px)/1.05 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
+    .panel-intro { margin: 0; color: var(--ink-soft); font-size: 13px; }
+    .control-row { display: flex; flex-wrap: wrap; gap: 9px 14px; align-items: center; margin-top: 18px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(255,255,255,.42); }
+    .control-group { display: inline-flex; align-items: center; gap: 7px; min-height: 30px; }
+    .control-group label { color: var(--ink-soft); font-size: 11px; font-weight: 700; }
+    select, input[type="range"] { accent-color: var(--orange); }
+    select { min-height: 34px; padding: 3px 27px 3px 9px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--white); font-size: 12px; }
+    input[type="range"] { width: 128px; height: 5px; }
+    .value-chip { min-width: 31px; color: var(--ink); font: 700 12px ui-monospace, monospace; text-align: right; }
+    .btn {
+      min-height: 36px; padding: 0 11px; border: 1px solid var(--ink); border-radius: 9px;
+      color: var(--ink); background: transparent; font-size: 11px; font-weight: 700;
+      transition: background .18s ease, transform .18s ease;
+    }
+    .btn:hover { background: #ece8de; }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { color: var(--white); background: var(--ink); }
+    .btn.secondary { color: var(--white); border-color: var(--orange); background: var(--orange); }
+    .btn:disabled { cursor: not-allowed; opacity: .42; }
+    .vc-layout { display: grid; grid-template-columns: minmax(0, 1fr) 205px; gap: 15px; margin-top: 16px; }
+    .visual-frame { min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.5); }
+    #vcSvg, #radSvg { display: block; width: 100%; height: auto; overflow: visible; }
+    .axis { stroke: var(--ink); stroke-width: 2; }
+    .tick { stroke: var(--line); stroke-width: 1; }
+    .svg-label { fill: var(--ink-soft); font: 11px ui-monospace, monospace; }
+    .svg-small { fill: var(--ink-soft); font: 10px ui-monospace, monospace; }
+    .vc-point { stroke: var(--ink); stroke-width: 1.5; }
+    .vc-point.positive { fill: var(--orange); }
+    .vc-point.negative { fill: var(--white); }
+    .vc-point-label { fill: var(--ink); font: 700 12px ui-monospace, monospace; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .boundary { stroke: var(--blue); stroke-width: 2.5; stroke-dasharray: 7 5; }
+    .interval-band { fill: rgba(22, 135, 125, .14); stroke: var(--teal); stroke-width: 2; }
+    .impossible-mark { fill: var(--danger); font: 500 19px var(--math-font); }
+    .pattern-panel { min-width: 0; }
+    .pattern-title { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; color: var(--ink-soft); font-size: 10px; font-weight: 700; }
+    .pattern-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; max-height: 226px; margin-top: 8px; padding-right: 3px; overflow: auto; }
+    .pattern {
+      min-height: 29px; padding: 0 3px; border: 1px solid var(--line); border-radius: 6px;
+      color: var(--ink-soft); background: rgba(255,255,255,.45); font: 700 11px ui-monospace, monospace;
+    }
+    .pattern:hover, .pattern[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); background: var(--white); }
+    .pattern.realizable { color: var(--green); border-color: rgba(31,143,99,.4); background: rgba(31,143,99,.08); }
+    .pattern.impossible { color: var(--danger); border-color: rgba(181,71,59,.35); background: rgba(181,71,59,.06); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+    .stat { min-height: 60px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,.4); }
+    .stat-label { display: block; color: var(--ink-soft); font-size: 10px; line-height: 1.2; }
+    .stat-value { display: block; margin-top: 4px; color: var(--ink); font: 500 19px/1.05 var(--math-font); }
+    .status-line { min-height: 26px; margin-top: 12px; color: var(--ink-soft); font-size: 12px; }
+    .status-line.good { color: var(--green); }
+    .status-line.bad { color: var(--danger); }
+    .lesson-note { margin-top: 13px; padding: 10px 12px; border-left: 3px solid var(--orange); color: var(--ink-soft); background: #f7eee4; font-size: 11px; }
+    .math-block { margin: 14px 0 0; padding: 11px 13px; border-radius: 10px; color: var(--white); background: var(--ink); font-family: var(--math-font); font-size: clamp(15px, 2vw, 19px); line-height: 1.34; }
+    .math-block.light { color: var(--ink); background: #e7ece6; }
+    .math-caption { display: block; margin-bottom: 4px; color: inherit; opacity: .65; font: 700 9px/1.2 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .rad-signs { display: flex; flex-wrap: wrap; gap: 4px; min-height: 34px; margin-top: 14px; padding: 7px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.42); }
+    .sign-chip { display: inline-grid; place-items: center; width: 27px; height: 25px; border-radius: 5px; font: 700 11px ui-monospace, monospace; }
+    .sign-chip.plus { color: #fff; background: var(--teal); }
+    .sign-chip.minus { color: #fff; background: var(--purple); }
+    .sign-empty { color: var(--ink-soft); font-size: 11px; }
+    .rad-winner { margin-top: 8px; color: var(--ink-soft); font-size: 11px; }
+    .rad-winner strong { color: var(--ink); font-family: var(--math-font); font-weight: 500; }
+    .chart-caption { display: flex; justify-content: space-between; gap: 8px; margin: 13px 1px 0; color: var(--ink-soft); font-size: 10px; }
+    .bound-panel { margin-top: 22px; padding: 22px 25px 24px; }
+    .bound-layout { display: grid; grid-template-columns: 1fr 1.25fr; gap: 22px; align-items: start; margin-top: 15px; }
+    .bound-controls { display: grid; gap: 9px; }
+    .bound-control { display: grid; grid-template-columns: 118px 1fr 42px; gap: 8px; align-items: center; }
+    .bound-control label { color: var(--ink-soft); font-size: 11px; font-weight: 700; }
+    .bound-control input { width: 100%; }
+    .bound-value { color: var(--ink); font: 700 11px ui-monospace, monospace; text-align: right; }
+    .bound-result { padding: 15px; border-radius: 12px; background: #ecefe9; }
+    .bound-result h3 { margin: 0; font-size: 12px; }
+    .bound-big { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-top: 8px; }
+    .bound-big strong { color: var(--ink); font: 500 30px/1 var(--math-font); }
+    .bound-big span { color: var(--ink-soft); font-size: 11px; text-align: right; }
+    .meter { height: 9px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: #dfe5df; }
+    .meter-fill { width: 100%; height: 100%; background: var(--danger); transition: width .2s ease, background .2s ease; }
+    .meter-fill.safe { background: var(--green); }
+    .bound-detail { margin: 10px 0 0; color: var(--ink-soft); font-size: 11px; }
+    .takeaways { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 22px; }
+    .takeaway { padding: 15px; border-top: 2px solid var(--ink); }
+    .takeaway:nth-child(2) { border-color: var(--orange); }
+    .takeaway:nth-child(3) { border-color: var(--teal); }
+    .takeaway h2 { margin: 0 0 5px; font-size: 13px; }
+    .takeaway p { margin: 0; color: var(--ink-soft); font-size: 12px; }
+    .footer-note { margin: 22px 2px 0; color: var(--ink-soft); font-size: 11px; }
+    @media (max-width: 1060px) {
+      .concepts { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .lab-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .app { padding: 19px 14px 32px; }
+      .masthead { grid-template-columns: 1fr; align-items: start; }
+      .header-note { max-width: none; text-align: left; }
+      .header-note strong { display: inline; margin-right: 7px; }
+      .vc-layout, .bound-layout { grid-template-columns: 1fr; }
+      .pattern-grid { max-height: 150px; }
+      .stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .takeaways { grid-template-columns: 1fr; gap: 9px; }
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: clamp(39px, 13vw, 59px); }
+      .subtitle { font-size: 14px; }
+      .concepts { grid-template-columns: 1fr; }
+      .control-row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+      .control-group { min-width: 0; }
+      .control-group select, .control-group input { max-width: 100%; }
+      .control-row .btn { width: 100%; }
+      .math-block { font-size: 15px; }
+      .bound-control { grid-template-columns: 104px 1fr 38px; }
+    }
+  </style>
+  <style>
+/* Extend the existing lecture palette with dark, rotatable geometry canvases. */
+body { font-size: 16px; }
+h1 { font-size: clamp(30px, 4vw, 48px); max-width: none; }
+.masthead { padding-bottom: 18px; }
+.lab-nav a { font-size: 14px; }
+.spatial-lab { margin-top: 24px; padding: clamp(16px, 2.4vw, 30px); scroll-margin-top: 16px; }
+.spatial-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.spatial-heading h2 { font: 500 clamp(25px, 3vw, 34px)/1.15 Georgia, serif; margin: 8px 0 0; }
+.spatial-kicker { font: 600 12px ui-monospace, monospace; letter-spacing: .09em; color: var(--teal); }
+.capacity-tag { padding: 7px 11px; background: #e3ece9; border-radius: 8px; font: 16px var(--math-font); }
+.spatial-intro { max-width: 980px; margin: 12px 0 20px; color: var(--ink-soft); }
+.spatial-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 25px; align-items: start; }
+.scene-column { min-width: 0; }
+.scene-wrap { position: relative; background: #101f2b; border-radius: 15px; overflow: hidden; }
+.scene-wrap canvas { width: 100%; height: clamp(330px, 36vw, 460px); display: block; cursor: grab; touch-action: none; }
+.scene-wrap canvas:active { cursor: grabbing; }
+.scene-wrap canvas:focus-visible { outline: 3px solid #ffbf89; outline-offset: -4px; }
+.scene-help { position: absolute; bottom: 12px; left: 14px; right: 12px; color: #bbccd8; font-size: 12px; pointer-events: none; }
+.scene-reset { position: absolute; top: 12px; right: 12px; background: #223948; color: #eff6fa; border: 1px solid #536775; border-radius: 7px; padding: 7px 10px; font-size: 12px; }
+.scene-legend { display: flex; flex-wrap: wrap; gap: 8px 17px; margin: 12px 0; color: var(--ink-soft); font-size: 13px; }
+.scene-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.plus-dot { background: #e85d3f; }.minus-dot { background: #2588d0; }.sum-dot { background: #a178d2; }.optimal-dot { background: #16877d; }
+.plane-swatch { display: inline-block; width: 15px; height: 9px; background: #55cfbc; transform: skew(-20deg); }
+.spatial-controls select { width: 100%; min-height: 40px; font-size: 14px; }
+.field-label { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 600; }
+.spatial-slider { margin: 16px 0; }.spatial-slider[hidden] { display: none; }
+.spatial-slider label { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.spatial-slider output { font: 15px var(--math-font); }
+.spatial-slider input { width: 100%; margin: 14px 0 6px; }
+.spatial-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.spatial-actions .btn { font-size: 14px; min-height: 40px; }
+.spatial-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+.spatial-metrics div { border: 1px solid var(--line); border-radius: 9px; padding: 11px; }
+.spatial-metrics span { display: block; font-size: 13px; color: var(--ink-soft); }
+.spatial-metrics strong { display: block; font: 500 27px/1.2 var(--math-font); margin-top: 6px; }
+.point-buttons { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+.point-buttons button { padding: 7px 11px; min-height: 36px; border-radius: 7px; font-size: 14px; border: 1px solid; }
+.point-buttons .positive { background: #fae6dd; border-color: #cd5e3b; color: #85381e; }
+.point-buttons .negative { background: #e4eff9; border-color: #4487b9; color: #1c5278; }
+.spatial-patterns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.spatial-patterns button { font: 13px ui-monospace, monospace; border: 1px solid #73a490; border-radius: 6px; background: #e9f1ec; color: #235b42; padding: 7px 3px; min-height: 34px; }
+.spatial-patterns button.impossible { background: #f8e9e5; border-color: #b66a5b; color: #923c30; }
+.spatial-patterns button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 1px; }
+.gallery-heading, .sign-heading { font-size: 14px; margin: 13px 0 7px; }
+.gallery-heading span, .sign-heading span { color: var(--ink-soft); font-size: 12px; margin-left: 6px; }
+.gallery-key, .control-note { color: var(--ink-soft); font-size: 13px; margin: 9px 0; }
+.manual-plane { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+.manual-plane summary { cursor: pointer; font-size: 14px; }
+.spatial-status { margin: 12px 0 0; min-height: 3em; font-size: 15px; }.spatial-status.good { color: #216344; }.spatial-status.bad { color: #973c30; }
+.spatial-insight { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--orange); background: #f7eee4; font-size: 15px; }
+.spatial-formula { margin-top: 16px; padding: 15px 17px; background: #17262d; border-radius: 10px; color: #fffdf8; font: 21px/1.6 var(--math-font); overflow-wrap: anywhere; }
+.spatial-formula span { display: block; color: #c0cdd0; font: 13px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; margin-top: 5px; }
+.spatial-caveat { margin-top: 14px; font-size: 14px; }
+.vector-readout { font: 16px/1.5 var(--math-font); margin: 10px 0; }
+#rad3dChart { width: 100%; display: block; background: #f1f3ef; border-radius: 8px; }
+.chart-key { display: flex; gap: 12px; font-size: 12px; margin-top: 7px; }.chart-key span:first-child { color: #7655a6; }.chart-key span:nth-child(2) { color: #16877d; }
+.foundations { margin-top: 25px; }.foundations > summary { padding: 17px 0; border-block: 1px solid var(--line); font-size: 17px; cursor: pointer; }
+.spatial-sources { font-size: 13px; margin: 24px 0 0; color: var(--ink-soft); }.spatial-sources a { color: var(--blue); }
+@media(max-width: 880px) { .spatial-layout { grid-template-columns: 1fr; } .scene-wrap canvas { height: 380px; } .spatial-controls { min-width: 0; } }
+@media(max-width: 480px) { .scene-wrap canvas { height: 320px; } .scene-help { font-size: 11px; } .spatial-formula { font-size: 18px; } .spatial-lab { border-radius: 13px; } .spatial-patterns { grid-template-columns: repeat(4, minmax(0,1fr)); } .capacity-tag { font-size: 14px; } }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <div>
+        <div class="brandline"><span class="brandmark" aria-hidden="true"></span> INFINITE HYPOTHESIS CLASSES</div>
+        <h1>See capacity in three dimensions.</h1>
+        <p class="subtitle">Rotate the sample. Fit a separating plane. Watch a linear predictor align with random noise.</p>
+        <nav class="lab-nav" aria-label="Learning labs">
+          <a href="pac-learning-demo-en.html">PAC Learning Lab</a>
+          <a class="active" href="infinite-classes-demo.html">Infinite Classes Lab</a>
+          <a href="#vc3d">VC in 3D</a><a href="#rad3d">Rademacher in 3D</a>
+        </nav>
+      </div>
+      <div class="header-note"><strong>VC + RAD</strong>Infinitely many parameters can still have finite behavior on a fixed sample.</div>
+    </header>
+
+    <section id="vc3d" class="surface spatial-lab" aria-labelledby="vc3dTitle">
+      <div class="spatial-heading"><div><span class="spatial-kicker">01 / SHATTERING IN 3D</span><h2 id="vc3dTitle">Can a plane realize every labeling?</h2></div><span class="capacity-tag">Affine halfspaces in ℝ³ · VC = 4</span></div>
+      <p class="spatial-intro">Four non-coplanar points can be shattered. Flip their labels and find a plane with all + points on one side and all − points on the other.</p>
+      <div class="spatial-layout">
+        <div class="scene-column">
+          <div class="scene-wrap"><canvas id="vc3dCanvas" tabindex="0" aria-label="Rotatable 3D sample and separating plane. Drag or use arrow keys to rotate. Use the point buttons to change labels.">Use the point label buttons and labeling gallery to explore shattering.</canvas><div class="scene-help">Drag to orbit · arrow keys rotate · + / − zoom</div><button id="vc3dView" class="scene-reset" type="button">Reset view</button></div>
+          <div class="scene-legend"><span><i class="dot plus-dot"></i>+ label</span><span><i class="dot minus-dot"></i>− label</span><span><i class="plane-swatch"></i>decision plane</span></div>
+          <div id="vc3dLabels" class="point-buttons" aria-label="Flip a point label"></div>
+          <p id="vc3dStatus" class="spatial-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="spatial-controls">
+          <label class="field-label" for="vc3dPreset">Sample geometry</label>
+          <select id="vc3dPreset"><option value="tetra">4 points · tetrahedron</option><option value="square">4 points · flat → lifted square</option><option value="center">5 points · tetrahedron + center</option></select>
+          <div id="vc3dLiftRow" class="spatial-slider" hidden><label for="vc3dLift">Lift point D <output id="vc3dLiftValue">0.00</output></label><input id="vc3dLift" type="range" min="0" max="1.2" step="0.05" value="0"></div>
+          <div class="spatial-actions"><button id="vc3dRandom" class="btn" type="button">Random labels</button><button id="vc3dFit" class="btn secondary" type="button">Fit plane</button><button id="vc3dCycle" class="btn" type="button" aria-pressed="false">Play all labelings</button></div>
+          <div class="spatial-metrics"><div><span>Realizable on this S</span><strong id="vc3dCount">16 / 16</strong></div><div><span>This S is shattered?</span><strong id="vc3dShattered">Yes</strong></div></div>
+          <div class="gallery-heading">All labelings <span>select one to fit it</span></div><div id="vc3dPatterns" class="spatial-patterns" aria-label="All labelings of the sample"></div>
+          <p class="gallery-key">✓ realizable &nbsp; × impossible</p>
+          <details class="manual-plane"><summary>Position the plane yourself</summary><div class="spatial-slider"><label for="vc3dYaw">Normal azimuth <output id="vc3dYawValue">0°</output></label><input id="vc3dYaw" type="range" min="-180" max="180" value="0"></div><div class="spatial-slider"><label for="vc3dPitch">Normal elevation <output id="vc3dPitchValue">0°</output></label><input id="vc3dPitch" type="range" min="-90" max="90" value="0"></div><div class="spatial-slider"><label for="vc3dOffset">Plane offset <output id="vc3dOffsetValue">0.00</output></label><input id="vc3dOffset" type="range" min="-2" max="2" step="0.01" value="0"></div><p id="vc3dErrors" class="control-note"></p></details>
+        </div>
+      </div>
+      <div id="vc3dLesson" class="spatial-insight"></div>
+      <div class="spatial-formula">h<sub>w,b</sub>(x) = sign(wᵀx + b), &nbsp; x ∈ ℝ³ <span>The plane is wᵀx + b = 0. VC = 4 belongs to the whole class; shattering describes a particular sample.</span></div>
+    </section>
+
+    <section id="rad3d" class="surface spatial-lab" aria-labelledby="rad3dTitle">
+      <div class="spatial-heading"><div><span class="spatial-kicker">02 / FITTING NOISE IN 3D</span><h2 id="rad3dTitle">Follow the random-sign resultant.</h2></div><span class="capacity-tag">Real-valued scores · ‖w‖₂ ≤ B</span></div>
+      <p class="spatial-intro">Keep the sample fixed. Each sign σᵢ either keeps xᵢ or reverses it. Their average points in the direction that gives the largest correlation with this noise.</p>
+      <div class="spatial-layout">
+        <div class="scene-column">
+          <div class="scene-wrap"><canvas id="rad3dCanvas" tabindex="0" aria-label="Rotatable signed sample vectors, their average, and the optimal weight direction. Drag or use arrow keys to rotate.">The vector sum and exact optimum are given numerically below.</canvas><div class="scene-help">Drag to orbit · wire sphere = sample radius R</div><button id="rad3dView" class="scene-reset" type="button">Reset view</button></div>
+          <div class="scene-legend"><span><i class="dot plus-dot"></i>σᵢ = +1</span><span><i class="dot minus-dot"></i>σᵢ = −1</span><span><i class="dot sum-dot"></i>signed average g</span><span><i class="dot optimal-dot"></i>direction w* / B</span></div>
+          <div class="sign-heading">Current signs <span>click for a custom pattern</span></div><div id="rad3dSigns" class="point-buttons" aria-label="Current Rademacher signs"></div>
+          <p id="rad3dVector" class="vector-readout"></p><p id="rad3dStatus" class="spatial-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="spatial-controls">
+          <label class="field-label" for="rad3dPreset">Fixed sample geometry</label><select id="rad3dPreset"><option value="sphere">Spread across a sphere</option><option value="line">Along one line</option><option value="cluster">Clustered in one direction</option></select>
+          <div class="spatial-slider"><label for="rad3dN">Sample size n <output id="rad3dNValue">8</output></label><input id="rad3dN" type="range" min="4" max="24" step="1" value="8"></div>
+          <div class="spatial-slider"><label for="rad3dB">Weight budget B <output id="rad3dBValue">1.00</output></label><input id="rad3dB" type="range" min="0.1" max="2" step="0.1" value="1"></div>
+          <div class="spatial-slider"><label for="rad3dR">Sample radius R <output id="rad3dRValue">1.00</output></label><input id="rad3dR" type="range" min="0.1" max="1" step="0.1" value="1"></div>
+          <div class="spatial-actions"><button id="rad3dDraw" class="btn secondary" type="button">Draw random signs</button><button id="rad3dRun" class="btn" type="button">Run 200 trials</button><button id="rad3dReset" class="btn" type="button">Reset trials</button></div>
+          <div class="spatial-metrics"><div><span>This pattern: best score</span><strong id="rad3dScore">—</strong></div><div><span>Monte Carlo mean</span><strong id="rad3dMean">—</strong></div><div><span>Exact R̂<sub>S</sub>(F), n ≤ 12</span><strong id="rad3dExact">—</strong></div><div><span>Upper bound BR / √n</span><strong id="rad3dBound">—</strong></div></div>
+          <p id="rad3dTrials" class="control-note"></p><svg id="rad3dChart" viewBox="0 0 380 132" role="img" aria-label="Running Monte Carlo mean, exact expectation and upper bound"></svg><div class="chart-key"><span>— mean</span><span>┄ exact</span><span>··· bound</span></div>
+        </div>
+      </div>
+      <div class="spatial-formula">g = (1/n) ∑ σᵢxᵢ, &nbsp; w* = B g / ‖g‖₂, &nbsp; max<sub>‖w‖₂≤B</sub> (1/n) ∑ σᵢwᵀxᵢ = B‖g‖₂<span>If g = 0, every feasible w ties at score 0; we choose w* = 0.</span></div>
+      <div class="spatial-insight"><strong>One random pattern is not the complexity.</strong> R̂<sub>S</sub>(F) averages this best score over independent random signs. The purple vector shows what remains after cancellation. A larger B or R scales the complexity; the guarantee BR/√n shrinks with n. For n ≤ 12, all 2ⁿ sign patterns are averaged exactly.</div>
+      <p class="control-note spatial-caveat">Here F contains real scores f<sub>w</sub>(x) = wᵀx with no bias, rather than the ±1 halfspace predictions above. Scores have magnitude at most BR and are not accuracy percentages. Geometry comparisons keep the same n, B and R.</p>
+    </section>
+    <details class="foundations"><summary>Review the 1D examples and the PAC generalization bridge</summary>
+    <section class="concepts" aria-label="Lecture examples">
+      <article class="concept-card">
+        <div class="concept-eyebrow">Example 01 · infinite H</div>
+        <h2>Thresholds</h2>
+        <p>There are infinitely many cut points t, but only n + 1 distinct labelings on n ordered points.</p>
+        <code>hₜ(x) = 1[x ≥ t] · VC(H) = 1</code>
+      </article>
+      <article class="concept-card">
+        <div class="concept-eyebrow">Example 02 · two endpoints</div>
+        <h2>Intervals</h2>
+        <p>Two real endpoints create more patterns. A single interval still cannot make 1–0–1.</p>
+        <code>hₐ,ᵦ(x) = 1[a ≤ x ≤ b] · VC(H) = 2</code>
+      </article>
+      <article class="concept-card">
+        <div class="concept-eyebrow">Example 03 · geometry / lecture sketch</div>
+        <h2>Affine separators</h2>
+        <p>A line in the plane has orientation and offset. Three non-collinear points can be shattered; a four-point XOR exposes the limit. The interactive panel below uses exact 1D classes so every pattern can be checked.</p>
+        <code>h(x) = sign(wᵀx + b) · VC(H) = 3</code>
+      </article>
+      <article class="concept-card">
+        <div class="concept-eyebrow">Example 04 · too rich</div>
+        <h2>Memorization</h2>
+        <p>A lookup-table class can match every sign pattern on a sample. Its VC dimension is infinite.</p>
+        <code>H|ₛ = {−1,+1}ⁿ · R̂ₛ(H) = 1</code>
+      </article>
+    </section>
+
+    <main class="lab-grid">
+      <section class="surface panel" aria-labelledby="vcTitle">
+        <div class="panel-kicker"><span>01 / VC DIMENSION PLAYGROUND</span><span class="badge">INFINITE H</span></div>
+        <h2 id="vcTitle">Can the class realize every labeling?</h2>
+        <p class="panel-intro">Pick a class and a set of ordered points. The gallery enumerates every ± labeling on this sample; green patterns are realizable, red patterns are impossible.</p>
+        <div class="control-row">
+          <div class="control-group"><label for="vcClass">Class</label><select id="vcClass"><option value="threshold">Thresholds · VC 1</option><option value="interval">Intervals · VC 2</option></select></div>
+          <div class="control-group"><label for="vcN">Points</label><input id="vcN" type="range" min="1" max="6" step="1" value="4"><output id="vcNValue" class="value-chip">4</output></div>
+          <button id="vcRandomize" class="btn secondary" type="button">New points</button>
+          <button id="vcCheck" class="btn" type="button">Check all labelings</button>
+        </div>
+        <div class="vc-layout">
+          <div class="visual-frame">
+            <svg id="vcSvg" viewBox="0 0 680 280" role="img" aria-labelledby="vcSvgTitle vcSvgDesc">
+              <title id="vcSvgTitle">Ordered sample points and a hypothesis boundary</title>
+              <desc id="vcSvgDesc">Click a point to flip its selected label. The line or interval shows the selected hypothesis when it is realizable.</desc>
+              <g id="vcLayer"></g>
+            </svg>
+          </div>
+          <div class="pattern-panel">
+            <div class="pattern-title"><span>Labelings on S</span><span id="vcPatternCount">—</span></div>
+            <div id="vcPatternGrid" class="pattern-grid" role="list"></div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">all labelings 2ⁿ</span><strong id="vcAllCount" class="stat-value">—</strong></div>
+          <div class="stat"><span class="stat-label">growth Π<sub>H</sub>(n)</span><strong id="vcGrowth" class="stat-value">—</strong></div>
+          <div class="stat"><span class="stat-label">shattered?</span><strong id="vcShattered" class="stat-value">—</strong></div>
+          <div class="stat"><span class="stat-label">known VC(H)</span><strong id="vcKnown" class="stat-value">—</strong></div>
+        </div>
+        <p id="vcStatus" class="status-line" role="status" aria-live="polite"></p>
+        <div class="lesson-note">Key idea: the class can have infinitely many parameter values while inducing only finitely many behaviors on a fixed sample. VC dimension asks for the largest sample whose <em>every</em> labeling is realizable.</div>
+      </section>
+
+      <section class="surface panel" aria-labelledby="radTitle">
+        <div class="panel-kicker"><span>02 / RADEMACHER PLAYGROUND</span><span class="badge">FIT RANDOM SIGNS</span></div>
+        <h2 id="radTitle">How well can H fit random noise?</h2>
+        <p class="panel-intro">Encode predictions as ±1. Freeze the sample, flip random signs σ, and measure the best signed correlation the class can manufacture.</p>
+        <div class="control-row">
+          <div class="control-group"><label for="radClass">Class</label><select id="radClass"><option value="constant">Constants · baseline</option><option value="threshold">Thresholds · infinite</option><option value="interval">Intervals · infinite</option><option value="memorization">Memorization · infinite VC</option></select></div>
+          <div class="control-group"><label for="radN">Points</label><input id="radN" type="range" min="4" max="24" step="1" value="10"><output id="radNValue" class="value-chip">10</output></div>
+          <div class="control-group"><label for="radTrials">Trials</label><input id="radTrials" type="range" min="20" max="500" step="10" value="120"><output id="radTrialsValue" class="value-chip">120</output></div>
+          <button id="radOne" class="btn secondary" type="button">Draw signs</button>
+          <button id="radRun" class="btn" type="button">Run trials</button>
+          <button id="radReset" class="btn" type="button">Reset</button>
+        </div>
+        <div id="radSigns" class="rad-signs" aria-label="Current random signs"></div>
+        <div class="rad-winner">Winning prediction: <strong id="radWinner">—</strong></div>
+        <div class="visual-frame" style="margin-top: 12px;">
+          <svg id="radSvg" viewBox="0 0 620 280" role="img" aria-labelledby="radSvgTitle radSvgDesc">
+            <title id="radSvgTitle">Rademacher score distribution and running mean</title>
+            <desc id="radSvgDesc">Bars show the distribution of maximum signed correlations across random sign trials. The line below shows the running mean.</desc>
+            <g id="radLayer"></g>
+          </svg>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">R̂<sub>S</sub>(H)</span><strong id="radMean" class="stat-value">—</strong></div>
+          <div class="stat"><span class="stat-label">last max score</span><strong id="radLast" class="stat-value">—</strong></div>
+          <div class="stat"><span class="stat-label">patterns on S</span><strong id="radCandidates" class="stat-value">—</strong></div>
+          <div class="stat"><span class="stat-label">sign trials</span><strong id="radTrialCount" class="stat-value">0</strong></div>
+        </div>
+        <p id="radStatus" class="status-line" role="status" aria-live="polite"></p>
+        <div class="math-block"><span class="math-caption">empirical Rademacher complexity · ±1 encoding</span>R̂<sub>S</sub>(H) = E<sub>σ</sub> [ max<sub>h∈H</sub> (1/n) Σ σᵢ h(xᵢ) ]</div>
+      </section>
+    </main>
+
+    <section class="surface bound-panel" aria-labelledby="boundTitle">
+      <div class="panel-kicker"><span>03 / GENERALIZATION BRIDGE</span><span class="badge">SAUER + GHOST SAMPLE</span></div>
+      <h2 id="boundTitle">When does the VC bound become small?</h2>
+      <p class="panel-intro">This is a conservative teaching bound for the realizable, consistent-learner setting. It turns a VC dimension d into a sample-size intuition.</p>
+      <div class="bound-layout">
+        <div class="bound-controls">
+          <div class="bound-control"><label for="boundD">VC dimension d</label><input id="boundD" type="range" min="1" max="12" step="1" value="2"><output id="boundDValue" class="bound-value">2</output></div>
+          <div class="bound-control"><label for="boundN">samples n</label><input id="boundN" type="range" min="1" max="500" step="1" value="80"><output id="boundNValue" class="bound-value">80</output></div>
+          <div class="bound-control"><label for="boundEps">error ε</label><input id="boundEps" type="range" min="0.05" max="0.50" step="0.01" value="0.10"><output id="boundEpsValue" class="bound-value">0.10</output></div>
+          <div class="bound-control"><label for="boundDelta">failure δ</label><input id="boundDelta" type="range" min="0.01" max="0.50" step="0.01" value="0.05"><output id="boundDeltaValue" class="bound-value">0.05</output></div>
+        </div>
+        <div class="bound-result">
+          <h3>Pedagogical VC failure upper bound</h3>
+          <div class="bound-big"><strong id="boundValue">—</strong><span id="boundState">—</span></div>
+          <div class="meter"><div id="boundMeter" class="meter-fill"></div></div>
+          <p id="boundDetail" class="bound-detail"></p>
+        </div>
+      </div>
+      <div class="math-block light"><span class="math-caption">Sauer–Shelah + ghost-sample form</span>B<sub>VC</sub>(n) = min{1, 2 · Π<sub>H</sub>(2n) · exp(−εn/2)}, &nbsp; Π<sub>H</sub>(m) ≤ Σ<sub>i=0</sub><sup>d</sup> C(m,i)</div>
+    </section>
+
+    <section class="takeaways" aria-label="Lecture takeaways">
+      <article class="takeaway"><h2>Cardinality is not capacity</h2><p>Thresholds and intervals both have infinitely many parameter choices. What matters first is the finite set of labelings they induce on the sample.</p></article>
+      <article class="takeaway"><h2>VC is worst-case combinatorics</h2><p>VC dimension asks whether there exists a sample on which every labeling is available. One impossible pattern is enough to stop shattering.</p></article>
+      <article class="takeaway"><h2>Rademacher is sample-dependent</h2><p>Rademacher complexity asks how much correlation the class can find in random signs on this particular sample. More flexibility means more ways to fit noise.</p></article>
+    </section>
+    <p class="footer-note">Teaching convention: the VC bound above uses a standard conservative form with illustrative constants; exact statements vary by loss class and assumptions. The 1D Rademacher panel uses ±1 predictions, so the memorization class reaches 1 exactly.</p>
+    </details>
+    <p class="spatial-sources">Mathematical background: <a href="https://www.cs.cmu.edu/afs/cs/academic/class/15456-s14/Handouts/Har-Peled-Chap5.pdf" target="_blank" rel="noopener noreferrer">VC dimension and Radon’s theorem</a> · <a href="https://www.cs.cornell.edu/~sridharan/rad-paper.pdf" target="_blank" rel="noopener noreferrer">Rademacher complexity of linear predictors</a>.</p>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      var NS = "http://www.w3.org/2000/svg";
+      var MATH_FONT = '"Latin Modern Math", "STIX Two Math", "Cambria Math", "STIXGeneral", "Times New Roman", serif';
+      var els = {
+        vcClass: document.getElementById("vcClass"),
+        vcN: document.getElementById("vcN"),
+        vcNValue: document.getElementById("vcNValue"),
+        vcRandomize: document.getElementById("vcRandomize"),
+        vcCheck: document.getElementById("vcCheck"),
+        vcSvg: document.getElementById("vcSvg"),
+        vcLayer: document.getElementById("vcLayer"),
+        vcPatternGrid: document.getElementById("vcPatternGrid"),
+        vcPatternCount: document.getElementById("vcPatternCount"),
+        vcAllCount: document.getElementById("vcAllCount"),
+        vcGrowth: document.getElementById("vcGrowth"),
+        vcShattered: document.getElementById("vcShattered"),
+        vcKnown: document.getElementById("vcKnown"),
+        vcStatus: document.getElementById("vcStatus"),
+        radClass: document.getElementById("radClass"),
+        radN: document.getElementById("radN"),
+        radNValue: document.getElementById("radNValue"),
+        radTrials: document.getElementById("radTrials"),
+        radTrialsValue: document.getElementById("radTrialsValue"),
+        radOne: document.getElementById("radOne"),
+        radRun: document.getElementById("radRun"),
+        radReset: document.getElementById("radReset"),
+        radSigns: document.getElementById("radSigns"),
+        radWinner: document.getElementById("radWinner"),
+        radSvg: document.getElementById("radSvg"),
+        radLayer: document.getElementById("radLayer"),
+        radMean: document.getElementById("radMean"),
+        radLast: document.getElementById("radLast"),
+        radCandidates: document.getElementById("radCandidates"),
+        radTrialCount: document.getElementById("radTrialCount"),
+        radStatus: document.getElementById("radStatus"),
+        boundD: document.getElementById("boundD"),
+        boundDValue: document.getElementById("boundDValue"),
+        boundN: document.getElementById("boundN"),
+        boundNValue: document.getElementById("boundNValue"),
+        boundEps: document.getElementById("boundEps"),
+        boundEpsValue: document.getElementById("boundEpsValue"),
+        boundDelta: document.getElementById("boundDelta"),
+        boundDeltaValue: document.getElementById("boundDeltaValue"),
+        boundValue: document.getElementById("boundValue"),
+        boundState: document.getElementById("boundState"),
+        boundMeter: document.getElementById("boundMeter"),
+        boundDetail: document.getElementById("boundDetail")
+      };
+      var vcState = { kind: "threshold", n: 4, xs: [], selected: [], tested: true };
+      var radState = { kind: "constant", n: 10, trials: 120, xs: [], signs: [], winner: [], scores: [] };
+
+      function node(name, attrs) {
+        var el = document.createElementNS(NS, name);
+        Object.keys(attrs || {}).forEach(function (key) { el.setAttribute(key, attrs[key]); });
+        return el;
+      }
+      function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+      function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+      function fmtPct(value) {
+        if (!isFinite(value)) return "—";
+        if (value >= .9995) return "100%";
+        if (value < .001) return (value * 100).toExponential(1) + "%";
+        return (value * 100).toFixed(value < .1 ? 1 : 0) + "%";
+      }
+      function fmtNumber(value) {
+        if (!isFinite(value)) return "—";
+        if (value >= 1000000) return (value / 1000000).toFixed(1) + "m";
+        if (value >= 1000) return (value / 1000).toFixed(1) + "k";
+        return String(Math.round(value));
+      }
+      function makePoints(n) {
+        var base = [.08, .21, .35, .49, .64, .81];
+        var xs = base.slice(0, n);
+        if (n > base.length) {
+          xs = [];
+          for (var i = 0; i < n; i += 1) xs.push((i + 1) / (n + 1));
+        }
+        return xs.map(function (x) { return clamp(x + (Math.random() - .5) * .018, .04, .96); }).sort(function (a, b) { return a - b; });
+      }
+      function allBinaryPatterns(n) {
+        var out = [];
+        var total = Math.pow(2, n);
+        for (var mask = 0; mask < total; mask += 1) {
+          var pattern = [];
+          for (var i = 0; i < n; i += 1) pattern.push((mask >> (n - i - 1)) & 1);
+          out.push(pattern);
+        }
+        return out;
+      }
+      function candidateBinaryPatterns(kind, n) {
+        var out = [];
+        if (kind === "threshold") {
+          for (var k = 0; k <= n; k += 1) {
+            var threshold = [];
+            for (var i = 0; i < n; i += 1) threshold.push(i < k ? 0 : 1);
+            out.push(threshold);
+          }
+        } else {
+          out.push(new Array(n).fill(0));
+          for (var left = 0; left < n; left += 1) {
+            for (var right = left; right < n; right += 1) {
+              var interval = new Array(n).fill(0);
+              for (var j = left; j <= right; j += 1) interval[j] = 1;
+              out.push(interval);
+            }
+          }
+        }
+        return out;
+      }
+      function patternKey(pattern) { return pattern.join(""); }
+      function signedPattern(pattern) { return pattern.map(function (bit) { return bit ? 1 : -1; }); }
+      function patternText(pattern) { return pattern.map(function (bit) { return bit ? "+" : "−"; }).join(""); }
+      function signedText(pattern) { return pattern.map(function (bit) { return bit > 0 ? "+" : "−"; }).join(""); }
+      function samePattern(a, b) { return !!a && !!b && patternKey(a) === patternKey(b); }
+      function selectVC(index) {
+        var all = allBinaryPatterns(vcState.n);
+        vcState.selected = all[index] ? all[index].slice() : all[0].slice();
+        renderVC();
+      }
+      function selectedVCIndex(all) {
+        var key = patternKey(vcState.selected);
+        var index = all.findIndex(function (pattern) { return patternKey(pattern) === key; });
+        if (index < 0) {
+          vcState.selected = all[0].slice();
+          return 0;
+        }
+        return index;
+      }
+      function vcBoundary(pattern) {
+        var firstOne = pattern.indexOf(1);
+        if (firstOne < 0) return 1;
+        if (firstOne === 0) return 0;
+        return (vcState.xs[firstOne - 1] + vcState.xs[firstOne]) / 2;
+      }
+      function vcInterval(pattern) {
+        var first = pattern.indexOf(1);
+        if (first < 0) return null;
+        var last = pattern.lastIndexOf(1);
+        for (var i = first; i <= last; i += 1) if (!pattern[i]) return null;
+        return { left: vcState.xs[first], right: vcState.xs[last] };
+      }
+      function drawVcAxis() {
+        var x0 = 54, x1 = 626, y = 158;
+        els.vcLayer.appendChild(node("line", { x1: x0, y1: y, x2: x1, y2: y, class: "axis" }));
+        for (var i = 0; i <= 5; i += 1) {
+          var x = x0 + i * (x1 - x0) / 5;
+          els.vcLayer.appendChild(node("line", { x1: x, y1: y - 6, x2: x, y2: y + 6, class: "tick" }));
+          var label = node("text", { x: x, y: y + 28, class: "svg-small", "text-anchor": "middle" });
+          label.textContent = (i / 5).toFixed(1);
+          els.vcLayer.appendChild(label);
+        }
+        var axisLabel = node("text", { x: x1, y: y + 48, class: "svg-label", "text-anchor": "end" });
+        axisLabel.textContent = "ordered x";
+        els.vcLayer.appendChild(axisLabel);
+      }
+      function renderVC() {
+        var n = vcState.n;
+        var all = allBinaryPatterns(n);
+        var candidates = candidateBinaryPatterns(vcState.kind, n);
+        var selectedIndex = selectedVCIndex(all);
+        var selected = vcState.selected;
+        var keySet = {};
+        candidates.forEach(function (pattern) { keySet[patternKey(pattern)] = true; });
+        clear(els.vcLayer);
+        drawVcAxis();
+        var x0 = 54, x1 = 626, y = 158;
+        var selectedRealizable = !!keySet[patternKey(selected)];
+        if (selectedRealizable) {
+          if (vcState.kind === "threshold") {
+            var boundary = vcBoundary(selected);
+            var bx = x0 + boundary * (x1 - x0);
+            els.vcLayer.appendChild(node("line", { x1: bx, y1: 63, x2: bx, y2: y + 2, class: "boundary" }));
+            var tLabel = node("text", { x: clamp(bx, x0 + 25, x1 - 25), y: 51, class: "svg-label", "text-anchor": "middle" });
+            tLabel.textContent = "threshold t";
+            els.vcLayer.appendChild(tLabel);
+          } else {
+            var band = vcInterval(selected);
+            if (band) {
+              var left = x0 + clamp(band.left - .045, 0, 1) * (x1 - x0);
+              var right = x0 + clamp(band.right + .045, 0, 1) * (x1 - x0);
+              els.vcLayer.appendChild(node("rect", { x: left, y: 88, width: Math.max(12, right - left), height: 78, rx: 10, class: "interval-band" }));
+              var iLabel = node("text", { x: (left + right) / 2, y: 78, class: "svg-label", "text-anchor": "middle" });
+              iLabel.textContent = "one interval [a,b]";
+              els.vcLayer.appendChild(iLabel);
+            }
+          }
+        } else {
+          var noLabel = node("text", { x: (x0 + x1) / 2, y: 67, class: "impossible-mark", "text-anchor": "middle" });
+          noLabel.textContent = "✕ no " + (vcState.kind === "threshold" ? "threshold" : "single interval") + " realizes this pattern";
+          els.vcLayer.appendChild(noLabel);
+        }
+        vcState.xs.forEach(function (value, index) {
+          var cx = x0 + value * (x1 - x0);
+          var point = node("circle", { cx: cx, cy: y, r: 16, class: "vc-point " + (selected[index] ? "positive" : "negative"), tabindex: "0", "data-index": index, "aria-label": "Point " + (index + 1) + ", label " + (selected[index] ? "positive" : "negative") });
+          point.addEventListener("click", function () {
+            selected[index] = selected[index] ? 0 : 1;
+            vcState.selected = selected.slice();
+            renderVC();
+          });
+          point.addEventListener("keydown", function (event) {
+            if (event.key === " " || event.key === "Enter") {
+              event.preventDefault();
+              selected[index] = selected[index] ? 0 : 1;
+              vcState.selected = selected.slice();
+              renderVC();
+            }
+          });
+          els.vcLayer.appendChild(point);
+          var mark = node("text", { x: cx, y: y, class: "vc-point-label" });
+          mark.textContent = selected[index] ? "+" : "−";
+          els.vcLayer.appendChild(mark);
+          var indexLabel = node("text", { x: cx, y: y - 27, class: "svg-small", "text-anchor": "middle" });
+          indexLabel.textContent = "x" + (index + 1);
+          els.vcLayer.appendChild(indexLabel);
+        });
+        var ratio = candidates.length + " / " + all.length;
+        els.vcPatternCount.textContent = ratio;
+        els.vcAllCount.textContent = String(all.length);
+        els.vcGrowth.textContent = String(candidates.length);
+        els.vcShattered.textContent = candidates.length === all.length ? "Yes" : "No";
+        els.vcKnown.textContent = vcState.kind === "threshold" ? "1" : "2";
+        els.vcNValue.textContent = String(n);
+        els.vcStatus.className = "status-line " + (selectedRealizable ? "good" : "bad");
+        els.vcStatus.textContent = selectedRealizable
+          ? "Selected pattern " + patternText(selected) + " is realizable. The highlighted " + (vcState.kind === "threshold" ? "cut point" : "interval") + " is one witness."
+          : "Selected pattern " + patternText(selected) + " is impossible for this class. Try the alternating pattern to see the limit.";
+        clear(els.vcPatternGrid);
+        all.forEach(function (pattern, index) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "pattern " + (keySet[patternKey(pattern)] ? "realizable" : "impossible");
+          button.setAttribute("role", "listitem");
+          button.setAttribute("aria-pressed", index === selectedIndex ? "true" : "false");
+          button.setAttribute("aria-label", "Labeling " + patternText(pattern) + (keySet[patternKey(pattern)] ? ", realizable" : ", impossible"));
+          button.textContent = patternText(pattern);
+          button.addEventListener("click", function () { selectVC(index); });
+          els.vcPatternGrid.appendChild(button);
+        });
+      }
+      function resetVC() {
+        vcState.kind = els.vcClass.value;
+        vcState.n = Number(els.vcN.value);
+        vcState.xs = makePoints(vcState.n);
+        vcState.selected = allBinaryPatterns(vcState.n)[0].slice();
+        renderVC();
+      }
+      function randomizeVC() {
+        vcState.xs = makePoints(vcState.n);
+        var all = allBinaryPatterns(vcState.n);
+        vcState.selected = all[Math.floor(Math.random() * all.length)].slice();
+        renderVC();
+      }
+      function randomSigns(n) {
+        var out = [];
+        for (var i = 0; i < n; i += 1) out.push(Math.random() < .5 ? -1 : 1);
+        return out;
+      }
+      function radCandidates(kind, n) {
+        if (kind === "memorization") return null;
+        if (kind === "constant") {
+          return [new Array(n).fill(1), new Array(n).fill(-1)];
+        }
+        return candidateBinaryPatterns(kind, n).map(signedPattern);
+      }
+      function score(signs, prediction) {
+        var total = 0;
+        for (var i = 0; i < signs.length; i += 1) total += signs[i] * prediction[i];
+        return total / signs.length;
+      }
+      function radOne(signs) {
+        var kind = radState.kind;
+        if (kind === "memorization") return { score: 1, winner: signs.slice() };
+        var candidates = radCandidates(kind, radState.n);
+        var best = -Infinity;
+        var winner = candidates[0];
+        candidates.forEach(function (candidate) {
+          var value = score(signs, candidate);
+          if (value > best) { best = value; winner = candidate; }
+        });
+        return { score: best, winner: winner.slice() };
+      }
+      function drawRadSigns() {
+        clear(els.radSigns);
+        if (!radState.signs.length) {
+          var empty = document.createElement("span");
+          empty.className = "sign-empty";
+          empty.textContent = "Draw a sign vector to start.";
+          els.radSigns.appendChild(empty);
+          return;
+        }
+        radState.signs.forEach(function (sign, index) {
+          var chip = document.createElement("span");
+          chip.className = "sign-chip " + (sign > 0 ? "plus" : "minus");
+          chip.textContent = sign > 0 ? "+1" : "−1";
+          chip.setAttribute("aria-label", "Sign " + (index + 1) + ": " + (sign > 0 ? "plus one" : "minus one"));
+          els.radSigns.appendChild(chip);
+        });
+      }
+      function drawRadChart() {
+        clear(els.radLayer);
+        var x0 = 52, x1 = 590;
+        var histTop = 23, histBottom = 126;
+        var runTop = 174, runBottom = 242;
+        var bins = 10;
+        els.radLayer.appendChild(node("line", { x1: x0, y1: histBottom, x2: x1, y2: histBottom, class: "axis" }));
+        els.radLayer.appendChild(node("line", { x1: x0, y1: histTop, x2: x0, y2: histBottom, class: "axis" }));
+        els.radLayer.appendChild(node("line", { x1: x0, y1: runBottom, x2: x1, y2: runBottom, class: "axis" }));
+        els.radLayer.appendChild(node("line", { x1: x0, y1: runTop, x2: x0, y2: runBottom, class: "axis" }));
+        [0, .5, 1].forEach(function (value) {
+          var x = x0 + value * (x1 - x0);
+          var tick = node("text", { x: x, y: histBottom + 17, class: "svg-small", "text-anchor": "middle" });
+          tick.textContent = value.toFixed(1);
+          els.radLayer.appendChild(tick);
+          var runTick = node("text", { x: x, y: runBottom + 17, class: "svg-small", "text-anchor": "middle" });
+          runTick.textContent = value.toFixed(1);
+          els.radLayer.appendChild(runTick);
+        });
+        var histLabel = node("text", { x: x0, y: histTop - 7, class: "svg-label" });
+        histLabel.textContent = "score distribution";
+        els.radLayer.appendChild(histLabel);
+        var runLabel = node("text", { x: x0, y: runTop - 8, class: "svg-label" });
+        runLabel.textContent = "running mean";
+        els.radLayer.appendChild(runLabel);
+        var scores = radState.scores;
+        if (!scores.length) {
+          var placeholder = node("text", { x: (x0 + x1) / 2, y: 92, class: "svg-label", "text-anchor": "middle" });
+          placeholder.textContent = "run a few random-sign trials";
+          els.radLayer.appendChild(placeholder);
+          return;
+        }
+        var counts = new Array(bins).fill(0);
+        scores.forEach(function (value) {
+          var index = clamp(Math.floor(value * bins), 0, bins - 1);
+          counts[index] += 1;
+        });
+        var maxCount = Math.max.apply(null, counts);
+        counts.forEach(function (count, index) {
+          var width = (x1 - x0) / bins - 4;
+          var height = maxCount ? count / maxCount * (histBottom - histTop - 9) : 0;
+          var x = x0 + index * (x1 - x0) / bins + 2;
+          var y = histBottom - height;
+          els.radLayer.appendChild(node("rect", { x: x, y: y, width: width, height: height, rx: 3, fill: index >= 7 ? "#e85d3f" : "#16877d", opacity: ".78" }));
+        });
+        var sum = scores.reduce(function (a, b) { return a + b; }, 0);
+        var mean = sum / scores.length;
+        var meanX = x0 + mean * (x1 - x0);
+        els.radLayer.appendChild(node("line", { x1: meanX, y1: histTop, x2: meanX, y2: histBottom, stroke: "#17262d", "stroke-width": "2", "stroke-dasharray": "4 4" }));
+        var meanLabel = node("text", { x: clamp(meanX + 5, x0 + 6, x1 - 6), y: histTop + 13, class: "svg-small", "text-anchor": meanX > x1 - 55 ? "end" : "start" });
+        meanLabel.textContent = "mean " + fmtPct(mean);
+        els.radLayer.appendChild(meanLabel);
+        var path = "";
+        scores.forEach(function (value, index) {
+          var running = scores.slice(0, index + 1).reduce(function (a, b) { return a + b; }, 0) / (index + 1);
+          var px = x0 + (scores.length === 1 ? 0 : index / (scores.length - 1)) * (x1 - x0);
+          var py = runBottom - running * (runBottom - runTop);
+          path += (index ? "L" : "M") + px.toFixed(2) + " " + py.toFixed(2);
+        });
+        els.radLayer.appendChild(node("path", { d: path, fill: "none", stroke: "#7655a6", "stroke-width": "2.5" }));
+      }
+      function renderRad() {
+        els.radNValue.textContent = String(radState.n);
+        els.radTrialsValue.textContent = String(radState.trials);
+        drawRadSigns();
+        drawRadChart();
+        var candidates = radCandidates(radState.kind, radState.n);
+        els.radCandidates.textContent = radState.kind === "memorization" ? "2^" + radState.n : fmtNumber(candidates.length);
+        els.radTrialCount.textContent = String(radState.scores.length);
+        if (radState.scores.length) {
+          var mean = radState.scores.reduce(function (a, b) { return a + b; }, 0) / radState.scores.length;
+          els.radMean.textContent = fmtPct(mean);
+          els.radLast.textContent = fmtPct(radState.scores[radState.scores.length - 1]);
+        } else {
+          els.radMean.textContent = "—";
+          els.radLast.textContent = "—";
+        }
+        els.radWinner.textContent = radState.winner.length ? signedText(radState.winner) : "—";
+        var descriptions = {
+          constant: "Baseline: only two constant predictors are available, so random signs mostly cancel.",
+          threshold: "Infinite cut points collapse to n + 1 patterns on S; the class has limited ways to fit noise.",
+          interval: "Two endpoints create n(n + 1)/2 + 1 patterns, so the average best fit is larger than for thresholds.",
+          memorization: "All 2ⁿ sign patterns are available on S; the class can match every random vector, so the score is always 1."
+        };
+        els.radStatus.textContent = descriptions[radState.kind] + (radState.scores.length ? " Keep running trials to see the mean settle." : "");
+        els.radStatus.className = "status-line";
+      }
+      function resetRad() {
+        radState.kind = els.radClass.value;
+        radState.n = Number(els.radN.value);
+        radState.trials = Number(els.radTrials.value);
+        radState.xs = makePoints(radState.n);
+        radState.signs = [];
+        radState.winner = [];
+        radState.scores = [];
+        renderRad();
+      }
+      function drawOneRad() {
+        radState.signs = randomSigns(radState.n);
+        var result = radOne(radState.signs);
+        radState.winner = result.winner;
+        radState.scores.push(result.score);
+        if (radState.scores.length > 800) radState.scores.shift();
+        renderRad();
+      }
+      function runRadTrials() {
+        for (var i = 0; i < radState.trials; i += 1) {
+          radState.signs = randomSigns(radState.n);
+          var result = radOne(radState.signs);
+          radState.winner = result.winner;
+          radState.scores.push(result.score);
+        }
+        while (radState.scores.length > 800) radState.scores.shift();
+        renderRad();
+      }
+      function logAdd(a, b) {
+        if (a === -Infinity) return b;
+        if (b === -Infinity) return a;
+        var max = Math.max(a, b);
+        return max + Math.log(Math.exp(a - max) + Math.exp(b - max));
+      }
+      function logSauer(m, d) {
+        m = Math.max(0, Math.floor(m));
+        d = Math.max(0, Math.floor(d));
+        if (d >= m) return m * Math.log(2);
+        var logSum = -Infinity;
+        var logC = 0;
+        for (var i = 0; i <= d; i += 1) {
+          if (i > 0) logC += Math.log(m - i + 1) - Math.log(i);
+          logSum = logAdd(logSum, logC);
+        }
+        return logSum;
+      }
+      function vcBound(n, d, epsilon) {
+        var logBound = Math.log(2) + logSauer(2 * n, d) - epsilon * n / 2;
+        if (logBound >= 0) return 1;
+        return Math.exp(logBound);
+      }
+      function requiredSamples(d, epsilon, delta) {
+        for (var n = 1; n <= 2500; n += 1) if (vcBound(n, d, epsilon) <= delta) return n;
+        return null;
+      }
+      function renderBound() {
+        var d = Number(els.boundD.value);
+        var n = Number(els.boundN.value);
+        var epsilon = Number(els.boundEps.value);
+        var delta = Number(els.boundDelta.value);
+        var bound = vcBound(n, d, epsilon);
+        var needed = requiredSamples(d, epsilon, delta);
+        els.boundDValue.textContent = String(d);
+        els.boundNValue.textContent = String(n);
+        els.boundEpsValue.textContent = epsilon.toFixed(2);
+        els.boundDeltaValue.textContent = delta.toFixed(2);
+        els.boundValue.textContent = fmtPct(bound);
+        var safe = bound <= delta;
+        els.boundState.textContent = safe ? "below δ target" : "above δ target";
+        els.boundMeter.style.width = Math.max(2, bound * 100).toFixed(1) + "%";
+        els.boundMeter.classList.toggle("safe", safe);
+        var growth = Math.exp(Math.min(700, logSauer(2 * n, d)));
+        els.boundDetail.textContent = "At n = " + n + ", Sauer gives Π_H(2n) ≲ " + fmtNumber(growth) + ". The smallest n found for this ε, δ, d is " + (needed ? needed : "> 2500") + ".";
+      }
+      els.vcClass.addEventListener("change", resetVC);
+      els.vcN.addEventListener("input", function () { vcState.n = Number(els.vcN.value); vcState.xs = makePoints(vcState.n); vcState.selected = allBinaryPatterns(vcState.n)[0].slice(); renderVC(); });
+      els.vcRandomize.addEventListener("click", randomizeVC);
+      els.vcCheck.addEventListener("click", function () { renderVC(); els.vcStatus.textContent += " The gallery has checked all " + Math.pow(2, vcState.n) + " labelings."; });
+      els.radClass.addEventListener("change", resetRad);
+      els.radN.addEventListener("input", function () { radState.n = Number(els.radN.value); radState.xs = makePoints(radState.n); radState.signs = []; radState.winner = []; radState.scores = []; renderRad(); });
+      els.radTrials.addEventListener("input", function () { radState.trials = Number(els.radTrials.value); renderRad(); });
+      els.radOne.addEventListener("click", drawOneRad);
+      els.radRun.addEventListener("click", runRadTrials);
+      els.radReset.addEventListener("click", resetRad);
+      [els.boundD, els.boundN, els.boundEps, els.boundDelta].forEach(function (input) { input.addEventListener("input", renderBound); });
+      resetVC();
+      resetRad();
+      renderBound();
+    }());
+  </script>
+  <script>
+(function () {
+  'use strict';
+  const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  const add = (a, b) => a.map((x, i) => x + b[i]);
+  const mul = (a, k) => a.map(x => x * k);
+  const norm = a => Math.sqrt(dot(a, a));
+  const unit = a => norm(a) > 1e-12 ? mul(a, 1 / norm(a)) : a.map(() => 0);
+  const cross = (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const signsFor = (mask, n) => Array.from({length:n}, (_,i) => mask & (1 << i) ? 1 : -1);
+  function solve(matrix, rhs) {
+    const n = rhs.length, a = matrix.map((row, i) => row.concat(rhs[i]));
+    for (let j = 0; j < n; j++) {
+      let p = j;
+      for (let i = j + 1; i < n; i++) if (Math.abs(a[i][j]) > Math.abs(a[p][j])) p = i;
+      if (Math.abs(a[p][j]) < 1e-10) return null;
+      [a[p], a[j]] = [a[j], a[p]];
+      const pivot = a[j][j];
+      for (let k = j; k <= n; k++) a[j][k] /= pivot;
+      for (let i = 0; i < n; i++) if (i !== j) {
+        const q = a[i][j];
+        for (let k = j; k <= n; k++) a[i][k] -= q * a[j][k];
+      }
+    }
+    return a.map(row => row[n]);
+  }
+  // A strictly separating affine classifier can be rescaled to A theta >= 1.
+  // The least-norm feasible theta is supported by <=4 independent active rows.
+  // Enumerate those sets and verify every margin; no convergence heuristic.
+  function separator(points, labels) {
+    const rows = points.map((p,i) => mul(p.concat(1), labels[i]));
+    let best = null, length = Infinity;
+    for (let mask = 1; mask < (1 << points.length); mask++) {
+      const active = rows.filter((_, i) => mask & (1 << i));
+      if (active.length > 4) continue;
+      const coeff = solve(active.map(a => active.map(b => dot(a,b))), active.map(() => 1));
+      if (!coeff) continue;
+      const theta = [0,0,0,0];
+      active.forEach((a,i) => a.forEach((x,j) => { theta[j] += coeff[i]*x; }));
+      if (rows.every(a => dot(a, theta) >= 1 - 1e-7) && dot(theta,theta) < length) {
+        best = theta; length = dot(theta,theta);
+      }
+    }
+    return best;
+  }
+  function vcPoints(kind, lift = 0) {
+    if (kind === 'square') return [[-.8,-.8,0],[.8,-.8,0],[.8,.8,0],[-.8,.8,lift]];
+    const p = [[.65,.65,.65],[.65,-.65,-.65],[-.65,.65,-.65],[-.65,-.65,.65]];
+    return kind === 'center' ? p.concat([[0,0,0]]) : p;
+  }
+  function planePolygon(theta, radius = 1.45) {
+    const w = theta.slice(0,3), b = theta[3];
+    if (norm(w) < 1e-10) return [];
+    const vertices = Array.from({length:8}, (_,m) => [0,1,2].map(i => (m & (1<<i) ? 1 : -1)*radius));
+    const cuts = [];
+    const put = p => { if (!cuts.some(q => norm(add(q,mul(p,-1))) < 1e-7)) cuts.push(p); };
+    vertices.forEach((p,m) => {
+      for (let i = 0; i < 3; i++) if (!(m & (1<<i))) {
+        const q = vertices[m | (1<<i)], fp = dot(w,p)+b, fq = dot(w,q)+b;
+        if (Math.abs(fp) < 1e-9) put(p);
+        if (Math.abs(fq) < 1e-9) put(q);
+        if (fp*fq < 0) put(add(p,mul(add(q,mul(p,-1)),fp/(fp-fq))));
+      }
+    });
+    if (cuts.length < 3) return [];
+    const center = mul(cuts.reduce(add,[0,0,0]), 1/cuts.length);
+    const u = unit(cross(w, Math.abs(unit(w)[2]) < .8 ? [0,0,1] : [0,1,0]));
+    const v = unit(cross(w,u));
+    return cuts.sort((a,b) => {
+      const pa = add(a,mul(center,-1)), pb = add(b,mul(center,-1));
+      return Math.atan2(dot(pa,v),dot(pa,u))-Math.atan2(dot(pb,v),dot(pb,u));
+    });
+  }
+  function radPoints(kind,n) {
+    if (kind === 'line') return Array.from({length:n}, () => [1,0,0]);
+    return Array.from({length:n}, (_,i) => {
+      const z = 1-2*(i+.5)/n, t = i*Math.PI*(3-Math.sqrt(5));
+      const p = [Math.sqrt(1-z*z)*Math.cos(t),Math.sqrt(1-z*z)*Math.sin(t),z];
+      return kind === 'cluster' ? unit(add([1,0,0],mul(p,.22))) : p;
+    });
+  }
+  const signedMean = (points, signs) => mul(points.reduce((a,p,i) => add(a,mul(p,signs[i])),[0,0,0]),1/points.length);
+  function exactRad(points) {
+    if (points.length > 12) return null;
+    let total = 0;
+    for (let m=0; m<2**points.length; m++) total += norm(signedMean(points,signsFor(m,points.length)));
+    return total / 2**points.length;
+  }
+  globalThis.Learning3DMath = { dot, norm, solve, separator, vcPoints, planePolygon, radPoints, signedMean, exactRad, signsFor };
+  if (typeof document === 'undefined') return;
+
+  const $ = id => document.getElementById(id);
+  const palette = { plus:'#ff956f',minus:'#65b6f0',plane:'#6de3cb',sum:'#c4a1f5',optimal:'#6de3cb',axis:'#648095',white:'#f5fafc' };
+  const fmt = n => Math.abs(n) < .0005 ? '0.000' : n.toFixed(3);
+  const vector = v => '('+v.map(fmt).join(', ')+')';
+  class Scene {
+    constructor(canvas, reset) {
+      this.canvas=canvas; this.ctx=canvas.getContext('2d'); this.yaw=.65; this.pitch=.4; this.zoom=1; this.items=[]; this.hit=[];
+      this.onChange=()=>{}; this.onPoint=()=>{};
+      let drag=null;
+      canvas.addEventListener('pointerdown',e=>{ if(e.button!==0)return; drag={x:e.clientX,y:e.clientY,moved:0}; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener('pointermove',e=>{
+        if(!drag)return;
+        const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+        drag.moved+=Math.abs(dx)+Math.abs(dy); drag.x=e.clientX;drag.y=e.clientY;
+        this.yaw+=dx*.009;this.pitch=clamp(this.pitch+dy*.009,-1.4,1.4);this.onChange();
+      });
+      canvas.addEventListener('pointerup',e=>{
+        if(drag && drag.moved<5){const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;const found=[...this.hit].reverse().find(p=>Math.hypot(p.x-x,p.y-y)<19);if(found)this.onPoint(found.id);}
+        drag=null;
+      });
+      canvas.addEventListener('pointercancel',()=>{drag=null;});
+      canvas.addEventListener('keydown',e=>{
+        if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'].includes(e.key))return;
+        e.preventDefault();
+        if(e.key==='ArrowLeft')this.yaw-=.12;if(e.key==='ArrowRight')this.yaw+=.12;
+        if(e.key==='ArrowUp')this.pitch=clamp(this.pitch-.12,-1.4,1.4);if(e.key==='ArrowDown')this.pitch=clamp(this.pitch+.12,-1.4,1.4);
+        if(e.key==='+'||e.key==='=')this.zoom=clamp(this.zoom*1.1,.65,1.5);if(e.key==='-')this.zoom=clamp(this.zoom/1.1,.65,1.5);
+        this.onChange();
+      });
+      reset.addEventListener('click',()=>{this.yaw=.65;this.pitch=.4;this.zoom=1;this.onChange();});
+      this.observer=new ResizeObserver(()=>this.onChange());this.observer.observe(canvas);
+    }
+    project(p){
+      const cy=Math.cos(this.yaw),sy=Math.sin(this.yaw),cp=Math.cos(this.pitch),sp=Math.sin(this.pitch);
+      const x=cy*p[0]-sy*p[1],y=sy*p[0]+cy*p[1];
+      const z=cp*p[2]-sp*y,depth=sp*p[2]+cp*y,k=5/(5-depth),s=Math.min(this.w,this.h)*.275*this.zoom;
+      return {x:this.w/2+x*s*k,y:this.h*.48-z*s*k,d:depth,k};
+    }
+    begin(){
+      this.w=this.canvas.clientWidth||600;this.h=this.canvas.clientHeight||400;
+      const dpr=Math.min(window.devicePixelRatio||1,2);
+      if(this.canvas.width!==Math.round(this.w*dpr)||this.canvas.height!==Math.round(this.h*dpr)){this.canvas.width=Math.round(this.w*dpr);this.canvas.height=Math.round(this.h*dpr);}
+      this.ctx.setTransform(dpr,0,0,dpr,0,0);this.ctx.clearRect(0,0,this.w,this.h);this.items=[];this.hit=[];
+      for(let i=-2;i<=2;i++){this.line([i*.5,-1.3,-1.15],[i*.5,1.3,-1.15],'#263e50',1);this.line([-1.3,i*.5,-1.15],[1.3,i*.5,-1.15],'#263e50',1);}
+      [[1.35,0,0],[0,1.35,0],[0,0,1.35]].forEach((p,i)=>{this.line(mul(p,-.9),p,palette.axis,1);this.text(mul(p,1.06),['x₁','x₂','x₃'][i],'#b1c2ce');});
+    }
+    line(a,b,color,width=1,dash=[],arrow=false){const p=this.project(a),q=this.project(b);this.items.push({d:(p.d+q.d)/2,draw:c=>{c.beginPath();c.strokeStyle=color;c.lineWidth=width;c.setLineDash(dash);c.moveTo(p.x,p.y);c.lineTo(q.x,q.y);c.stroke();c.setLineDash([]);if(arrow&&Math.hypot(q.x-p.x,q.y-p.y)>3){const t=Math.atan2(q.y-p.y,q.x-p.x);c.beginPath();c.moveTo(q.x,q.y);c.lineTo(q.x-10*Math.cos(t-.4),q.y-10*Math.sin(t-.4));c.lineTo(q.x-10*Math.cos(t+.4),q.y-10*Math.sin(t+.4));c.closePath();c.fillStyle=color;c.fill();}}});}
+    text(p,label,color=palette.white){const q=this.project(p);this.items.push({d:q.d+.04,draw:c=>{c.fillStyle=color;c.font='13px system-ui';c.textAlign='left';c.fillText(label,q.x+9,q.y-10);}});}
+    point(p,color,label,id,radius=10){const q=this.project(p);this.items.push({d:q.d+.01,draw:c=>{c.beginPath();c.arc(q.x,q.y,radius*q.k,0,Math.PI*2);c.fillStyle=color;c.fill();c.strokeStyle='#10202b';c.lineWidth=2;c.stroke();if(label){c.fillStyle='#f5fafc';c.font='600 13px system-ui';c.textAlign='left';c.fillText(label,q.x+radius*q.k+5,q.y-5);}if(id!==undefined)this.hit.push({...q,id});}});}
+    polygon(points){if(points.length<3)return;const p=points.map(x=>this.project(x));this.items.push({d:p.reduce((s,x)=>s+x.d,0)/p.length,draw:c=>{c.beginPath();p.forEach((q,i)=>i?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y));c.closePath();c.fillStyle='rgba(71,208,177,.22)';c.fill();c.strokeStyle='#68dac2';c.lineWidth=1.5;c.stroke();}});}
+    end(){this.items.sort((a,b)=>a.d-b.d).forEach(item=>item.draw(this.ctx));}
+    caption(text){this.ctx.font='14px system-ui';this.ctx.fillStyle='#dbe7ed';this.ctx.textAlign='left';this.ctx.fillText(text,16,28);}
+  }
+  const vc={kind:'tetra',lift:0,points:[],labels:[1,1,-1,-1],fits:[],theta:null,manual:false,timer:null};
+  const vcScene=new Scene($('vc3dCanvas'),$('vc3dView'));
+  function stopCycle(){if(vc.timer)clearInterval(vc.timer);vc.timer=null;$('vc3dCycle').textContent='Play all labelings';$('vc3dCycle').setAttribute('aria-pressed','false');}
+  const maskOf=labels=>labels.reduce((m,x,i)=>x>0?m|(1<<i):m,0);
+  function recalcVC(){vc.points=vcPoints(vc.kind,vc.lift);vc.fits=Array.from({length:2**vc.points.length},(_,m)=>separator(vc.points,signsFor(m,vc.points.length)));fitVC();}
+  function syncPlane(){
+    if(!vc.theta)return;
+    const w=vc.theta.slice(0,3),length=norm(w),u=length>1e-9?mul(w,1/length):[1,0,0];
+    $('vc3dYaw').value=Math.atan2(u[1],u[0])*180/Math.PI;$('vc3dPitch').value=Math.asin(clamp(u[2],-1,1))*180/Math.PI;
+    $('vc3dOffset').value=length>1e-9?clamp(-vc.theta[3]/length,-2,2):0;
+    planeReadouts();
+  }
+  function planeReadouts(){['Yaw','Pitch'].forEach(k=>{$('vc3d'+k+'Value').textContent=$('vc3d'+k).value+'°';});$('vc3dOffsetValue').textContent=Number($('vc3dOffset').value).toFixed(2);}
+  function fitVC(){vc.theta=vc.fits[maskOf(vc.labels)];vc.manual=false;syncPlane();renderVC3D();}
+  function selectVC(mask){vc.labels=signsFor(mask,vc.points.length);fitVC();}
+  function drawVC3D(){
+    vcScene.begin();
+    const edges=vc.kind==='square'?[[0,1],[1,2],[2,3],[3,0]]:[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+    edges.forEach(([a,b])=>vcScene.line(vc.points[a],vc.points[b],'#768b9a',1,[4,4]));
+    if(vc.theta){vcScene.polygon(planePolygon(vc.theta));const w=vc.theta.slice(0,3),l=norm(w);if(l>1e-9){const center=mul(w,-vc.theta[3]/(l*l));if(norm(center)<1.8){vcScene.line(center,add(center,mul(w,.45/l)),palette.plane,2,[],true);vcScene.text(add(center,mul(w,.45/l)),'+ side',palette.plane);}}}
+    if(!vc.fits[maskOf(vc.labels)]){
+      if(vc.kind==='square'){vcScene.line(vc.points[0],vc.points[2],palette.plus,3);vcScene.line(vc.points[1],vc.points[3],palette.minus,3);vcScene.point([0,0,0],palette.white,'shared midpoint',undefined,5);}
+      else vc.points.slice(0,4).forEach(p=>vcScene.line(p,[0,0,0],'#b78aa5',1.5,[5,4]));
+    }
+    vc.points.forEach((p,i)=>vcScene.point(p,vc.labels[i]>0?palette.plus:palette.minus,String.fromCharCode(65+i)+(vc.labels[i]>0?' +':' −'),i));
+    vcScene.end();vcScene.caption(vc.manual?'Your plane':vc.theta?'Fitted separating plane':'Convex hulls intersect');
+  }
+  function renderVC3D(){
+    const mask=maskOf(vc.labels),fit=vc.fits[mask],count=vc.fits.filter(Boolean).length,total=vc.fits.length;
+    $('vc3dCount').textContent=count+' / '+total;$('vc3dShattered').textContent=count===total?'Yes':'No';$('vc3dFit').disabled=!fit;
+    $('vc3dLiftRow').hidden=vc.kind!=='square';$('vc3dLiftValue').textContent=vc.lift.toFixed(2);
+    $('vc3dLabels').replaceChildren();vc.labels.forEach((label,i)=>{const b=document.createElement('button');b.type='button';b.className=label>0?'positive':'negative';b.textContent=String.fromCharCode(65+i)+' '+(label>0?'+':'−');b.setAttribute('aria-label','Point '+String.fromCharCode(65+i)+': '+(label>0?'positive':'negative')+'. Flip label.');b.onclick=()=>{stopCycle();vc.labels[i]*=-1;fitVC();};$('vc3dLabels').append(b);});
+    $('vc3dPatterns').replaceChildren();vc.fits.forEach((result,m)=>{const b=document.createElement('button');b.type='button';b.className=result?'':'impossible';b.textContent=signsFor(m,vc.points.length).map(x=>x>0?'+':'−').join('')+' '+(result?'✓':'×');b.setAttribute('aria-pressed',String(mask===m));b.setAttribute('aria-label',b.textContent+(result?' realizable':' impossible'));b.onclick=()=>{stopCycle();selectVC(m);};$('vc3dPatterns').append(b);});
+    const mistakes=vc.theta?vc.points.filter((p,i)=>(dot(p,vc.theta.slice(0,3))+vc.theta[3]>=0?1:-1)!==vc.labels[i]).length:null;
+    $('vc3dErrors').textContent=vc.theta?'Current plane: '+mistakes+' / '+vc.points.length+' labels incorrect. Points exactly on the plane receive +.':'No plane can fit this labeling.';
+    $('vc3dStatus').className='spatial-status '+(fit?'good':'bad');
+    $('vc3dStatus').textContent=!fit?'Impossible labeling: the positive and negative convex hulls intersect. This is a geometric obstruction.':vc.manual?'This labeling is realizable. Your plane currently misses '+mistakes+' labels; use Fit plane to see a witness.':'A separating plane realizes this labeling. Try another pattern, or click a point to flip its label.';
+    $('vc3dLesson').textContent=vc.kind==='tetra'?'Try all 16 patterns: every one has a separator. Four affinely independent points establish VC ≥ 4. In ℝ³, Radon’s theorem guarantees an obstructing labeling for every set of five points, giving VC ≤ 4.':vc.kind==='square'?(vc.lift===0?'The alternating XOR labels share a diagonal midpoint, so no plane separates them. Lift D even slightly: the four points become non-coplanar and all 16 patterns become realizable. VC = 4 never meant every four-point sample is shattered.':'Lifting D makes these four points affinely independent: all 16 labelings are realizable. As the lift approaches zero, the separator for XOR must squeeze between increasingly close convex hulls.'):'The center is the average of the four vertices. If an affine score is positive at every vertex, it must be positive at the center. Outer + / center − (and its reverse) are impossible: 30 of 32 patterns are realizable.';
+    drawVC3D();
+  }
+  vcScene.onChange=drawVC3D;vcScene.onPoint=i=>{stopCycle();vc.labels[i]*=-1;fitVC();};
+  $('vc3dPreset').onchange=()=>{stopCycle();vc.kind=$('vc3dPreset').value;vc.lift=0;$('vc3dLift').value=0;vc.labels=vc.kind==='center'?[1,1,1,1,-1]:vc.kind==='square'?[1,-1,1,-1]:[1,1,-1,-1];recalcVC();};
+  $('vc3dLift').oninput=()=>{stopCycle();vc.lift=Number($('vc3dLift').value);recalcVC();};
+  $('vc3dFit').onclick=()=>{stopCycle();fitVC();};$('vc3dRandom').onclick=()=>{stopCycle();selectVC(Math.floor(Math.random()*vc.fits.length));};
+  $('vc3dCycle').onclick=()=>{if(vc.timer){stopCycle();return;}$('vc3dCycle').textContent='Pause labelings';$('vc3dCycle').setAttribute('aria-pressed','true');vc.timer=setInterval(()=>selectVC((maskOf(vc.labels)+1)%vc.fits.length),1400);};
+  ['vc3dYaw','vc3dPitch','vc3dOffset'].forEach(id=>{$(id).oninput=()=>{stopCycle();const yaw=Number($('vc3dYaw').value)*Math.PI/180,pitch=Number($('vc3dPitch').value)*Math.PI/180;vc.theta=[Math.cos(pitch)*Math.cos(yaw),Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),-Number($('vc3dOffset').value)];vc.manual=true;planeReadouts();renderVC3D();};});
+
+  const rad={kind:'sphere',n:8,B:1,R:1,points:[],signs:[],samples:[],exact:null,custom:false};
+  const radScene=new Scene($('rad3dCanvas'),$('rad3dView'));
+  const randomSigns=()=>Array.from({length:rad.n},()=>Math.random()<.5?-1:1);
+  function drawRad3D(){
+    radScene.begin();
+    for(let axis=0;axis<3;axis++)for(let j=0;j<48;j++){const a=[0,0,0],b=[0,0,0],i=(axis+1)%3,k=(axis+2)%3;a[i]=rad.R*Math.cos(j*Math.PI/24);a[k]=rad.R*Math.sin(j*Math.PI/24);b[i]=rad.R*Math.cos((j+1)*Math.PI/24);b[k]=rad.R*Math.sin((j+1)*Math.PI/24);radScene.line(a,b,'#304b60');}
+    rad.points.forEach((p,i)=>{const q=mul(p,rad.R*rad.signs[i]);radScene.line([0,0,0],q,rad.signs[i]>0?'#ac725e':'#496f91',1);radScene.point(q,rad.signs[i]>0?palette.plus:palette.minus,rad.n<=10?String(i+1):'',undefined,4);});
+    const mean=mul(signedMean(rad.points,rad.signs),rad.R);
+    if(norm(mean)>1e-10){radScene.line([0,0,0],unit(mean),palette.optimal,2,[5,4],true);radScene.text(unit(mean),'w* / B',palette.optimal);radScene.line([0,0,0],mean,palette.sum,5,[],true);radScene.point(mean,palette.sum,'g',undefined,5);}else radScene.text([0,0,0],'g = 0',palette.sum);
+    radScene.end();radScene.caption('Signed vectors σᵢxᵢ');
+  }
+  function drawChart(){
+    const svg=$('rad3dChart'),NS='http://www.w3.org/2000/svg';svg.replaceChildren();
+    const el=(tag,attrs,text)=>{const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));if(text)n.textContent=text;svg.append(n);};
+    const scale=rad.B*rad.R,upper=scale/Math.sqrt(rad.n),means=[];let sum=0;
+    rad.samples.forEach((s,i)=>{sum+=s;means.push(sum/(i+1)*scale);});
+    const ceiling=Math.max(upper*1.25,...means,.01),y=v=>105-85*v/ceiling;
+    el('line',{x1:42,x2:365,y1:105,y2:105,stroke:'#a0aaa4'});
+    [0,ceiling/2,ceiling].forEach(v=>el('text',{x:36,y:y(v)+4,'text-anchor':'end','font-size':11,fill:'#536169'},v.toFixed(2)));
+    el('line',{x1:42,x2:365,y1:y(upper),y2:y(upper),stroke:'#536169','stroke-dasharray':'2 4'});
+    if(rad.exact!==null)el('line',{x1:42,x2:365,y1:y(rad.exact*scale),y2:y(rad.exact*scale),stroke:'#16877d','stroke-dasharray':'6 4'});
+    if(means.length===1)el('circle',{cx:42,cy:y(means[0]),r:3,fill:'#7655a6'});
+    if(means.length>1){const stride=Math.max(1,Math.floor(means.length/500));const path=[];means.forEach((v,i)=>{if(i%stride===0||i===means.length-1)path.push((path.length?'L':'M')+(42+323*i/(means.length-1)).toFixed(2)+' '+y(v).toFixed(2));});el('path',{d:path.join(' '),fill:'none',stroke:'#7655a6','stroke-width':2});}
+    el('text',{x:42,y:124,'font-size':11,fill:'#536169'},'1');el('text',{x:365,y:124,'text-anchor':'end','font-size':11,fill:'#536169'},rad.samples.length+' trials');
+    if(!means.length)el('text',{x:200,y:40,'text-anchor':'middle','font-size':12,fill:'#536169'},'Draw random signs to begin');
+  }
+  function renderRad3D(){
+    $('rad3dNValue').textContent=rad.n;$('rad3dBValue').textContent=rad.B.toFixed(2);$('rad3dRValue').textContent=rad.R.toFixed(2);
+    const scale=rad.B*rad.R,g=mul(signedMean(rad.points,rad.signs),rad.R),w=mul(unit(g),rad.B);
+    $('rad3dScore').textContent=fmt(rad.B*norm(g));$('rad3dExact').textContent=rad.exact===null?'n > 12':fmt(rad.exact*scale);$('rad3dBound').textContent=fmt(scale/Math.sqrt(rad.n));
+    const n=rad.samples.length,mean=n?rad.samples.reduce((a,b)=>a+b,0)/n:0;
+    const se=n>1?Math.sqrt(rad.samples.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)/n)*scale:0;
+    $('rad3dMean').textContent=n?fmt(mean*scale):'—';
+    $('rad3dTrials').textContent=n+' independent sign trials'+(n>1?' · standard error '+fmt(se):'')+'.'+(rad.exact===null?' Use n ≤ 12 for exact enumeration.':' Exact expectation uses all '+2**rad.n+' sign patterns.');
+    $('rad3dVector').textContent='g = '+vector(g)+'    w* = '+vector(w);
+    $('rad3dStatus').textContent=(rad.custom?'Custom pattern: excluded from the Monte Carlo average. ':'Current signs were drawn independently. ')+(norm(g)<1e-10?'Complete cancellation: every feasible weight scores 0.':'The optimal weight aligns with g. The dashed arrow shows its unit direction, not its magnitude.')+(rad.kind==='line'?' Overlapping dots represent repeated sample locations.':'');
+    $('rad3dSigns').replaceChildren();rad.signs.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className=s>0?'positive':'negative';b.textContent=(i+1)+': '+(s>0?'+':'−');b.setAttribute('aria-label','Sign '+(i+1)+' is '+(s>0?'plus':'minus')+'. Flip sign.');b.onclick=()=>{rad.signs[i]*=-1;rad.custom=true;renderRad3D();};$('rad3dSigns').append(b);});
+    drawRad3D();drawChart();
+  }
+  function resetSample(){rad.kind=$('rad3dPreset').value;rad.n=Number($('rad3dN').value);rad.points=radPoints(rad.kind,rad.n);rad.exact=exactRad(rad.points);rad.signs=randomSigns();rad.samples=[];rad.custom=false;renderRad3D();}
+  function trials(n){for(let i=0;i<n;i++){rad.signs=randomSigns();rad.samples.push(norm(signedMean(rad.points,rad.signs)));}rad.custom=false;renderRad3D();}
+  radScene.onChange=drawRad3D;
+  $('rad3dPreset').onchange=resetSample;$('rad3dN').oninput=resetSample;
+  ['B','R'].forEach(k=>{$('rad3d'+k).oninput=()=>{rad[k]=Number($('rad3d'+k).value);renderRad3D();};});
+  $('rad3dDraw').onclick=()=>trials(1);$('rad3dRun').onclick=()=>trials(200);$('rad3dReset').onclick=()=>{rad.samples=[];renderRad3D();};
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCycle();});
+  recalcVC();resetSample();
+}());
+</script>
+</body>
+</html>
