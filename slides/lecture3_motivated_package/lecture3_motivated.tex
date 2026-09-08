@@ -1,3 +1,5 @@
+% Revised edition: 13 motivation frames inserted before the relevant concepts.
+% See insertion_guide.md for original/revised page mapping and teaching prompts.
 % COMP 5212 lecture deck: Rademacher Complexity and VC Dimension
 % Core organization, definitions, theorems, and proof strategy follow Chapter 3 of:
 % M. Mohri, A. Rostamizadeh, and A. Talwalkar,
@@ -146,11 +148,11 @@
 
 \begin{document}
 
-% 1 ---------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 1: Course title
 \begin{frame}
 	\begin{tikzpicture}[remember picture, overlay]
 		\node[anchor=north west, inner sep=10pt] at (current page.north west)
-		{\includegraphics[width=6cm]{../source/logo.png}};
+		{\includegraphics[width=6cm]{assets/logo.png}};
 	\end{tikzpicture}
 	
 	\centering
@@ -167,7 +169,7 @@
 \end{frame}
 
 
-% 3 ---------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 2: Learning Goals
 \begin{frame}[t]{Learning Goals}
   \vspace{0.03cm}
   {\fontsize{13.2}{16.2}\selectfont
@@ -178,11 +180,12 @@
     \item explain the symmetrization argument behind Rademacher bounds;
     \item connect growth functions to Rademacher complexity via Massart's lemma;
     \item compute or bound the VC dimension of common hypothesis classes;
-    \item use Sauer's lemma to derive distribution-free generalization guarantees.
+    \item use Sauer's lemma to derive generalization guarantees for VC classes.
   \end{itemize}}
 \end{frame}
 
 
+% ORIGINAL PDF SLIDE 3: Infinite Hypothesis Sets
 \begin{frame}[t]{Infinite Hypothesis Sets}
   \vspace{0.04cm}
   \begin{columns}[T,totalwidth=\textwidth]
@@ -215,7 +218,7 @@
   \end{columns}
 \end{frame}
 
-% 6 ---------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 4: Why the Naive Union Bound Fails
 \begin{frame}[t]{Why the Naive Union Bound Fails}
   \vspace{0.06cm}
   For a fixed $h$, concentration gives approximately
@@ -234,7 +237,7 @@
   \end{beamercolorbox}
 \end{frame}
 
-% 7 ---------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 5: Three Views of Capacity
 \begin{frame}[t]{Three Views of Capacity}
   \vspace{0.10cm}
   \begin{center}
@@ -253,12 +256,14 @@
   \vspace{0.22cm}
   \centering
   \textbf{Analytic} $\longrightarrow$ \textbf{combinatorial} $\longrightarrow$ \textbf{single-number summary}
+
 \end{frame}
 
-% 8 ---------------------------------------------------------------------------
-\SectionSlide{Part I: Rademacher Complexity}
+% ORIGINAL PDF SLIDE 6: Part I: Rademacher Complexity
+\SectionSlide{Part I: Rademacher Complexity}{}
 
-% 9 ---------------------------------------------------------------------------
+
+
 \begin{frame}[t]{Random Signs as a Stress Test}
   \vspace{0.10cm}
   Fix a sample $S=(z_1,\ldots,z_m)$ and draw independent signs
@@ -280,7 +285,7 @@
   \end{columns}
 \end{frame}
 
-% 10 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 8: Empirical Rademacher Complexity
 \begin{frame}[t]{Empirical Rademacher Complexity}
   \vspace{0.06cm}
   Let $\Gc$ be a family of real-valued functions on $\Z$ and let
@@ -305,7 +310,7 @@
   \end{itemize}
 \end{frame}
 
-% 11 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 9: Geometry of the Definition
 \begin{frame}[t]{Geometry of the Definition}
   \vspace{0.01cm}
   Associate each function with its evaluation vector
@@ -335,7 +340,7 @@
   \end{center}
 \end{frame}
 
-% 12 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 10: Toy Examples: Very Small Classes
 \begin{frame}[t]{Toy Examples: Very Small Classes}
   \vspace{0.06cm}
   \begin{columns}[T,totalwidth=\textwidth]
@@ -361,7 +366,7 @@
   \KeyBox{Rademacher complexity measures flexibility of a \emph{class}, not variability of one fixed function.}
 \end{frame}
 
-% 13 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 11: Toy Example: A Maximally Rich Class
 \begin{frame}[t]{Toy Example: A Maximally Rich Class}
   \vspace{0.06cm}
   Suppose that on the fixed sample $S$, the class realizes every sign pattern:
@@ -381,26 +386,83 @@
   \OrangeBox{A class able to reproduce arbitrary random labels has maximal sample-level complexity.}
 \end{frame}
 
-% 14 --------------------------------------------------------------------------
+
 \begin{frame}[t]{Expected Rademacher Complexity}
-  \vspace{0.10cm}
-  When the sample itself is random, define
-  \begin{beamercolorbox}[rounded=true,sep=0.22cm,wd=\linewidth]{block body}
-    \[
-      \boxed{
-      \Rad_m(\Gc)=\E_{S\sim\D^m}\bigl[\RadS(\Gc)\bigr].}
-    \]
-  \end{beamercolorbox}
-  \vspace{0.18cm}
-  \begin{itemize}
-    \setlength{\itemsep}{0.15cm}
-    \item $\RadS(\Gc)$ is \textbf{data-dependent}: it adapts to the observed sample.
-    \item $\Rad_m(\Gc)$ is \textbf{distribution-dependent}: it averages over samples from $\D$.
-    \item A worst-case upper bound may remove dependence on both $S$ and $\D$, at the cost of looseness.
-  \end{itemize}
+	\vspace{0.10cm}
+	When the sample itself is random, define
+	\begin{beamercolorbox}[rounded=true,sep=0.22cm,wd=\linewidth]{block body}
+		\[
+		\boxed{
+			\Rad_m(\Gc)=\E_{S\sim\D^m}\bigl[\RadS(\Gc)\bigr].}
+		\]
+	\end{beamercolorbox}
+	\vspace{0.18cm}
+	\begin{itemize}
+		\setlength{\itemsep}{0.15cm}
+		\item $\RadS(\Gc)$ is \textbf{data-dependent}: it adapts to the observed sample.
+		\item $\Rad_m(\Gc)$ is \textbf{distribution-dependent}: it averages over samples from $\D$.
+		\item A worst-case upper bound may remove dependence on both $S$ and $\D$, at the cost of looseness.
+	\end{itemize}
 \end{frame}
 
-% 15 --------------------------------------------------------------------------
+\begin{frame}[t]{Repeated and Distinct Inputs}
+  \vspace{0.04cm}
+  \small
+
+  Let $a$ and $b$ represent two patient profiles. Let $\Hc$ contain all
+  four maps $\{a,b\}\to\pmone$.
+  Keep this class fixed and compare samples of size two.
+  \begin{center}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lcc}
+    \toprule
+    & $S_1=(a,a)$ & $S_2=(a,b)$\\
+    \midrule
+    Available prediction vectors & $(+,+),(-,-)$ & all four sign vectors\\
+    Best scores for $++,+-,-+,--$ & $1,0,0,1$ & $1,1,1,1$\\
+    Average over random signs & $\widehat{\Rad}_{S_1}=1/2$ & $\widehat{\Rad}_{S_2}=1$\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  If $a$ and $b$ each have probability $1/2$, an i.i.d. sample repeats a
+  point with probability $1/2$. The average over samples is
+  \[
+    \frac12\cdot\frac12+\frac12\cdot1=\frac34.
+  \]
+  \KeyBox{The first average fixes the inputs. A second average accounts for
+  which inputs the data distribution supplies.}
+
+\end{frame}
+
+% MOTIVATION V02 -- before original PDF page 12: Expected Rademacher Complexity
+\begin{frame}[t]{Repeated and Distinct Patients}
+  \vspace{0.04cm}\small
+  The same risk model can have different flexibility on different samples.
+  \begin{center}
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    \node[font=\bfseries] at (1.9,2.0) {Repeated profile};
+    \node[font=\bfseries] at (6.7,2.0) {Distinct profiles};
+    \draw[thick] (0,0)--(3.8,0);
+    \fill[pointblue] (1.2,0) circle (3pt) node[below=4pt] {$a$};
+    \fill[pointblue] (2.5,0) circle (3pt) node[below=4pt] {$a$};
+    \draw[deepblue,thick] (1.2,0.38)--(2.5,0.38);
+    \node[align=center] at (1.85,0.75) {same profile\\same prediction};
+    \draw[thick] (4.9,0)--(8.7,0);
+    \fill[pointred] (5.9,0) circle (3pt) node[below=4pt] {$a$};
+    \fill[pointblue] (7.6,0) circle (3pt) node[below=4pt] {$b$};
+    \draw[pointred,thick] (5.55,0.38)--(6.25,0.38);
+    \draw[pointblue,thick] (7.25,0.38)--(7.95,0.38);
+    \node[align=center] at (6.75,0.75) {different profiles\\independent choices};
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.08cm}
+  \KeyBox{The first sample forces repeated evaluations to agree. The second
+  sample lets the class choose two predictions separately.}
+\end{frame}
+
+
+
+% ORIGINAL PDF SLIDE 13: Basic Properties
 \begin{frame}[t]{Basic Properties}
   \vspace{0.01cm}
   For a fixed sample $S$:
@@ -420,7 +482,33 @@
   \KeyBox{These rules let us analyze composite function classes from simpler building blocks.}
 \end{frame}
 
-% 16 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 14: Convexification Does Not Increase Complexity
+% MOTIVATION M03 -- before original PDF page 14: Convexification Does Not Increase Complexity
+\begin{frame}[t]{Mixing Two Predictors}
+  \vspace{0.03cm}
+  \small
+  Fix one sample $S$ and one sign vector $\sigma$.  Suppose two real-valued
+  functions have correlations
+  \[
+    c_1=\frac1m\sum_i\sigma_i g_1(z_i)=0.2,
+    \qquad
+    c_2=\frac1m\sum_i\sigma_i g_2(z_i)=0.6.
+  \]
+  For the mixture $f_\alpha=\alpha g_1+(1-\alpha)g_2$, $0\le\alpha\le1$,
+  \[
+    \frac1m\sum_i\sigma_i f_\alpha(z_i)
+      =\alpha c_1+(1-\alpha)c_2
+      =0.6-0.4\alpha\in[0.2,0.6].
+  \]
+  \vspace{0.02cm}
+  \KeyBox{\centering
+    The best mixture reaches $0.6$, exactly the better endpoint score.
+    We added infinitely many mixtures. Did we gain any ability to fit this
+    noise vector? What happens when we average over all sign vectors?
+  }
+
+\end{frame}
+
 \begin{frame}[t]{Convexification Does Not Increase Complexity}
   \vspace{0.03cm}
   \small
@@ -439,7 +527,7 @@
   \OrangeBox{\footnotesize Convex mixtures can greatly enlarge a class without increasing this complexity; this later helps analyze ensembles.}
 \end{frame}
 
-% 17 --------------------------------------------------------------------------
+
 \begin{frame}[t]{From Hypotheses to Loss Functions}
   \vspace{0.06cm}
   Generalization concerns losses, not predictions directly. Given $\Hc$ and loss $\ell$, define
@@ -458,7 +546,7 @@
   \SourceNote{This loss-class relation is a central specialization in Chapter 3.}
 \end{frame}
 
-% 18 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 16: Rademacher Generalization Bound
 \begin{frame}[t]{Rademacher Generalization Bound}
   \vspace{0.02cm}
   Let $\Gc$ be a family of functions $g:\Z\to[0,1]$. For any $\delta>0$, with probability at least $1-\delta$ over $S\sim\D^m$, every $g\in\Gc$ satisfies
@@ -482,7 +570,7 @@
   \SourceNote{Koltchinskii and Panchenko (2002); theorem presentation follows Chapter 3.}
 \end{frame}
 
-% 19 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 17: How to Read the Bound
 \begin{frame}[t]{How to Read the Bound}
   \vspace{0.10cm}
   \[
@@ -512,7 +600,8 @@
   \end{itemize}
 \end{frame}
 
-% 20 --------------------------------------------------------------------------
+
+
 \begin{frame}[t]{Proof Roadmap}
   \vspace{0.05cm}
   Define the worst one-sided gap
@@ -532,7 +621,7 @@
   \textbf{Uniform deviation} $\Rightarrow$ \textbf{randomized correlation problem}
 \end{frame}
 
-% 21 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 19: Step 1: Bounded Differences
 \begin{frame}[t]{Step 1: Bounded Differences}
   \vspace{0.01cm}
   Let $S$ and $S'$ differ only in the last point. Since $g\in[0,1]$,
@@ -553,7 +642,7 @@
   \KeyBox{The hard part is now to bound the mean $\E_S[\Phi(S)]$.}
 \end{frame}
 
-% 22 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 20: Step 2: Introduce a Ghost Sample
 \begin{frame}[t]{Step 2: Introduce a Ghost Sample}
   \vspace{0.01cm}
   Let $S'=(z_1',\ldots,z_m')\sim\D^m$ be independent of $S$. Then
@@ -570,7 +659,7 @@
   \OrangeBox{We replaced an inaccessible population expectation by a comparison between two finite samples.}
 \end{frame}
 
-% 23 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 21: Step 3: Symmetrize with Random Signs
 \begin{frame}[t]{Step 3: Symmetrize with Random Signs}
   \vspace{0.01cm}
   {\small
@@ -588,7 +677,7 @@
   \end{align*}}
 \end{frame}
 
-% 24 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 22: Finish the Expected-Gap Bound
 \begin{frame}[t]{Finish the Expected-Gap Bound}
   \vspace{0.10cm}
   Because $-\sigma$ has the same distribution as $\sigma$, the two terms are equal:
@@ -606,7 +695,7 @@
   \KeyBox{Symmetrization is the bridge from uniform generalization error to correlation with random noise.}
 \end{frame}
 
-% 25 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 23: From Expected to Empirical Complexity
 \begin{frame}[t]{From Expected to Empirical Complexity}
   \vspace{0.04cm}
   The map $S\mapsto\RadS(\Gc)$ changes by at most $1/m$ when one point is replaced. Therefore, with probability at least $1-\delta/2$,
@@ -625,7 +714,7 @@
   \OrangeBox{The price for a fully observable, data-dependent bound is a slightly larger confidence constant.}
 \end{frame}
 
-% 26 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 24: Binary Classification Corollary
 \begin{frame}[t]{Binary Classification Corollary}
   \vspace{0.01cm}
   Let $\Hc\subseteq\{h:\X\to\pmone\}$. With probability at least $1-\delta$, every $h\in\Hc$ satisfies
@@ -649,7 +738,7 @@
   The factor $1/2$ from zero-one loss cancels the factor $2$ in the general theorem.
 \end{frame}
 
-% 27 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 25: Consequence for Empirical Risk Minimization
 \begin{frame}[t]{Consequence for Empirical Risk Minimization}
   \vspace{-0.02cm}
   {\footnotesize
@@ -672,7 +761,7 @@
   \KeyBox{\footnotesize Uniform convergence turns optimization of training error into a population guarantee.}}
 \end{frame}
 
-% 28 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 26: A Numerical Reading of the Bound
 \begin{frame}[t]{A Numerical Reading of the Bound}
   \vspace{0.01cm}
   Suppose a bounded loss class has
@@ -695,7 +784,7 @@
   \end{itemize}
 \end{frame}
 
-% 29 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 27: Can We Compute $\RadS(\Hc)$?
 \begin{frame}[t]{Can We Compute $\RadS(\Hc)$?}
   \vspace{0.05cm}
   The definition requires
@@ -718,10 +807,64 @@
 
 
 
-% 32 --------------------------------------------------------------------------
-\SectionSlide{Part II: Growth Functions and VC Dimension}
+% ORIGINAL PDF SLIDE 28: Part II: Growth Functions and VC Dimension
+\SectionSlide{Part II: Growth Functions and VC Dimension}{}
 
-% 33 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 29: Restriction of a Class to a Sample
+% MOTIVATION M06 -- before original PDF page 29: Restriction of a Class to a Sample
+\begin{frame}[t]{Many Cutoffs, Five Predictions}
+  \vspace{0.04cm}
+  \small
+
+  A sensor raises an alarm when $x\ge a$. Four observed readings are
+  $1,2,3,4$, and the cutoff $a$ may be any real number.
+  \begin{center}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lcccc}
+    \toprule
+    Cutoff & $x=1$ & $x=2$ & $x=3$ & $x=4$\\
+    \midrule
+    $a\le1$ & 1 & 1 & 1 & 1\\
+    $1<a\le2$ & 0 & 1 & 1 & 1\\
+    $2<a\le3$ & 0 & 0 & 1 & 1\\
+    $3<a\le4$ & 0 & 0 & 0 & 1\\
+    $a>4$ & 0 & 0 & 0 & 0\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Cutoffs $a=2.1$ and $a=2.9$ are different rules but agree on these data.
+  \vspace{0.15cm}
+  \KeyBox{On this sample, infinitely many rules produce only five prediction
+  vectors. What should we count when we measure the class on finite data?}
+
+\end{frame}
+
+% MOTIVATION V03 -- before original PDF page 29: Restriction of a Class to a Sample
+\begin{frame}[t]{ Threshold and Interval Rules}
+  \vspace{0.04cm}\small
+  Two common rules over a one-dimensional measurement have different shapes.
+  \begin{center}
+  \begin{tikzpicture}[x=1.0cm,y=1cm]
+    \node[anchor=west,font=\bfseries] at (0,1.35) {Sensor alarm: one cutoff};
+    \draw[thick,->] (0,1)--(10,1);
+    \foreach \x in {1,3,5,7,9}{\fill[pointblue] (\x,1) circle (2.5pt);}
+    \draw[slideorange,very thick] (5,0.65)--(5,1.35);
+    \node[slideorange,above=2pt] at (5,1.35) {$a$};
+    \node at (2.8,0.45) {0};\node at (7.2,0.45) {1};
+    \node[anchor=west,font=\bfseries] at (0,-0.10) {Biomarker range: one interval};
+    \draw[thick,->] (0,-0.45)--(10,-0.45);
+    \foreach \x in {1,3,5,7,9}{\fill[pointblue] (\x,-0.45) circle (2.5pt);}
+    \draw[pointred,very thick] (3,-0.45)--(7,-0.45);
+    \draw[pointred,very thick] (3,-0.70)--(3,-0.20);
+    \draw[pointred,very thick] (7,-0.70)--(7,-0.20);
+    \node[pointred,below=5pt] at (5,-0.45) {$[a,b]$};
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.04cm}
+  \centering
+  Infinitely many parameter values can produce only finitely many behaviors on the observed points.
+\end{frame}
+
 \begin{frame}[t]{Restriction of a Class to a Sample}
   \vspace{0.04cm}
   For $S_X=(x_1,\ldots,x_m)$, define the set of prediction vectors
@@ -746,7 +889,7 @@
   \end{center}
 \end{frame}
 
-% 34 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 30: Growth Function
 \begin{frame}[t]{Growth Function}
   \vspace{0.04cm}
   For a binary hypothesis set $\Hc$, its growth function is
@@ -767,7 +910,7 @@
   \end{itemize}
 \end{frame}
 
-% 35 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 31: Example: Thresholds on the Real Line
 \begin{frame}[t]{Example: Thresholds on the Real Line}
   \vspace{0.02cm}
   Let
@@ -793,7 +936,7 @@
   \end{center}
 \end{frame}
 
-% 36 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 32: Example: Intervals on the Real Line
 \begin{frame}[t]{Example: Intervals on the Real Line}
   \vspace{0.03cm}
   Let $h_{a,b}(x)=\ind{a\le x\le b}$. On ordered points, the positive labels form one contiguous block.
@@ -813,7 +956,34 @@
   For $m=3$, this gives $7$: every labeling except $101$ is realizable.
 \end{frame}
 
-% 37 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 33: Massart's Lemma
+% MOTIVATION M07 -- before original PDF page 33: Massart's Lemma
+\begin{frame}[t]{101 Vectors, Many Sign Draws}
+  \vspace{0.04cm}
+  \small
+
+  Consider increasing thresholds on $100$ distinct ordered inputs.
+  Encode their predictions as $-1$ and $+1$.
+  \begin{center}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lc}
+    \toprule
+    Quantity & Value\\
+    \midrule
+    Possible real cutoffs & infinitely many\\
+    Distinct prediction vectors & $101$\\
+    Euclidean norm of each prediction vector & $\sqrt{100}=10$\\
+    Possible random sign vectors & $2^{100}\approx1.27\times10^{30}$\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Exact averaging over all sign vectors is impractical even in this example.
+  \vspace{0.15cm}
+  \KeyBox{Can the number of prediction vectors and their Euclidean norms
+  bound their best average correlation with random signs?}
+
+\end{frame}
+
 \begin{frame}[t]{Massart's Lemma}
   \vspace{0.03cm}
   Let $A\subset\mathbb{R}^m$ be finite and let
@@ -837,7 +1007,7 @@
   \SourceNote{Massart (2000); proof route follows the chapter's exponential-moment argument.}
 \end{frame}
 
-% 38 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 34: Massart's Lemma: Exponential-Moment Step
 \begin{frame}[t]{Massart's Lemma: Exponential-Moment Step}
   \vspace{0.01cm}
   {\small
@@ -854,7 +1024,7 @@
   \end{align*}}
 \end{frame}
 
-% 39 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 35: Massart's Lemma: Optimize the Parameter
 \begin{frame}[t]{Massart's Lemma: Optimize the Parameter}
   \vspace{0.03cm}
   Taking logarithms gives
@@ -864,19 +1034,19 @@
   \]
   Choose
   \[
-    \lambda=\frac{\sqrt{2\log\abs{A}}}{r}
+    \lambda=\frac{\sqrt{2\log\abs{A}}}{r}\quad\text{if }r>0,\ \abs{A}>1
   \]
   to balance the terms. Then
   \[
     \E_\sigma\sup_{a\in A}\angles{\sigma,a}
     \le r\sqrt{2\log\abs{A}}.
   \]
-  Dividing by $m$ proves the displayed form.
+  Dividing by $m$ proves the result. If $r=0$ or $\abs{A}=1$, both sides are zero.
   \vspace{0.08cm}
   \KeyBox{A square root of a logarithm emerges from optimizing an exponential-moment bound.}
 \end{frame}
 
-% 40 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 36: Growth Function Bounds Rademacher Complexity
 \begin{frame}[t]{Growth Function Bounds Rademacher Complexity}
   \vspace{0.01cm}
   For binary functions $h:\X\to\pmone$, each evaluation vector has norm $\sqrt m$. On any fixed sample,
@@ -897,7 +1067,7 @@
   \end{beamercolorbox}
 \end{frame}
 
-% 41 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 37: Generalization Bound via Growth Function
 \begin{frame}[t]{Generalization Bound via Growth Function}
   \vspace{0.04cm}
   Combining the binary Rademacher bound with the growth estimate yields: with probability at least $1-\delta$, every $h\in\Hc$ satisfies
@@ -919,10 +1089,73 @@
   \end{itemize}
 \end{frame}
 
-% 42 --------------------------------------------------------------------------
-\SectionSlide{VC Dimension}
+% ORIGINAL PDF SLIDE 38: VC Dimension
+\SectionSlide{VC Dimension}{}
 
-% 43 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 39: Shattering and VC Dimension
+% MOTIVATION M08 -- before original PDF page 39: Shattering and VC Dimension
+\begin{frame}[t]{An Interval Labeling Game}
+  \vspace{0.04cm}
+  \small
+
+  A classifier predicts $1$ inside one interval and $0$ outside. Think of
+  $x$ as a biomarker or dosage level and the interval as a target range.
+  Imagine that someone chooses the labels \emph{after} we place the points.
+  \begin{center}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lll}
+    \toprule
+    Inputs & Labels to fit & Can one interval fit them?\\
+    \midrule
+    $x_1<x_2$ & $00,01,10,11$ & Yes, all four choices\\
+    $x_1<x_2<x_3$ & $010$ & Yes, keep only the middle point\\
+    $x_1<x_2<x_3$ & $101$ & No, an interval cannot skip the middle\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  The labeling $010$ is feasible. Our challenge is to fit
+  \emph{every} labeling of the same points.
+  \vspace{0.20cm}
+  \KeyBox{What is the largest number of points for which our class can win
+  against every possible choice of labels?}
+
+\end{frame}
+
+% MOTIVATION V04 -- before original PDF page 39: Shattering and VC Dimension
+\begin{frame}[t]{Shattering as a Labeling Game}
+  \vspace{0.04cm}\small
+  Place the points first. Then ask whether the class can answer every labeling challenge.
+  \begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.52\textwidth}
+      \textbf{Two points: all four challenges}
+      \begin{center}
+      \begin{tikzpicture}[x=0.82cm,y=0.48cm]
+        \foreach \y/\l in {3.0/00,2.1/01,1.2/10,0.3/11}{
+          \node[anchor=east] at (-0.15,\y) {$\l$};
+          \draw[thick] (0,\y)--(2,\y);
+          \fill[pointblue] (0.6,\y) circle (2.5pt);
+          \fill[pointblue] (1.4,\y) circle (2.5pt);
+        }
+      \end{tikzpicture}
+      \end{center}
+      Every labeling can be realized by a suitable interval.
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \textbf{Three points: one challenge fails}
+      \begin{center}
+      \begin{tikzpicture}[x=0.82cm]
+        \draw[thick] (0,0)--(3,0);
+        \fill[pointred] (0.6,0) circle (3pt) node[above=4pt] {$+$};
+        \fill[pointblue] (1.5,0) circle (3pt) node[above=4pt] {$-$};
+        \fill[pointred] (2.4,0) circle (3pt) node[above=4pt] {$+$};
+        \node[darkred,align=center] at (1.5,-0.75) {$101$ impossible\\for one interval};
+      \end{tikzpicture}
+      \end{center}
+    \end{column}
+  \end{columns}
+  \KeyBox{The largest number of points on which every labeling is possible is the VC dimension.}
+\end{frame}
+
 \begin{frame}[t]{Shattering and VC Dimension}
   \vspace{0.04cm}
   A set $S_X=\{x_1,\ldots,x_m\}$ is \textbf{shattered} by $\Hc$ if
@@ -933,19 +1166,19 @@
   \begin{beamercolorbox}[rounded=true,sep=0.20cm,wd=\linewidth]{block body}
     \[
       \boxed{
-      \vcdim(\Hc)=\max\{m:\PiH(m)=2^m\}.}
+      \vcdim(\Hc)=\sup\{m\ge0:\PiH(m)=2^m\}.}
     \]
   \end{beamercolorbox}
   \vspace{0.15cm}
   \begin{itemize}
     \setlength{\itemsep}{0.10cm}
-    \item It is a purely combinatorial notion for binary-valued classes.
+    \item If arbitrarily large finite sets are shattered, $\vcdim(\Hc)=\infty$.
     \item Infinite cardinality does not imply infinite VC dimension.
     \item Finite VC dimension means complete freedom eventually stops.
   \end{itemize}
 \end{frame}
 
-% 44 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 40: How to Prove a VC-Dimension Claim
 \begin{frame}[t]{How to Prove a VC-Dimension Claim}
   \vspace{0.05cm}
   To show $\vcdim(\Hc)=d$, prove two statements:
@@ -968,7 +1201,7 @@
   A common mistake is to show only that one particular set of $d+1$ points is not shattered.
 \end{frame}
 
-% 45 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 41: VC Dimension of Thresholds: $1$
 \begin{frame}[t]{VC Dimension of Thresholds: $1$}
   \vspace{0.05cm}
   For $h_a(x)=\ind{x\ge a}$:
@@ -991,7 +1224,7 @@
   \end{center}
 \end{frame}
 
-% 46 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 42: VC Dimension of Intervals: $2$
 \begin{frame}[t]{VC Dimension of Intervals: $2$}
   \vspace{0.01cm}
   \textbf{Lower bound.} Any two points can realize all four labelings using an interval: empty, left only, right only, or both.
@@ -1017,7 +1250,7 @@
   \end{center}
 \end{frame}
 
-% 47 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 43: Axis-Aligned Rectangles in $\mathbb{R}^2$: VC Dimension $4$
 \begin{frame}[t]{Axis-Aligned Rectangles in $\mathbb{R}^2$: VC Dimension $4$}
   \vspace{0.01cm}
   \begin{columns}[T,totalwidth=\textwidth]
@@ -1040,9 +1273,9 @@
       \begin{itemize}
         \setlength{\itemsep}{0.10cm}
         \item Lower bound: use left, right, top, and bottom extremes.
-        \item Upper bound: among any five points, one is not an $x$- or $y$-extreme.
-        \item Label that point negative and the four extremes positive.
-        \item A rectangle containing all extremes must contain the fifth point.
+        \item Upper bound: select one point attaining each coordinate minimum or maximum (at most four points).
+        \item Label the selected points positive and one unselected point negative.
+        \item A rectangle containing the selected points must contain the unselected point.
       \end{itemize}}
     \end{column}
   \end{columns}
@@ -1052,7 +1285,8 @@
   \]
 \end{frame}
 
-% 48 --------------------------------------------------------------------------
+
+
 \begin{frame}[t]{Linear Separators in $\mathbb{R}^2$: VC Dimension $3$}
   \vspace{0.01cm}
   \begin{columns}[T,totalwidth=\textwidth]
@@ -1074,7 +1308,7 @@
       \begin{itemize}
         \setlength{\itemsep}{0.10cm}
         \item Four points in convex position admit an XOR labeling that no line separates.
-        \item If one point lies inside the triangle of the other three, label the interior point positive and the outer points negative.
+        \item Otherwise, one point lies in the convex hull of the others (possibly on its boundary). Label that point positive and the others negative.
       \end{itemize}
     \end{column}
   \end{columns}
@@ -1084,7 +1318,7 @@
   \]
 \end{frame}
 
-% 49 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 45: Hyperplanes in $\mathbb{R}^d$: VC Dimension $d+1$
 \begin{frame}[t]{Hyperplanes in $\mathbb{R}^d$: VC Dimension $d+1$}
   \vspace{0.01cm}
   Consider affine classifiers
@@ -1107,12 +1341,12 @@
   The proof is geometric; parameter counting alone is not a general VC-dimension argument.
 \end{frame}
 
-% 50 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 46: Finite and Infinite VC Dimension
 \begin{frame}[t]{Finite and Infinite VC Dimension}
   \vspace{0.01cm}
   \begin{itemize}
     \setlength{\itemsep}{0.10cm}
-    \item Convex polygons with at most $d$ sides have $\vcdim=2d+1$.
+    \item Convex polygons in $\mathbb{R}^2$ with at most $d\ge3$ sides have $\vcdim=2d+1$.
     \item The class of all convex polygons has infinite VC dimension.
   \end{itemize}
   \begin{center}
@@ -1122,22 +1356,44 @@
       \fill[pointblue] ({2.2*cos(\a)},{2.2*sin(\a)}) circle (2.2pt);
     }
     \draw[pointred,very thick] (0:2.2) -- (60:2.2) -- (150:2.2) -- (240:2.2) -- (315:2.2) -- cycle;
-    \node[align=left,text width=5.5cm] at (7.0,0.4) {More allowed sides permit more alternating label patterns on a circle.};
+    \node[align=left,text width=5.5cm] at (7.6,0.4) {More allowed sides permit more alternating label patterns on a circle.};
   \end{tikzpicture}
   \end{center}
   \vspace{0.02cm}
   \OrangeBox{Infinite VC dimension means arbitrarily large finite sets can be shattered; it is stronger than having infinitely many hypotheses.}
 \end{frame}
 
-% 51 --------------------------------------------------------------------------
-
-% 52 --------------------------------------------------------------------------
 
 
-% 53 --------------------------------------------------------------------------
-\SectionSlide{Part III: Sauer's Lemma and Learning Bounds}
+% ORIGINAL PDF SLIDE 48: Sauer's Lemma
+% MOTIVATION M09 -- before original PDF page 48: Sauer's Lemma
+\begin{frame}[t]{Counting Interval Patterns}
+  \vspace{0.04cm}
+  \small
 
-% 54 --------------------------------------------------------------------------
+  Intervals cannot fit $101$ on three ordered inputs. Their positive labels
+  must form one contiguous block, giving $1+m(m+1)/2$ patterns.
+  \begin{center}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{r r r}
+    \toprule
+    Number of inputs $m$ & Interval patterns & All binary patterns $2^m$\\
+    \midrule
+    3 & 7 & 8\\
+    5 & 16 & 32\\
+    10 & 56 & 1,024\\
+    20 & 211 & 1,048,576\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  Missing one pattern on every triple accompanies a large restriction on
+  longer label sequences.
+  \vspace{0.15cm}
+  \KeyBox{If a different class also has VC dimension $2$, must it obey a
+  similar bound even without the geometry of intervals?}
+
+\end{frame}
+
 \begin{frame}[t]{Sauer's Lemma}
   \vspace{0.04cm}
   If $\vcdim(\Hc)=d$, then for every $m\in\mathbb{N}$,
@@ -1153,12 +1409,43 @@
   \begin{itemize}
     \setlength{\itemsep}{0.10cm}
     \item For $m\le d$, the right side equals $2^m$.
-    \item For $m>d$, it is much smaller than $2^m$.
+    \item For fixed $d$, it grows polynomially as $m$ increases.
   \end{itemize}
   \SourceNote{Vapnik--Chervonenkis; Sauer; also independently Shelah.}
 \end{frame}
 
-% 55 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 49: Sauer's Lemma: Proof Setup
+% MOTIVATION M10 -- before original PDF page 49: Sauer's Lemma: Proof Setup
+\begin{frame}[t]{Extending a Prediction Pattern}
+  \vspace{0.04cm}
+  \small
+
+  Increasing thresholds on $x_1<x_2<x_3$ produce
+  \[
+    G=\{000,001,011,111\}.
+  \]
+  Remove the last coordinate and group the remaining prefixes.
+  \begin{center}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{ccc}
+    \toprule
+    Prefix on $(x_1,x_2)$ & Allowed last labels & Full patterns\\
+    \midrule
+    $00$ & $0$ or $1$ & $000,001$\\
+    $01$ & $1$ & $011$\\
+    $11$ & $1$ & $111$\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  There are three prefixes, and one prefix has an extra extension:
+  \[
+    4=3+1.
+  \]
+  \KeyBox{Count each prefix once, then add the prefixes that allow both
+  labels at the last point. This is the split used in Sauer's proof.}
+
+\end{frame}
+
 \begin{frame}[t]{Sauer's Lemma: Proof Setup}
   \vspace{0.01cm}
   Fix $S=\{x_1,\ldots,x_m\}$ on which $\Hc$ realizes the maximum number of patterns, and let
@@ -1179,7 +1466,7 @@
   \end{beamercolorbox}
 \end{frame}
 
-% 56 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 50: Sauer's Lemma: The Key Recurrence
 \begin{frame}[t]{Sauer's Lemma: The Key Recurrence}
   \vspace{0.03cm}
   The two restricted families have smaller parameters:
@@ -1197,7 +1484,7 @@
   \KeyBox{The recurrence mirrors Pascal's identity for binomial coefficients.}
 \end{frame}
 
-% 57 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 51: Sauer's Lemma: Close the Induction
 \begin{frame}[t]{Sauer's Lemma: Close the Induction}
   \vspace{-0.02cm}
   {\small
@@ -1215,7 +1502,7 @@
   \OrangeBox{\small The proof tracks which restrictions can branch into both labels at the final point.}
 \end{frame}
 
-% 58 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 52: Polynomial Growth Consequence
 \begin{frame}[t]{Polynomial Growth Consequence}
   \vspace{0.02cm}
   For $m\ge d\ge1$,
@@ -1238,7 +1525,7 @@
   This is exactly the quantity needed in the growth-function bound.
 \end{frame}
 
-% 59 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 53: The Growth Dichotomy
 \begin{frame}[t]{The Growth Dichotomy}
   \vspace{0.04cm}
   A binary hypothesis class has one of two qualitatively different behaviors:
@@ -1264,10 +1551,10 @@
   There is no intermediate asymptotic regime for the worst-case growth function.
 \end{frame}
 
-% 60 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 54: VC Generalization Bound via Rademacher Complexity
 \begin{frame}[t]{VC Generalization Bound via Rademacher Complexity}
   \vspace{0.02cm}
-  Let $\Hc\subseteq\{h:\X\to\pmone\}$ have VC dimension $d$, with $m\ge d$. Combining Sauer's lemma with the Rademacher bound gives, with probability at least $1-\delta$, for all $h\in\Hc$,
+  Let $\Hc\subseteq\{h:\X\to\pmone\}$ have VC dimension $d$, with $m\ge d\ge1$. Combining Sauer's lemma with the Rademacher bound gives, with probability at least $1-\delta$, for all $h\in\Hc$,
   \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=\linewidth]{block body}
     \[
       \boxed{
@@ -1283,10 +1570,10 @@
   \]
 \end{frame}
 
-% 61 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 55: The Standard VC Bound
 \begin{frame}[t]{The Standard VC Bound}
   \vspace{0.02cm}
-  A direct symmetrization and growth-function argument gives another classical form. With probability at least $1-\delta$, for all $h\in\Hc$,
+  For $m\ge d\ge1$, a direct symmetrization and growth-function argument gives another classical form. With probability at least $1-\delta$, for all $h\in\Hc$,
   \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=\linewidth]{block body}
     \[
       \boxed{
@@ -1305,7 +1592,7 @@
   \SourceNote{Classical Vapnik--Chervonenkis bound, as compared in Chapter 3.}
 \end{frame}
 
-% 62 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 56: Comparing the Two Upper Bounds
 \begin{frame}[t]{Comparing the Two Upper Bounds}
   \vspace{0.01cm}
   {\small
@@ -1327,7 +1614,7 @@
   \KeyBox{\small\raggedright VC dimension controls worst-case capacity; empirical complexity can reveal easier data.\par}
 \end{frame}
 
-% 63 --------------------------------------------------------------------------
+
 \begin{frame}[t]{Sample Complexity from the VC Bound}
   \vspace{-0.04cm}
   {\footnotesize
@@ -1355,7 +1642,7 @@
   \end{itemize}}
 \end{frame}
 
-% 64 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 58: Worked Example: Intervals
 \begin{frame}[t]{Worked Example: Intervals}
   \vspace{0.01cm}
   For intervals on $\mathbb{R}$, $d=2$. Take $m=5000$ and $\delta=0.05$. The Rademacher--VC deviation term is
@@ -1374,32 +1661,62 @@
   \OrangeBox{The theorem is distribution-free and uniform, so it is often conservative compared with test-set estimates.}
 \end{frame}
 
-% 65 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 59: Worked Example: Linear Separators
 \begin{frame}[t]{Worked Example: Linear Separators}
   \vspace{0.01cm}
   Affine halfspaces in $\mathbb{R}^{20}$ have $d=21$. With $m=5000$ and $\delta=0.05$,
   \[
     \sqrt{\frac{2d\log(em/d)}{m}}
     +\sqrt{\frac{\log(1/\delta)}{2m}}
-    \approx 0.251.
+    \approx 0.250.
   \]
   \begin{itemize}
     \setlength{\itemsep}{0.12cm}
-    \item Capacity grows linearly with ambient dimension.
-    \item The bound ignores margin information and observed-sample geometry.
-    \item Margin bounds in the SVM chapter can be much sharper than raw VC dimension.
+    \item Capacity grows linearly with the model dimension.
+    \item The bound is distribution-free, so it possibly ignores margin information and observed-sample geometry.
   \end{itemize}
   \vspace{0.06cm}
   \KeyBox{Capacity measures should match the algorithm and structure one wants to exploit.}
 \end{frame}
 
-% 66 --------------------------------------------------------------------------
-\SectionSlide{Lower Bounds}
+% ORIGINAL PDF SLIDE 60: Lower Bounds
+\SectionSlide{Lower Bounds}{}
 
-% 67 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 61: Lower Bound: Realizable Case
+% MOTIVATION M12 -- before original PDF page 61: Lower Bound: Realizable Case
+\begin{frame}[t]{Unseen Labels}
+  \vspace{0.04cm}
+  \small
+
+  Suppose $\Hc$ shatters four inputs $\{a,b,c,d\}$. Choose a target
+  uniformly from the $16$ possible labelings on these inputs.
+  \begin{center}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lcccc}
+    \toprule
+    Input & $a$ & $b$ & $c$ & $d$\\
+    \midrule
+    Observed in training? & Yes & Yes & No & No\\
+    Observed label & $+$ & $-$ & ? & ?\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  The four possibilities for the unseen pair are
+  \[
+    (y_c,y_d)\in\{(+,+),(+,-),(-,+),(-,-)\}.
+  \]
+  All remain equally likely. Whatever the learner predicts, its expected
+  error on each unseen input is $1/2$ under this random target.
+  \vspace{0.16cm}
+  \KeyBox{Even a perfect fit to observed labels cannot determine unseen
+  labels. Assigning probability mass to rarely seen inputs creates a
+  lower bound that applies to every learning algorithm.}
+
+\end{frame}
+
 \begin{frame}[t]{Lower Bound: Realizable Case}
   \vspace{0.01cm}
-  Let $\Hc$ have VC dimension $d>1$. For any learning algorithm $A$, there exist a distribution $\D$ and target $f\in\Hc$ such that
+  Let $\Hc$ have VC dimension $d>1$ and let $m\ge d$. For any learning algorithm $A$, there exist a distribution $\D$ and target $f\in\Hc$ such that
   \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=\linewidth]{alertblock body}
     \[
       \boxed{
@@ -1417,7 +1734,7 @@
   \SourceNote{Ehrenfeucht, Haussler, Kearns, and Valiant (1988); Chapter 3 lower-bound theorem.}
 \end{frame}
 
-% 68 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 62: Hard Distribution Intuition
 \begin{frame}[t]{Hard Distribution Intuition}
   \vspace{0.01cm}
   Start with $d$ points shattered by $\Hc$:
@@ -1437,44 +1754,9 @@
   \OrangeBox{On an unseen rare point, any algorithm is effectively guessing a fair coin under a random target labeling.}
 \end{frame}
 
-% 69 --------------------------------------------------------------------------
-\begin{frame}[t]{Realizable Lower Bound: Proof Sketch}
-  \vspace{0.01cm}
-  \begin{enumerate}
-    \setlength{\itemsep}{0.12cm}
-    \item Choose rare-point mass so the sample sees at most about half of them with constant probability.
-    \item Average over a uniform random labeling of the shattered points.
-    \item On every unseen rare point, the algorithm's expected error is $1/2$.
-    \item Use the probabilistic method to select one fixed target attaining the average lower bound.
-    \item A Chernoff bound supplies the constant-probability event on the number of observed rare points.
-  \end{enumerate}
-  \vspace{0.06cm}
-  \KeyBox{The argument is information-theoretic and applies even to computationally unlimited learners.}
-\end{frame}
 
-% 70 --------------------------------------------------------------------------
-\begin{frame}[t]{Lower Bound: Non-Realizable Case}
-  \vspace{0.01cm}
-  For $\vcdim(\Hc)=d>1$, any learning algorithm faces a distribution for which
-  \begin{beamercolorbox}[rounded=true,sep=0.18cm,wd=\linewidth]{alertblock body}
-    \[
-      \boxed{
-      \Prb_{S\sim\D^m}\!\left[
-        R_\D(h_S)-\inf_{h\in\Hc}R_\D(h)
-        >\sqrt{\frac{d}{320m}}
-      \right]\ge\frac{1}{64}.}
-    \]
-  \end{beamercolorbox}
-  Hence constant-confidence agnostic learning requires
-  \[
-    \boxed{m=\Omega\!\left(\frac{d}{\eps^2}\right).}
-  \]
-  \vspace{0.04cm}
-  Intuition: each shattered point carries a small unknown label bias; identifying $d$ weak biases is a coin-estimation problem.
-  \SourceNote{Anthony and Bartlett (1999); Chapter 3 non-realizable lower bound.}
-\end{frame}
 
-% 71 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 65: What the Three Complexity Measures Tell Us
 \begin{frame}[t]{What the Three Complexity Measures Tell Us}
   \vspace{0.01cm}
   {\scriptsize
@@ -1500,7 +1782,7 @@
   }
 \end{frame}
 
-% 72 --------------------------------------------------------------------------
+% ORIGINAL PDF SLIDE 66: References and Questions
 \begin{frame}[t]{References and Questions}
   \vspace{0.01cm}
   {\small
