@@ -1,0 +1,33 @@
+% All panels plot the same mean m(x)=100+5x+3x^2 and tangent at x0=5.
+\begingroup
+\pgfplotsset{motivationzoom/.style={width=\linewidth,height=3.45cm,font=\scriptsize,
+ xlabel={$x$ (tonnes/day)},ylabel={$m(x)$ (kWh/day)},
+ grid=major,grid style={black!8},axis line style={black!40},tick style={black!40},
+ scaled ticks=false,tick label style={/pgf/number format/fixed},samples=65}}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.315\textwidth}\centering
+\small $|x-5|\leq 5$\par
+\begin{tikzpicture}\begin{axis}[motivationzoom,xmin=0,xmax=10,ymin=0,ymax=470,xtick={0,5,10},ytick={0,200,400}]
+\addplot[blueplot,very thick,domain=0:10]{100+5*x+3*x*x};
+\addplot[redplot,thick,dashed,domain=0:10]{25+35*x};
+\end{axis}\end{tikzpicture}\par
+\small Max. gap: $75$ kWh
+\end{column}
+\begin{column}{.315\textwidth}\centering\uncover<2->{
+\small $|x-5|\leq 1$\par
+\begin{tikzpicture}\begin{axis}[motivationzoom,xmin=4,xmax=6,ymin=158,ymax=245,xtick={4,5,6},ytick={160,200,240}]
+\addplot[blueplot,very thick,domain=4:6]{100+5*x+3*x*x};
+\addplot[redplot,thick,dashed,domain=4:6]{25+35*x};
+\end{axis}\end{tikzpicture}\par
+\small Max. gap: $3$ kWh}
+\end{column}
+\begin{column}{.315\textwidth}\centering\uncover<3->{
+\small $|x-5|\leq 0.2$\par
+\begin{tikzpicture}\begin{axis}[motivationzoom,xmin=4.8,xmax=5.2,ymin=191,ymax=209,xtick={4.8,5,5.2},ytick={192,200,208}]
+\addplot[blueplot,very thick,domain=4.8:5.2]{100+5*x+3*x*x};
+\addplot[redplot,thick,dashed,domain=4.8:5.2]{25+35*x};
+\end{axis}\end{tikzpicture}\par
+\small Max. gap: $0.12$ kWh}
+\end{column}
+\end{columns}
+\endgroup

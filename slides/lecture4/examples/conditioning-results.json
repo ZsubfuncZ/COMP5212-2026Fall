@@ -1,0 +1,50 @@
+{
+  "condition_number": 10000.0,
+  "perturbed_weights": [
+    5.5,
+    -4.5
+  ],
+  "perturbation_norm": 7.0710678118654755,
+  "binary64": {
+    "epsilon": 1e-08,
+    "gram_diagonal": 1.0,
+    "gram_offdiagonal": 0.9999999999999999,
+    "gram_small_eigenvalue": 1.1102230246251565e-16,
+    "exact_small_eigenvalue": 2.0000000000000002e-16,
+    "coefficient_from_rounded_gram": 90071992.54740992,
+    "exact_coefficient": 50000000.0,
+    "relative_error": 0.8014398509481984
+  },
+  "ridge": [
+    {
+      "lambda_": 0.0,
+      "weights": [
+        5.5,
+        -4.5
+      ],
+      "training_mse": 0.0,
+      "strong_shrink": 1.0,
+      "weak_shrink": 1.0
+    },
+    {
+      "lambda_": 1e-06,
+      "weights": [
+        0.5495044504955495,
+        0.45049454950545054
+      ],
+      "training_mse": 4.901485247024604e-07,
+      "strong_shrink": 0.9999990000010001,
+      "weak_shrink": 0.009900990099009903
+    },
+    {
+      "lambda_": 0.0001,
+      "weights": [
+        0.5004499550044995,
+        0.4994500549945005
+      ],
+      "training_mse": 5.048990151479818e-07,
+      "strong_shrink": 0.9999000099990001,
+      "weak_shrink": 9.999000099990002e-05
+    }
+  ]
+}

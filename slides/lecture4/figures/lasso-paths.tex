@@ -1,0 +1,22 @@
+\begin{minipage}{.48\linewidth}
+\begin{tikzpicture}
+\begin{axis}[width=\linewidth,height=4.45cm,title={Ridge},xmin=0,xmax=2.5,ymin=-.55,ymax=2.15,
+  xlabel={$\lambda$},ylabel={Coefficient},xtick={0,1,2},ytick={0,1,2},
+  ticklabel style={font=\scriptsize},label style={font=\small},grid=major,grid style={gray!15}]
+\addplot[blueplot,very thick,domain=0:2.5,samples=70] {2/(1+x)};
+\addplot[redplot,very thick,domain=0:2.5,samples=70] {.8/(1+x)};
+\addplot[inkplot,very thick,domain=0:2.5,samples=70] {-.35/(1+x)};
+\end{axis}\end{tikzpicture}
+\end{minipage}\hfill
+\begin{minipage}{.48\linewidth}
+\begin{tikzpicture}
+\begin{axis}[width=\linewidth,height=4.45cm,title={Lasso},xmin=0,xmax=2.5,ymin=-.55,ymax=2.15,
+  xlabel={$\lambda$},xtick={0,1,2},ytick={0,1,2},
+  ticklabel style={font=\scriptsize},label style={font=\small},grid=major,grid style={gray!15}]
+\addplot[blueplot,very thick] coordinates {(0,2)(2,0)(2.5,0)};
+\addplot[redplot,very thick] coordinates {(0,.8)(.8,0)(2.5,0)};
+\addplot[inkplot,very thick] coordinates {(0,-.35)(.35,0)(2.5,0)};
+\end{axis}\end{tikzpicture}
+\end{minipage}
+\par\centering\scriptsize
+\textcolor{blueplot}{$w_1$}\qquad\textcolor{redplot}{$w_2$}\qquad\textcolor{inkplot}{$w_3$}

@@ -1,0 +1,10 @@
+\begin{tikzpicture}
+\begin{axis}[width=\linewidth,height=4.3cm,xmin=-3,xmax=3,ymin=-3,ymax=3,
+  axis lines=middle,xlabel={$c$},ylabel={$S(c,1)$},
+  xtick={-2,-1,1,2},ytick={-2,-1,1,2},ticklabel style={font=\scriptsize},
+  label style={font=\small},grid=major,grid style={gray!15}]
+\addplot[gray!60,dashed,domain=-3:3] {x};
+\addplot[blueplot,very thick] coordinates {(-3,-2)(-1,0)(1,0)(3,2)};
+\addplot[only marks,mark=*,redplot,mark size=2.6pt] coordinates {(.6,0)};
+\end{axis}
+\end{tikzpicture}

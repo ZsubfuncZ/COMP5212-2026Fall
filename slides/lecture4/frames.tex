@@ -1,0 +1,1413 @@
+% English linear regression lecture. Exactly five sections.
+% Cover in main.tex; detailed explanations remain in speaker notes.
+
+% Slide 2 | roadmap
+
+% Slide 3 | section-1
+\SectionSlide{Motivation Example}{}
+
+% Slide 4 | motivation-1
+\begin{frame}{Tomorrow's electricity use?}
+\lead{A factory plans to produce $5.5$ tonnes tomorrow.}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.52\textwidth}\centering
+\begin{tikzpicture}[x=.85cm,y=.85cm]
+\useasboundingbox (-.5,-.9) rectangle (7,4.4);
+\path[fill=definitionblue,draw=blueplot,thick] (0,0)--(0,2.4)--(1.4,1.8)--(1.4,2.4)--(2.8,1.8)--(2.8,2.4)--(4.2,1.8)--(4.2,0)--cycle;
+\path[fill=lightplot,draw=blueplot] (3.5,2.1) rectangle (4,3.7);
+\foreach \x in {.4,1.5,2.6}{\path[fill=white,draw=blueplot] (\x,.8) rectangle +(0.7,.65);}
+\path[fill=white,draw=blueplot] (3.45,0) rectangle +(0.5,.9);
+\draw[-{Stealth},thick,black!45] (4.45,1.1)--(5.1,1.1);
+\node[draw=blueplot,rounded corners,fill=white,minimum width=1.6cm,minimum height=1.3cm,align=center] at (6,1.1) {\Large ?\\[-1pt]\small kWh};
+\node[anchor=north,align=center,font=\small] at (2.1,-.25) {Production plan};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.43\textwidth}
+\begin{overlayarea}{\linewidth}{3.4cm}
+\only<1>{\vspace{.65cm}\Large What would you measure?}
+\only<2>{\small\textbf{Past daily records}\par\medskip
+Production + electricity\par\medskip
+Weather + shifts\par\bigskip
+\textbf{Tomorrow's target}\par\medskip
+Electricity use}
+\only<3>{\large Inputs $x$\par\medskip
+$\downarrow$\par\medskip
+Prediction $\widehat y$\par\medskip
+\small Budgeting\quad Energy monitoring}
+\end{overlayarea}
+\end{column}
+\end{columns}
+\end{frame}
+
+% Slide 5 | motivation-2
+\begin{frame}{Tomorrow's electricity use?}
+\lead{Tomorrow: $5.5$ tonnes. Your forecast?}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.59\textwidth}\input{figures/motivation-energy.tex}\end{column}
+\begin{column}{.37\textwidth}
+\begin{overlayarea}{\linewidth}{3.6cm}
+\only<1>{\vspace{.7cm}\Large One number?\par\medskip\small Explain your choice.}
+\only<2>{\textcolor{lightplot}{\textbf{Ignore production}}\par\medskip
+\Large $\overline y=201.2$\par\medskip\small kWh/day\par\bigskip
+Where does this miss?}
+\only<3>{\textcolor{blueplot}{\textbf{Use production}}\par\medskip
+\large $\widehat y=b+wx$\par\medskip
+\Large $\widehat y(5.5)\approx219$\par\medskip\small kWh/day}
+\end{overlayarea}
+\end{column}
+\end{columns}
+\end{frame}
+
+% Slide 6 | motivation-3
+\begin{frame}{But the world is nonlinear}
+\lead{Would one straight line work everywhere?}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.59\textwidth}\input{figures/motivation-global.tex}\end{column}
+\begin{column}{.37\textwidth}
+\begin{overlayarea}{\linewidth}{3.7cm}
+\only<1>{\vspace{.6cm}\large Suppose the true mean looks like this.\par\bigskip
+Reject a linear model?}
+\only<2>{\vspace{.4cm}\large Where do we operate?\par\bigskip
+\small Observed range:\par\medskip
+\large $4\leq x\leq6$}
+\only<3>{\vspace{.3cm}\textcolor{blueplot}{\textbf{Curved mean}}\par\medskip
+\textcolor{redplot}{\textbf{Local tangent}}\par\bigskip
+\large Close here.\par\medskip
+Different elsewhere.}
+\end{overlayarea}
+\end{column}\end{columns}
+\end{frame}
+
+% Slide 7 | motivation-4
+\begin{frame}{Zoom in. What changes?}
+\lead{Same curve. Same tangent. Smaller neighborhoods.}
+\vspace{.15cm}
+\input{figures/motivation-zoom.tex}
+\vspace{.15cm}
+\centering{\scriptsize\textcolor{blueplot}{Solid: mean}\qquad\textcolor{redplot}{Dashed: tangent}\qquad Each panel rescales its axes.}
+\vfill
+\uncover<3->{\begin{takeaway}Useful range depends on curvature, noise, and required accuracy.\end{takeaway}}
+\note{Suggested time: 4 minutes. Build 1: show only the wide-range panel. Ask what students expect if we zoom around x=5, and pause for 10 seconds. Build 2: reveal the middle panel, whose range matches the previous observations. Pause again before asking how large the approximation error now is relative to the several-kWh deviations in the scatterplot. Build 3: reveal the narrow panel. All panels use the same m(x)=100+5x+3x squared and tangent L(x)=25+35x. The exact difference is m(x)-L(x)=3(x-5) squared, so the maximum gaps are 75, 3, and 0.12 kWh on radii 5, 1, and 0.2. Both horizontal and vertical axes are rescaled, and the numerical gaps prevent a misleading purely visual claim. Smaller neighborhoods improve this smooth approximation but may contain fewer samples for estimation. Noise size here is illustrative; do not imply that these finite data determine the population noise variance. The derivative predicts first-order change, not exact equality on a finite interval.}
+\end{frame}
+
+% Slide 8 | motivation-5
+\begin{frame}{Why linear models appear everywhere}
+\lead{What is the first change near an operating point?}
+\begin{overlayarea}{\textwidth}{4.5cm}
+\only<1>{\vspace{1cm}\centering
+\Large $x_0\ \longrightarrow\ x_0+h$\par\bigskip
+\large What happens to $m(x)$?}
+\only<2>{\vspace{.55cm}
+\begin{definitionbox}\[
+\underbrace{m(x_0+h)}_{\text{nearby mean}}
+\ \approx\ \underbrace{m(x_0)}_{\text{level}}
++\underbrace{m'(x_0)}_{\text{slope}}h.
+\]\end{definitionbox}
+\vspace{.45cm}\centering\large Level $+$ sensitivity $\times$ change}
+\only<3>{\vspace{.4cm}
+\begin{definitionbox}\[
+\begin{aligned}
+m(x_0+h)&\approx m(x_0)+\nabla m(x_0)^{\mathsf T}h,\\[4pt]
+&=b+w^{\mathsf T}x,\qquad x=x_0+h.
+\end{aligned}
+\]\end{definitionbox}
+\vspace{.25cm}\centering\small $w=\nabla m(x_0),\qquad b=m(x_0)-w^{\mathsf T}x_0$}
+\end{overlayarea}
+\end{frame}
+
+
+\begin{frame}{Why linear models appear everywhere}
+	Linear relationships arise naturally in many settings.
+	
+	\medskip
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{0.47\textwidth}
+			\centering
+			\textbf{Physical laws}
+			
+			\medskip
+			\begin{tikzpicture}[scale=0.85]
+				\path[use as bounding box]
+				(-0.5,-0.3) rectangle (3.5,2.9);
+				\draw[->] (0,0) -- (3,0) node[right] {$I$};
+				\draw[->] (0,0) -- (0,2.5) node[above] {$V$};
+				\draw[blue,thick] (0,0) -- (2.6,2.1);
+				\node at (1.8,0.6) {$V=RI$};
+			\end{tikzpicture}
+			
+			\par\smallskip
+			{\small
+				Ohm's law: voltage is proportional to current
+				for a fixed resistance.\par
+			}
+		\end{column}
+		\hspace{0.06\textwidth}%
+		\begin{column}{0.47\textwidth}
+			\centering
+			\textbf{Economic models}
+			
+			\medskip
+			\begin{tikzpicture}[scale=0.85]
+				\path[use as bounding box]
+				(-0.5,-0.3) rectangle (3.5,2.9);
+				\draw[->] (0,0) -- (3,0) node[right] {$q$};
+				\draw[->] (0,0) -- (0,2.5) node[above] {$C$};
+				\draw[blue,thick] (0,0.5) -- (2.6,2.1);
+				\node[left] at (0,0.5) {$F$};
+				\node at (1.8,0.5) {$C=F+cq$};
+			\end{tikzpicture}
+			
+			\par\smallskip
+			{\small
+				Total cost is linear in output when
+				marginal cost is constant.\par
+			}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+% Slide 9 | motivation-6
+\begin{frame}{How much complexity do we need?}
+\lead{Unknown curvature. Limited observations. A new prediction task.}
+\begin{overlayarea}{\textwidth}{4.5cm}
+\only<1>{\vspace{.85cm}\centering
+\Large Straight line?\qquad Polynomial?\qquad Neural network?\par\bigskip
+\large What would you try first?}
+\only<2>{\vspace{.65cm}\centering
+\begin{tikzpicture}[every node/.style={align=center,font=\small}]
+\node[fill=definitionblue,rounded corners,minimum width=3.5cm,minimum height=1.5cm] (a) {\textbf{Linear baseline}\\[7pt]Fit quickly};
+\node[fill=definitionblue,rounded corners,minimum width=3.5cm,minimum height=1.5cm,right=1.1cm of a] (b) {\textbf{Held-out data}\\[7pt]Measure error};
+\draw[-{Stealth},thick] (a)--(b);
+\end{tikzpicture}\par\bigskip
+\large A first benchmark, before adding complexity.}
+\only<3>{\vspace{.4cm}\centering
+\begin{tikzpicture}[every node/.style={align=center,font=\small}]
+\node[fill=definitionblue,rounded corners,minimum width=3.4cm,minimum height=1.1cm] (a) {\textbf{Linear baseline}};
+\node[fill=takeawaypeach,rounded corners,minimum width=4.7cm,minimum height=1.1cm,right=1cm of a,yshift=.85cm] (b) {Good enough?\\[4pt]Keep it};
+\node[fill=takeawaypeach,rounded corners,minimum width=4.7cm,minimum height=1.1cm,right=1cm of a,yshift=-.85cm] (c) {Residual structure?\\[4pt]Improve features or model};
+\draw[-{Stealth},thick] (a.east)--(b.west);
+\draw[-{Stealth},thick] (a.east)--(c.west);
+\end{tikzpicture}}
+\end{overlayarea}
+\vfill
+\uncover<2->{\begin{takeaway}An inexpensive starting point; adequacy is an empirical question.\end{takeaway}}
+\note{Suggested time: 3 minutes. Build 1: invite a vote and pause for 15 seconds. Interpret unknown scale broadly: we may not yet know the sample size needed, the relevant input range, the curvature, or how accurate the application requires predictions to be. Build 2: suggest a simple linear baseline because it is comparatively easy to fit, inspect, and compare. This is a modeling heuristic, not a theorem that linear regression is universally optimal or literally always appropriate. Strong prior knowledge, structural constraints, or the target type may point elsewhere immediately. Build 3: reveal the next decision only after asking what evidence would justify more complexity. Evaluate on a validation split matching intended use, inspect residual patterns, and consider interactions, transformed features, regularization, or a different model. A repeated pattern is a diagnostic lead, not proof of a particular mechanism. Reserve a final test set for the end of model selection. Linear models remain useful benchmarks even when a more flexible model eventually wins.}
+\end{frame}
+
+% Slide 10 | section-2
+
+\SectionSlide{Formulation and closed-form derivation}{}
+
+
+% Slide 11 | lsq-10
+\begin{frame}{Linear in the parameters}
+\begin{definitionbox}
+\[
+ f_{\theta}(x)=b+w^{\mathsf T}x \qquad \theta= [b,w]^{\top}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{8pt}
+\item Weights enter linearly in input.
+\item The intercept $b$ is the prediction when every feature is zero.
+\end{itemize}
+\end{frame}
+
+% Slide 12 | lsq-11
+\begin{frame}{What counts as a good fit?}
+\lead{Squared loss gives larger errors more weight}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.55\textwidth}\input{figures/squared.tex}\end{column}
+\begin{column}{0.42\textwidth}\small
+Residual: $e_i=y_i-f_{\theta}(x_i)$.
+\[
+ J(\theta)=\frac{1}{2n}\sum_{i=1}^n e_i^2.
+\]
+\begin{itemize}\setlength{\itemsep}{10pt}
+\item $1/2$ simplifies derivatives.
+\item $1/n$ normalizes sample size.
+\end{itemize}
+\end{column}\end{columns}
+\end{frame}
+
+
+
+
+
+
+% Slide 17 | lsq-20
+\begin{frame}{Build the design matrix first}
+\lead{Rows represent observations; columns represent the features whose effects we fit}
+\begin{definitionbox}
+\[
+X=\begin{bmatrix}
+1&x_{1,1}&\cdots&x_{1,d}\\
+\vdots&\vdots&\ddots&\vdots\\
+1&x_{n,1}&\cdots&x_{n,d}
+\end{bmatrix},\qquad
+\theta=\begin{bmatrix}b\\w\end{bmatrix},\qquad
+y=\begin{bmatrix}y_1\\\vdots\\y_n\end{bmatrix}.
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{9pt}
+\item With $p=d+1$, $X\in\R^{n\times p}$, $\theta\in\R^p$, and $y\in\R^n$; assume $n>0$.
+\item The $i$th row is $\widetilde x_i^{\mathsf T}$ (where $\widetilde x =[1, x^{\top}]^{\top}$), so $(X\theta)_i=\theta^{\mathsf T}\widetilde x_i$.
+\item Predictions and residuals are $\widehat y=X\theta$ and $e=y-X\theta$.
+\end{itemize}
+\end{frame}
+
+% Slide 18 | lsq-21
+\begin{frame}{Expand the quadratic before differentiating}
+\lead{Expose the terms that depend on the parameter vector}
+\begin{definitionbox}
+\[
+\begin{aligned}
+2nJ(\theta)&=(X\theta-y)^{\mathsf T}(X\theta-y),\\
+&=\theta^{\mathsf T}X^{\mathsf T}X\theta
+-\theta^{\mathsf T}X^{\mathsf T}y-y^{\mathsf T}X\theta+y^{\mathsf T}y,\\
+y^{\mathsf T}X\theta&=(y^{\mathsf T}X\theta)^{\mathsf T}
+=\theta^{\mathsf T}X^{\mathsf T}y,\\
+2nJ(\theta)&=\theta^{\mathsf T}X^{\mathsf T}X\theta
+-2\theta^{\mathsf T}X^{\mathsf T}y+y^{\mathsf T}y.
+\end{aligned}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item Both cross terms are the same scalar; a scalar equals its transpose.
+\item $y^{\mathsf T}y$ is constant in $\theta$, while $X^{\mathsf T}X$ is symmetric.
+\end{itemize}
+\end{frame}
+
+% Slide 19 | lsq-22
+\begin{frame}{Derive the gradient using a differential}
+\lead{A small parameter change gives $dr=X\,d\theta$ for $r=X\theta-y$}
+\begin{definitionbox}
+\[
+\begin{aligned}
+dJ&=\frac1{2n}\bigl[(dr)^{\mathsf T}r+r^{\mathsf T}dr\bigr],\\
+&=\frac1n r^{\mathsf T}X\,d\theta
+=\left[\frac1n X^{\mathsf T}(X\theta-y)\right]^{\mathsf T}d\theta,\\
+\nabla J(\theta)&=\frac1n X^{\mathsf T}(X\theta-y).
+\end{aligned}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item Match the coefficient of $d\theta$ with $dJ=(\nabla J)^{\mathsf T}d\theta$.
+\item Component $j$: $\partial J/\partial\theta_j=n^{-1}\sum_i X_{ij}(X\theta-y)_i$.
+\end{itemize}
+\end{frame}
+
+% Slide 20 | lsq-23
+\begin{frame}{Normal equations give a global minimum}
+\lead{A zero gradient is sufficient here because the objective is convex}
+\begin{definitionbox}
+\[
+\begin{aligned}
+\nabla J(\widehat\theta)=0
+&\iff X^{\mathsf T}X\widehat\theta=X^{\mathsf T}y,\\
+H=\nabla^2J&=\frac1nX^{\mathsf T}X,\qquad
+v^{\mathsf T}Hv=\frac1n\lVert Xv\rVert^2\ge0,\\
+J(\widehat\theta+v)-J(\widehat\theta)
+&=\frac1{2n}\lVert Xv\rVert^2\ge0.
+\end{aligned}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{8pt}
+\item Every solution of the normal equations is a global minimizer; rank deficiency may leave multiple solutions.
+\item A minimizer exists: project $y$ onto the closed finite-dimensional space $\Col(X)$ (column space of the design matrix $X$).
+\end{itemize}
+\end{frame}
+
+% Slide 21 | lsq-24
+\begin{frame}{When is the analytic solution unique?}
+\lead{An inverse is justified only after the rank condition is checked}
+\begin{definitionbox}
+\[
+\begin{gathered}
+\rank(X)=p
+\iff Xv\ne0\ \text{for every }v\ne0
+\iff X^{\mathsf T}X\succ0,\\
+X^{\mathsf T}X\widehat\theta=X^{\mathsf T}y
+\quad\Longrightarrow\quad
+\widehat\theta=(X^{\mathsf T}X)^{-1}X^{\mathsf T}y.
+\end{gathered}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{9pt}
+\item Full column rank requires $n\ge p$, but $n\ge p$ alone does not guarantee it.
+\item In code, solve the least-squares problem with QR or SVD; the displayed inverse is an analytic expression.
+\item A full-rank matrix can still be nearly singular and yield unstable coefficients.
+\end{itemize}
+\end{frame}
+
+% Slide 22 | lsq-25
+\begin{frame}{Least squares as a projection}
+\lead{Find the representable prediction $X\theta$ closest to $y$}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.55\textwidth}\input{figures/projection.tex}\end{column}
+\begin{column}{0.42\textwidth}\small
+The projection of black point $y$ lies in $\Col(X)$.
+\[
+\widehat y=P_Xy,\qquad
+X^{\mathsf T}(y-\widehat y)=0.
+\]
+The red residual is orthogonal to every feature column.
+\end{column}\end{columns}
+\vfill
+\begin{takeaway}Two-dimensional example: $X=[1,1]^{\mathsf T}$, $y=[2,0]^{\mathsf T}$, $\widehat y=[1,1]^{\mathsf T}$.\end{takeaway}
+\end{frame}
+
+% Slide 23 | lsq-26
+\begin{frame}{Derive the projection matrix}
+\lead{The fitted vector is a linear transformation of the observed responses}
+\begin{definitionbox}
+\[
+\begin{aligned}
+\widehat y&=X\widehat\theta=Py,
+\qquad P=X(X^{\mathsf T}X)^{-1}X^{\mathsf T},\\
+P^{\mathsf T}&=P,\\
+P^2&=X(X^{\mathsf T}X)^{-1}(X^{\mathsf T}X)
+(X^{\mathsf T}X)^{-1}X^{\mathsf T}=P,\\
+PX&=X,\qquad X^{\mathsf T}(I-P)=0.
+\end{aligned}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item Assume full column rank here. Symmetry and idempotence identify an orthogonal projection.
+\item $P$ preserves vectors in $\Col(X)$ and removes their orthogonal component.
+\end{itemize}
+\end{frame}
+
+% Slide 24 | lsq-27
+\begin{frame}{A Pythagorean proof of the best fit}
+\lead{Every competing prediction adds a perpendicular component of error}
+\begin{definitionbox}
+\[
+\begin{aligned}
+e&=y-\widehat y,\qquad \widehat y=Py,\qquad z\in\Col(X),\\
+y-z&=e+(\widehat y-z),\qquad e^{\mathsf T}(\widehat y-z)=0,\\
+\lVert y-z\rVert^2&=\lVert e\rVert^2+\lVert\widehat y-z\rVert^2
+\ge\lVert e\rVert^2,\\
+\mathbf1\in\Col(X)&\quad\Longrightarrow\quad
+\mathbf1^{\mathsf T}e=0\quad\Longrightarrow\quad
+\overline{\widehat y}=\bar y.
+\end{aligned}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item Equality holds only when the competing fitted vector is $z=\widehat y$.
+\item An included intercept makes residuals sum to zero; it does not make residuals independent of inputs.
+\end{itemize}
+\end{frame}
+
+
+
+\SectionSlide{Ill-conditioning and remedies}{}
+
+
+% Slide 27 | conditioning-28
+\begin{frame}{Unique predictions, unique parameters?}
+\lead{Can the data distinguish different parameter values?}
+\small
+\begin{itemize}\setlength{\itemsep}{10pt}
+\item \textbf{Full column rank.} $X^{\mathsf T}X$ is positive definite; the OLS parameters are unique.
+\item \textbf{Rank deficiency.} There is a $v\ne0$ such that $Xv=0$.
+\item \textbf{Indistinguishable.} $\theta$ and $\theta+v$ make identical training predictions.
+\item \textbf{Choosing a solution.} The pseudoinverse selects the minimum Euclidean norm.
+\end{itemize}
+\vfill
+\begin{takeaway}More features do not automatically add information. Predictions at new inputs may still differ.\end{takeaway}
+\end{frame}
+
+% Slide 28 | conditioning-29
+\begin{frame}{The compact singular value decomposition}
+\lead{SVD decompostion:}
+\begin{definitionbox}
+\[
+ X=U_r\Sigma_r V_r^{\mathsf T},\qquad r=\rank(X),
+ \qquad \Sigma_r=\diag(s_1,\ldots,s_r),
+\]
+\[
+ X\in\R^{n\times p},\quad U_r\in\R^{n\times r},\quad
+ V_r\in\R^{p\times r},\quad s_1\geq\cdots\geq s_r>0.
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item $U_r^{\mathsf T}U_r=V_r^{\mathsf T}V_r=I_r$: the columns are orthonormal.
+\item A parameter direction $v_j$ produces the prediction direction
+      $Xv_j=s_j u_j$.
+\item Small $s_j$: a large coefficient change can produce a small change in the observed predictions.
+\end{itemize}
+\end{frame}
+
+% Slide 29 | conditioning-30
+\begin{frame}{Least squares in singular coordinates}
+\small
+Write $\theta=V_r a+v_0$, where $Xv_0=0$, and let $c_j=u_j^{\mathsf T}y$.
+\begin{definitionbox}
+\[
+ \|X\theta-y\|_2^2
+ =\sum_{j=1}^r(s_j a_j-c_j)^2
+   +\|(I-U_rU_r^{\mathsf T})y\|_2^2.
+\]
+\[
+ \frac{\partial}{\partial a_j}(s_j a_j-c_j)^2
+ =2s_j(s_j a_j-c_j)=0
+ \quad\Longrightarrow\quad \widehat a_j=\frac{c_j}{s_j}.
+\]
+\end{definitionbox}
+\[
+ \widehat\theta_{\min}=\sum_{j=1}^r v_j \cdot\frac{u_j^{\mathsf T}y}{s_j} =\underbrace{V_r\Sigma_r^{-1}U_r^{\mathsf T}}_{X^+}y 
+\]
+\[ X^+ = (X^{\top}X)^{-1}X^{\top} \text{ when } (X^{\top}X) \text{ is invertible}
+\]
+\end{frame}
+
+% Slide 30 | conditioning-31
+\begin{frame}{Rank deficiency and minimum norm}
+\lead{Rank deficiency creates freedom in the coefficients, not in the fitted values}
+\begin{definitionbox}
+\[
+ \underset{\theta}{\argmin}\;\|X\theta-y\|_2^2
+ =\{X^+y+v_0:\;v_0\in\ker(X)\}.
+\]
+\[
+ \|X^+y+v_0\|_2^2=\|X^+y\|_2^2+\|v_0\|_2^2,
+ \qquad \widehat y=XX^+y.
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item $X^+y$ is orthogonal to $\ker(X)$, so $v_0=0$ uniquely minimizes the parameter norm.
+\item Every least-squares minimizer has the same training prediction $\widehat y$.
+\item Example: $X=[1\;1]$, $y=1$. All $(a,1-a)^{\mathsf T}$ fit exactly; the minimum-norm choice is $(1/2,1/2)^{\mathsf T}$.
+\end{itemize}
+\end{frame}
+
+% Slide 31 | conditioning-32
+\begin{frame}{Collinearity destabilizes coefficients}
+\lead{Similar predictions can conceal large coefficient changes}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.55\textwidth}\input{figures/collinearity.tex}\end{column}
+\begin{column}{0.42\textwidth}\small
+\begin{itemize}\setlength{\itemsep}{13pt}
+\item When $x_2\approx x_1$, the data mainly constrain $w_1+w_2$.
+\item Small singular-value directions amplify data noise.
+\item Standardization cannot remove genuine collinearity.
+\end{itemize}
+\end{column}\end{columns}
+\end{frame}
+
+% Slide 32 | conditioning-33
+\begin{frame}{Full rank does not imply stability}
+\lead{Existence and uniqueness are different from sensitivity to perturbations}
+\begin{definitionbox}
+\[
+ \rank(X)=p\quad\Longleftrightarrow\quad s_p>0,
+ \qquad \kappa_2(X)=\frac{s_1}{s_p}.
+\]
+\[
+ \Delta\widehat\theta=X^+\Delta y,
+ \qquad
+ \|\Delta\widehat\theta\|_2\leq\frac{\|\Delta y\|_2}{s_p}
+ \quad\text{when $X$ is fixed.}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item Full rank answers whether the coefficients are uniquely determined in exact arithmetic.
+\item A large condition number signals very different strengths across parameter directions.
+\item Whether sensitivity is unacceptable depends on noise, units, arithmetic precision, and the intended use. There is no universal cutoff.
+\end{itemize}
+\end{frame}
+
+% Slide 33 | conditioning-34
+\begin{frame}{A controlled near-collinear design}
+\lead{Two columns become nearly equal while the matrix remains full rank}
+\small
+Let $q_1,q_2$ be orthonormal. For the concrete two-sample example, use
+$q_1=(1,0)^{\mathsf T}$ and $q_2=(0,1)^{\mathsf T}$. 
+\begin{definitionbox}
+\[
+ X_\epsilon=[q_1+\epsilon q_2\;\;q_1-\epsilon q_2]
+ =\begin{bmatrix}1&1\\\epsilon&-\epsilon\end{bmatrix},
+ \qquad 0<\epsilon\leq1.
+\]
+\[
+ v_+=\frac{1}{\sqrt2}\begin{bmatrix}1\\1\end{bmatrix},\quad
+ v_-=\frac{1}{\sqrt2}\begin{bmatrix}1\\-1\end{bmatrix},\quad
+ X_\epsilon v_+=\sqrt2q_1,\quad X_\epsilon v_-=\sqrt2\epsilon q_2.
+\]
+\end{definitionbox}
+\[
+ s_+=\sqrt2,\qquad s_-=\sqrt2\epsilon,\qquad
+ \kappa_2(X_\epsilon)=\epsilon^{-1}.
+\]
+
+\end{frame}
+
+% Slide 34 | conditioning-35
+\begin{frame}{A tiny response change}
+\lead{Keep the design fixed and perturb only its weak response direction}
+\begin{definitionbox}
+\[
+\begin{gathered}
+ y=q_1,\qquad y'=q_1+\delta q_2,\qquad
+ X_\epsilon\widehat\theta'=y',\\[4pt]
+ \widehat\theta_1'+\widehat\theta_2'=1,\qquad
+ \epsilon(\widehat\theta_1'-\widehat\theta_2')=\delta.
+\end{gathered}
+\]
+\uncover<2->{\[
+ \widehat\theta'=\begin{bmatrix}1/2+\delta/(2\epsilon)\\1/2-\delta/(2\epsilon)\end{bmatrix},
+ \qquad \|\Delta\widehat\theta\|_2=\frac{|\delta|}{\sqrt2\epsilon}.
+\]}
+\end{definitionbox}
+\small
+\uncover<3->{With $\epsilon=10^{-4}$ and $\delta=10^{-3}$:
+\[
+ \begin{bmatrix}0.5\\0.5\end{bmatrix}
+ \longrightarrow
+ \begin{bmatrix}5.5\\-4.5\end{bmatrix},\qquad
+ \|\Delta y\|_2=0.001,\quad\|\Delta\widehat\theta\|_2\approx7.071.
+\]}
+\end{frame}
+
+% Slide 35 | conditioning-36
+\begin{frame}{Which predictions remain stable?}
+\lead{Coefficient error, training prediction error, and future prediction error differ}
+\begin{definitionbox}
+\[
+ \Delta\widehat y=XX^+\Delta y, \qquad  \|XX^+\|_{\mathrm{op}}\leq 1, 
+ \qquad \|\Delta\widehat y\|_2\leq\|\Delta y\|_2.
+\]
+\[
+ \Delta f(x_*)=x_*^{\mathsf T}\Delta\widehat\theta
+ =\sum_{j=1}^r\frac{(x_*^{\mathsf T}v_j)(u_j^{\mathsf T}\Delta y)}{s_j}.
+\]
+\end{definitionbox}
+\small
+For the controlled example, with $\epsilon=10^{-4}$ and $\delta=10^{-3}$:
+{\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Quantity} & \textbf{Change} & \textbf{Reason}\\\midrule
+Training fitted vector & $\delta q_2$ & Norm $0.001$\\
+Future input $x_*=(1,1)^{\mathsf T}$ & $0$ & Uses the coefficient sum\\
+Future input $x_*=(1,-1)^{\mathsf T}$ & $\delta/\epsilon=10$ & Amplifies the weak direction\\\bottomrule
+\end{tabular}
+\par}
+\vfill
+\begin{takeaway}Stable predictions on the observed design do not guarantee stability for a new feature pattern.\end{takeaway}
+\note{Suggested time: 5 minutes. The matrix $XX^+$ is an orthogonal projector, whose Euclidean operator norm is at most one. This explains why the fitted training vector can be insensitive in absolute norm even when the coefficients are highly sensitive. The statement holds for fixed $X$ and response perturbations; it is not a universal guarantee about future data or perturbations of the design. To analyze a future input, insert the singular expansion of the coefficient change and inspect its alignment with the weak right singular directions. In our example, the two future vectors respectively isolate the stable sum and the unstable difference. The second vector departs from the near-equality pattern seen at substantial scale in the training data. It is not outside the algebraic span of this full-rank toy design; the issue is that the difference direction was observed only at tiny magnitude. Discuss how this resembles correlated sensors separating after deployment.}
+\end{frame}
+
+% Slide 36 | conditioning-37
+\begin{frame}{Sampling variance in weak directions}
+\lead{The same singular-value division appears in statistical uncertainty}
+\small
+Fixed $X$ with $\rank(X)=p$: $y=X\theta_*+\xi$, $\E[\xi\mid X]=0$,
+and $\Cov(\xi\mid X)=\sigma^2I$.
+\begin{definitionbox}
+\[
+ \widehat\theta-\theta_*
+ =\sum_{j=1}^p\frac{u_j^{\mathsf T}\xi}{s_j}v_j,
+ \qquad \Cov(\widehat\theta\mid X)
+ =\sigma^2 V\diag(s_j^{-2})V^{\mathsf T}.
+\]
+\[
+ \Var(v_j^{\mathsf T}\widehat\theta\mid X)=\frac{\sigma^2}{s_j^2}.
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{5pt}
+\item Tenfold smaller $s_j$ gives hundredfold larger variance; 
+\end{itemize}
+\end{frame}
+
+
+% Slide 39 | conditioning-40
+\begin{frame}{Numerical rank is a tolerance decision}
+\lead{A tiny positive singular value need not contain usable information}
+\begin{definitionbox}
+\[
+ \mathcal I_\tau=\{j:s_j>\tau s_1\},\qquad
+ \widehat\theta_\tau=\sum_{j\in\mathcal I_\tau}
+       \frac{u_j^{\mathsf T}y}{s_j}v_j,
+ \qquad
+ \widehat y_\tau=\sum_{j\in\mathcal I_\tau}u_j u_j^{\mathsf T}y.
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item Truncated SVD keeps selected singular directions and removes the rest.
+\item A roundoff heuristic is $\tau\sim\max(n,p)u$, where $u$ is unit roundoff. Measurement noise may justify stronger truncation.
+\item Try-and-error in order: inspect feature scales and singular values; check residuals and solver sensitivity; test the intended future prediction task.
+\end{itemize}
+\end{frame}
+
+
+% Slide 41 | conditioning-42
+\begin{frame}{Gradient descent for linear regression}
+
+\small Why is Gradient Descent (GD) not the closed-form solution \( X^+ y \)?  
+The dimension \( p \) can be large, and the data may arrive in a stream.
+
+\small{Quadratic curvature determines step size and convergence}
+\begin{definitionbox}
+\[
+\begin{gathered}
+\theta_{t+1}=\theta_t-\frac{\eta}{n}X^{\mathsf T}(X\theta_t-y),\\
+H=\frac{1}{n}X^{\mathsf T}X,\qquad L=\lambda_{\max}(H),\qquad 0<\eta<\frac{2}{L}.
+\end{gathered}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{8pt}
+\item With full column rank, this step size contracts error in every eigendirection.
+\item The largest curvature limits the stable step size.
+\item The convergence factor is $\max_j\lvert1-\eta\lambda_j\rvert$.
+\end{itemize}
+\vfill
+\begin{takeaway}Derivation: $\theta_{t+1}-\theta^*=(I-\eta H)(\theta_t-\theta^*)$.\end{takeaway}
+\note{Suggested time: 4 minutes. For a quadratic objective this is an exact error recursion, not a local approximation. Along eigenvector \(j\) of the Hessian, the error is multiplied by \(1-\eta\lambda_j\). Contraction in every nonzero-curvature direction requires an absolute value below 1, giving \(0<\eta<\frac{2}{L}\). With full column rank, \(H\) is positive definite and the parameters converge to the unique solution. Under rank deficiency, zero-curvature directions do not contract, and the initial null-space component is retained. Gradient methods are motivated by large samples, sparse data, and online updates; we need not assume that the normal equations are always unusable. Over the full interval \(0<\eta<\frac{2}{L}\), the slowest direction is determined by the largest absolute contraction factor. When \(\eta\) exceeds \(\frac{1}{L}\), the largest-eigenvalue direction can become the bottleneck, so the smallest curvature is not unconditionally the slowest direction.\par\medskip\textbf{Further reading.}
+\begin{itemize}
+\item Tengyu Ma and Andrew Ng, CS229 Lecture Notes, Chapters 1--3 and 8--9. \url{https://cs229.stanford.edu/main_notes.pdf}
+\end{itemize}\par\smallskip\textbf{Web demonstration.} \url{https://regression-lab-graduate-2026.whu38f.chatgpt.site/\#gradient-descent}}
+\end{frame}
+
+% Slide 42 | conditioning-43
+\begin{frame}{Ill-conditioning slows gradient descent}
+\lead{A stable step size can still produce very slow progress}
+\begin{definitionbox}
+\[
+\begin{gathered}
+e_{t+1}=(I-\eta H)e_t,\qquad H=\frac1nX^{\mathsf T}X,\qquad e_t=\theta_t-\widehat\theta,\\
+\eta_* =\frac{2}{L+\mu},\qquad
+q_* =\max_j|1-\eta_*\lambda_j(H)|
+ =\frac{\kappa_H-1}{\kappa_H+1},\\
+\kappa_H=\frac{L}{\mu}=\kappa_2(X)^2,\qquad
+\lVert e_t\rVert_2\le q_*^t\lVert e_0\rVert_2.
+\end{gathered}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{4pt}
+\item Assume full column rank, with $0<\mu=\lambda_{\min}(H)\le L$.
+\item If $\kappa_2(X)=10^3$, then $\kappa_H=10^6$ and $q_*\approx0.999998$.
+\item Diretional rescaling can help improve the efficiency. 
+\end{itemize}
+\end{frame}
+
+% Slide 43 | conditioning-44
+\begin{comment}
+\begin{frame}{Feature scale changes optimization}
+\lead{The same prediction problem can have very different coordinates}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.55\textwidth}\input{figures/scaling.tex}\end{column}
+\begin{column}{0.42\textwidth}\small
+\begin{itemize}\setlength{\itemsep}{13pt}
+\item Different units can create elongated loss contours.
+\item Standardization often makes a fixed step size easier to choose.
+\item Estimate scaling parameters from training data only.
+\end{itemize}
+\end{column}\end{columns}
+\end{frame}
+\end{comment}
+% Slide 44 | remedies
+\begin{frame}{Choose the right remedy}
+\lead{A reliable computation cannot create information that the data do not contain}
+\small\begin{tabularx}{\textwidth}{@{}lYY@{}}\toprule
+\textbf{Problem} & \textbf{Response} & \textbf{What changes?}\\\midrule
+Inconsistent units & Center and scale & Coordinates; OLS fitted space is preserved\\[3pt]
+Avoidable roundoff & QR or SVD solver & Computation of the same LSQ objective\\[3pt]
+Weak input directions & Better measurements or a redesigned sample & Information in the data\\[3pt]
+Unreliable directions & Truncation, Ridge, or Lasso & Model or objective; bias may increase\\\bottomrule
+\end{tabularx}
+\end{frame}
+
+% Slide 45 | section-4
+\SectionSlide{Regularization: Ridge and Lasso}{}
+
+% Slide 46 | ridge-50
+\begin{frame}{Ridge Regression}
+\lead{Constrain parameter directions that the data determine poorly}
+\begin{definitionbox}
+\[
+\begin{aligned}
+J(\theta;\lambda)&=\frac{\lVert X\theta-y\rVert^2}{2n}+\frac{\lambda}{2}\lVert w\rVert^2,\\
+D&=\diag(0,1,\ldots,1),\\
+\widehat\theta&=(X^{\mathsf T}X+n\lambda D)^{-1}X^{\mathsf T}y.
+\end{aligned}
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{7pt}
+\item $\lambda>0$ shrinks slopes; the intercept is unpenalized.
+\item Small singular-value directions receive stronger relative shrinkage.
+\item Select $\lambda$ using validation data.
+\end{itemize}
+\end{frame}
+
+% Slide 47 | ridge-51
+\begin{frame}{Ridge filters singular directions}
+\lead{Derive the exact shrinkage factors}
+\begin{definitionbox}
+\[
+ \min_w\;\frac{\|X\theta-y\|_2^2}{2n}+\frac{\lambda}{2}\|\theta\|_2^2,
+ \qquad X=U_r\diag(s_j)V_r^{\mathsf T}.
+\]
+\[
+ \widehat \theta_\lambda
+ =\sum_{j=1}^r\frac{s_j}{s_j^2+n\lambda}(u_j^{\mathsf T}y_c)v_j,
+ \qquad
+X\widehat \theta_\lambda
+ =\sum_{j=1}^r\underbrace{\frac{s_j^2}{s_j^2+n\lambda}}_{h_j}
+ (u_j^{\mathsf T}y_c)u_j.
+\]
+\end{definitionbox}
+\small
+Model $\theta = \sum_{j} a_j v_j$.
+The scalar normal equation is $(s_j^2+n\lambda)a_j=s_j u_j^{\mathsf T}y_c$.
+For $\lambda>0$, null-space coefficients are zero.
+\end{frame}
+
+
+% Slide 49 | ridge-53
+\begin{frame}{Ridge stabilizes the controlled example}
+\lead{Compare stability and training fit under one controlled perturbation}
+\small
+Return to the \textbf{intercept-free} toy, with $n=2$,
+$\epsilon=10^{-4}$, and $y=q_1+10^{-3}q_2$.
+\begin{definitionbox}
+\[
+ \widehat \theta_{1,\lambda}=\frac{1}{2(1+\lambda)}
+ +\frac{10^{-3}\epsilon}{2(\epsilon^2+\lambda)},\qquad
+ \widehat \theta_{2,\lambda}=\frac{1}{2(1+\lambda)}
+ -\frac{10^{-3}\epsilon}{2(\epsilon^2+\lambda)}.
+\]
+\end{definitionbox}
+\small
+{\centering
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$\lambda$ & $\widehat \theta_1$ & $\widehat \theta_2$ & Training MSE\\\midrule
+$0$ & $5.500000$ & $-4.500000$ & $0$\\
+$10^{-6}$ & $0.549504$ & $0.450495$ & $4.9015\times10^{-7}$\\
+$10^{-4}$ & $0.500450$ & $0.499450$ & $5.0490\times10^{-7}$\\\bottomrule
+\end{tabular}
+\par}
+At $\lambda=10^{-4}$: strong direction $h_+\approx0.9999$;
+weak direction $h_-\approx10^{-4}$.
+\end{frame}
+
+
+
+% Slide 51 | lasso-1
+\begin{frame}{Lasso Regression}
+\lead{Ridge shrinks coefficients; an absolute-value penalty can set them to zero}
+\begin{definitionbox}\[
+\min_{\theta}\;\frac{\|y-X\theta\|_2^2}{2n}+\lambda\|\theta\|_1,
+\qquad \|\theta\|_1=\sum_{j=1}^d|\theta_j|.
+\]\end{definitionbox}
+\small\begin{itemize}\setlength{\itemsep}{9pt}
+\item Assume $n>0$, $\lambda\geq0$; the intercept is unpenalized.
+\item Fit centering and scaling on the training fold only.
+\end{itemize}
+\end{frame}
+
+% Slide 52 | lasso-2
+\begin{frame}{Why do corners encourage zeros?}
+\lead{Where does the smallest loss contour first touch the constraint?}
+\noindent\makebox[\textwidth][c]{\input{figures/lasso-geometry.tex}}\par
+\small\centering Constructed contours; both constraint radii use $t=1.2$.
+\vfill\uncover<2->{\begin{takeaway}The $L_1$ boundary has axis-aligned corners; a contact at a corner gives a zero coefficient.\end{takeaway}}
+\note{Suggested time: 4 minutes. Build 1: show squared-loss contours centered at the unconstrained estimate (2,0.4) and ask students to predict the first point of contact as the contours expand. Wait 15 seconds. Build 2: reveal the contact points. In this isotropic example, the L2 ball projects the estimate radially to approximately (1.1767,0.2353), while projection onto the L1 ball gives (1.2,0). The latter is a corner, hence an exact zero. Both sets have radius parameter 1.2, but they are different constraints and do not produce the same fit. This is constrained geometry: minimizing squared loss subject to a norm bound. Suitable penalty and constraint parameters can describe the same optimum, but t is not lambda and should not be substituted for it. A corner makes sparse optima possible; the statement is not that every Lasso optimum lies at a corner. An optimum can also lie on an edge with several nonzero coefficients.}
+\end{frame}
+
+% Slide 53 | lasso-3
+\begin{frame}{Optimality at a zero coefficient}
+\lead{At a kink, optimality uses a set of possible slopes}
+\begin{definitionbox}\[
+\partial|u|=\begin{cases}\{1\},&u>0,\\[-1pt][-1,1],&u=0,\\[-1pt]\{-1\},&u<0,\end{cases}
+\qquad
+0\in-\frac{X_{j}^{\mathsf T}(y-X\widehat \theta)}{n}
+       +\lambda\partial|\widehat \theta_j|.
+\]\[
+\widehat \theta_j=0\ \Longrightarrow\
+\left|\frac{X_j^{\mathsf T}(y-X\widehat \theta)}{n}\right|\leq\lambda.
+\]\end{definitionbox}
+\small\begin{itemize}\setlength{\itemsep}{9pt}
+\item A nonzero coefficient requires residual correlation $=\lambda\,\mathrm{sign}(\widehat \theta_j)$.
+\item Convexity makes the full set of these conditions sufficient for a global minimum.
+\end{itemize}
+\end{frame}
+
+
+
+% Slide 55 | lasso-5
+\begin{frame}{Deriving a coordinate-descent update}
+\lead{Hold the other coefficients fixed; subtract their current predictions}
+\begin{definitionbox}\[
+r_{-j}=y-\sum_{k\ne j}X_k\theta_k,\qquad
+a_j=\frac{\|X_{j}\|_2^2}{n}>0,\quad c_j=\frac{X_j^{\mathsf T}r_{-j}}{n}.
+\]\[
+\frac{\|r_{-j}-X_j\theta_j\|_2^2}{2n}+\lambda|\theta_j|
+=\frac{a_j}{2}\theta_j^2-c_j\theta_j+\lambda|\theta_j|+\text{constant},
+\]\end{definitionbox}
+\small\begin{itemize}\setlength{\itemsep}{3pt}
+\item With our standardization, $a_j=1$; cycle through all retained columns.
+\item Use warm starts along a decreasing $\lambda$ sequence; stop using an optimality tolerance.
+\end{itemize}
+\end{frame}
+
+% Slide 56 | lasso-6
+\begin{frame}{Ridge and Lasso trace different paths}
+\lead{Constructed normalized orthogonal design: $c=(2,0.8,-0.35)^{\mathsf T}$}
+\begin{overlayarea}{\textwidth}{4.85cm}
+\only<1>{\vspace{1.1cm}\centering\Large Increase $\lambda$ from zero.\par\bigskip
+\large Which coefficients reach exactly zero?}
+\only<2>{\input{figures/lasso-paths.tex}}
+\end{overlayarea}\vfill
+\uncover<2->{\begin{takeaway}Ridge: $\widehat \theta_j=c_j/(1+\lambda)$.\qquad Lasso: $\widehat \theta_j$: no closed form solution.\end{takeaway}}
+\note{Suggested time: 4 minutes. Build 1: ask students to predict the qualitative coefficient paths and pause for 15 seconds. Build 2: reveal two exact analytic examples, not paths estimated from a claimed real dataset. The normalized orthogonal feature design makes both formulas explicit. Ridge divides each nonzero coefficient by one plus lambda and approaches zero continuously without reaching it at a finite penalty in this example. Lasso reaches zero at the coefficient's absolute unpenalized value, so the three knots occur at 0.35, 0.8, and 2. The red and black paths eventually share the horizontal axis; this overlap is intentional. General correlated Lasso paths can enter and leave the active set, so this simple ordering is not a universal rule. The same numerical lambda in the two penalties is not a claim of equal complexity or equal predictive performance. Choose each model's tuning parameter by validation.}
+\end{frame}
+
+
+
+% Slide 58 | lasso-8
+\begin{frame}{Choose a penalty for the modeling task}
+\lead{What tradeoff are we willing to make?}
+\small\begin{tabularx}{\textwidth}{@{}lYY@{}}\toprule
+ & \textbf{Ridge} & \textbf{Lasso}\\\midrule
+Penalty & $\lambda\|\theta\|_2^2/2$ & $\lambda\|\theta\|_1$\\[4pt]
+Typical behavior & Continuous shrinkage & Shrinkage with possible exact zeros\\[4pt]
+Useful preference & Many small effects; stable prediction & A smaller feature set\\[4pt]
+Correlated inputs & Spreads weight across similar columns & Selection can be unstable\\[4pt]
+Tuning & Validation / cross-validation & Validation / cross-validation\\\bottomrule
+\end{tabularx}
+\end{frame}
+
+
+% Slide 60 | section-5
+\SectionSlide{Feature expansion: polynomials and kernels}{}
+% Slide 61 | features-1
+\begin{frame}{Can a linear model bend?}
+\lead{5. Feature expansion \hfill Same fitting machinery. Richer inputs.}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.54\textwidth}\input{figures/feat-curvature.tex}\end{column}
+\begin{column}{.42\textwidth}
+\begin{definitionbox}
+\[
+\widehat y=b+w_1x+w_2x^2+w_3x^3
+\]
+\[
+\phi(x)=\begin{bmatrix}x&x^2&x^3\end{bmatrix}^{\mathsf T}
+\]
+\[
+\widehat y=b+w^{\mathsf T}\phi(x)
+\]
+\end{definitionbox}
+\medskip\large Linear in $w$.\par\medskip
+Curved in $x$.
+\end{column}
+\end{columns}
+\vfill
+\begin{takeaway}Feature design changes the functions we can fit.\end{takeaway}
+\note{Suggested time: 2 minutes. Ask which object must enter linearly for a model to be called linear regression: the raw input or the unknown coefficients? The cubic curve is still linear in its coefficients. The intercept is separate, so the displayed feature vector excludes a constant. The constructed observations use 14 equally spaced x values on [-1,1], a mean 0.7 sin(pi x)+0.25x, and fixed pseudo-random normal deviations with standard deviation 0.16. A cubic least-squares fit is shown. The plot is a teaching example, not a physical law. Any fixed feature map can replace raw inputs in the design matrix; least squares, ridge, and Lasso can all be applied to the resulting columns. Reference for the feature-map viewpoint: Ng and Ma, Stanford CS229 kernel notes, section 1.1, \url{https://cs229.stanford.edu/summer2019/cs229-notes3.pdf}.}
+\end{frame}
+
+% Slide 62 | features-2
+\begin{frame}{How much curvature is useful?}
+\lead{Fourteen training observations. Which degree would you choose?}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.56\textwidth}\input{figures/feat-poly-selection.tex}\end{column}
+\begin{column}{.40\textwidth}
+\begin{overlayarea}{\linewidth}{4.35cm}
+\only<1>{\vspace{.8cm}\Large Degree 1?\par\medskip Degree 3?\par\medskip Degree 12?\par\bigskip\small Make a prediction first.}
+\only<2>{\vspace{.35cm}\textcolor{lightplot}{\textbf{Dashed: degree 1}}\par\medskip
+\textcolor{blueplot}{\textbf{Blue: degree 3}}\par\medskip
+\textcolor{redplot}{\textbf{Red: degree 12}}\par\bigskip
+\large Which one wins on new data?}
+\only<3>{\small\textbf{Separate validation observations}\par\medskip
+\begin{tabular}{@{}rrr@{}}\toprule
+Degree & Train MSE & Val. MSE\\\midrule
+1 & 0.1793 & 0.1455\\
+3 & 0.0300 & \textbf{0.0149}\\
+12 & \textbf{0.0007} & 0.2897\\\bottomrule
+\end{tabular}\par\bigskip
+$\bullet$ Training\quad $\circ$ Validation\par\medskip
+\large Better fit $\neq$ better prediction.}
+\end{overlayarea}
+\end{column}
+\end{columns}
+\vfill
+\uncover<3->{\begin{takeaway}Choose degree and penalty using validation; keep a final test set untouched.\end{takeaway}}
+\note{Suggested time: 4 minutes. Build 1: show only the 14 training observations. Ask students to choose a polynomial degree and justify their choice; wait 15 seconds. Build 2: reveal the three OLS curves fitted to exactly the same training points, without regularization. Ask which will predict new observations best, then wait 15 seconds. Build 3: reveal the 13 separate validation points and their measured MSE. They use x values equally spaced from -0.95 to 0.95 and fresh independent deviations from the same constructed mean. Degree 3 has the lowest validation MSE among these three candidates, while degree 12 has the lowest training MSE. This is one finite constructed split, not a universal ranking. Repeatedly adapting candidates to one small validation set can overfit model selection; reserve a test set for a final assessment. Values are 0.179332/0.145546 for degree 1, 0.030043/0.014866 for degree 3, and 0.000670/0.289744 for degree 12. The monomial fits were solved with an SVD least-squares routine; no normal-equation inverse was formed.}
+\end{frame}
+
+% Slide 63 | features-3
+\begin{frame}{Expansion can bring back ill-conditioning}
+\lead{Same polynomial space. Different coordinates.}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.53\textwidth}\input{figures/feat-conditioning.tex}\end{column}
+\begin{column}{.43\textwidth}
+\textcolor{blueplot}{\textbf{Monomials}}\par
+\small $1,x,x^2,\ldots,x^q$\par\medskip
+\textcolor{redplot}{\textbf{Chebyshev basis}}\par
+\small $T_0(x),T_1(x),\ldots,T_q(x)$\par\bigskip
+\large At degree 12:\par\medskip
+\small $\kappa_2:\quad 18{,}000\ \longrightarrow\ 2.65$\par\bigskip
+Scale the input; solve with QR or SVD.
+\end{column}
+\end{columns}
+\vfill
+\begin{takeaway}A basis change preserves the OLS model space, but generally changes an isotropic ridge penalty.\end{takeaway}
+\note{Suggested time: 3 minutes. The figure computes the 2-norm condition number of the full design, including the constant, at 30 equally spaced inputs on [-1,1]. Degree 12 gives 17968.47 for monomials and 2.65166 for the Chebyshev basis. The basis polynomials satisfy T0=1, T1=x, and Tj=2x T(j-1)-T(j-2). Both full-rank designs span exactly the same degree-at-most-q functions; in exact arithmetic their unregularized least-squares fitted values agree. Better coordinates improve numerical computation, but do not remove statistical uncertainty or justify more degrees. Scale raw input ranges before generating high powers; fit any data-dependent preprocessing on training data only. A general non-orthogonal coordinate change does not preserve the Euclidean norm of coefficients. Therefore equal numeric ridge penalties in monomial and Chebyshev coordinates impose different priors on functions; the displayed comparison concerns OLS conditioning only. Polynomial features in d variables through degree q have binomial(d+q,q) distinct terms, including the constant, so feature counts also grow quickly.}
+\end{frame}
+
+% Slide 64 | features-4
+\begin{frame}{A dot product can hide six features}
+\lead{Two-dimensional inputs: $x=(x_1,x_2)$ and $z=(z_1,z_2)$.}
+\begin{overlayarea}{\textwidth}{4.45cm}
+\only<1>{\vspace{.7cm}\centering
+\Large $k(x,z)=(1+x^{\mathsf T}z)^2$\par\bigskip
+\large Can this be a dot product in another space?}
+\only<2->{
+\begin{definitionbox}\[
+\phi(x)=\bigl[1,\sqrt{2}x_1,\sqrt{2}x_2,x_1^2,\sqrt{2}x_1x_2,x_2^2\bigr]^{\mathsf T}
+\]\end{definitionbox}
+\vspace{.15cm}\centering
+\begin{tikzpicture}[every node/.style={font=\small,align=center}]
+\node[fill=definitionblue,rounded corners,minimum width=2.3cm,minimum height=.9cm] (x) {$x\in\R^2$};
+\node[fill=takeawaypeach,rounded corners,minimum width=3.6cm,minimum height=.9cm,right=1.6cm of x] (p) {$\phi(x)\in\R^6$};
+\draw[-{Stealth},thick] (x)--node[above] {Expand}(p);
+\end{tikzpicture}\par\medskip
+\uncover<3->{\begin{definitionbox}\[
+\phi(x)^{\mathsf T}\phi(z)
+=1+2x^{\mathsf T}z+(x^{\mathsf T}z)^2
+=(1+x^{\mathsf T}z)^2.
+\]\end{definitionbox}}
+}
+\end{overlayarea}
+\end{frame}
+
+% Slide 65 | features-5
+\begin{frame}{Compare points without listing features}
+\lead{The kernel trick: compute $k(x,z)=\langle\phi(x),\phi(z)\rangle$ directly.}
+\vspace{.15cm}\centering
+\begin{tikzpicture}[every node/.style={font=\small,align=center}]
+\node[fill=definitionblue,draw=blueplot,minimum width=5.3cm,minimum height=1.9cm] (p)
+{\textbf{Explicit feature matrix}\\[8pt]$\Phi\in\R^{n\times p}$\\[8pt]Each row lists features};
+\node[fill=takeawaypeach,draw=redplot,minimum width=4.3cm,minimum height=1.9cm,right=1.2cm of p] (k)
+{\textbf{Gram matrix}\\[8pt]$K_{ij}=k(x_i,x_j)$\\[8pt]$K\in\R^{n\times n}$};
+\draw[-{Stealth},thick] (p)--node[above] {$\Phi\Phi^{\mathsf T}$} (k);
+\end{tikzpicture}
+\vspace{.30cm}
+\begin{columns}[t,onlytextwidth]
+\begin{column}{.48\textwidth}\small
+\textbf{100 inputs, degree at most 3}\par\medskip
+$p=\binom{103}{3}=176{,}851$ distinct terms.
+\end{column}
+\begin{column}{.48\textwidth}\small
+\textbf{But the sample size still matters}\par\medskip
+Dense $K$: $O(n^2)$ storage; direct solve: $O(n^3)$.
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{How to solve the kernelized linear regression?}
+	\begin{definitionbox}
+	\[  \min_{\theta} J(\theta) = \frac{1}{2n}\sum_{i=1}^n (\phi_i^{\top}\theta - y)^2 + \frac{1}{2} \cdot \lambda \|\theta\|_2  \]
+\end{definitionbox}
+	\pause
+		\begin{definitionbox}
+	\[ \theta^* =  (  \Phi^{\top}\Phi + \lambda I  )^{-1} \Phi^{\top} y \]
+\end{definitionbox}
+	
+	\pause
+	\vspace{0.1cm}
+	$\phi_i$ can have a high dimension $d$. (what is the size of $\Phi^{\top}\Phi$?)
+	
+	\pause
+	\begin{definitionbox}
+	\[	\theta^* =  (  \Phi^{\top}\Phi + \lambda I_d )^{-1} \Phi^{\top} y  = \Phi^{\top} (\Phi \Phi^{\top} + \lambda I_n)y = \Phi^{\top} (K+ \lambda I_n)y    \]
+	\end{definitionbox}
+	
+
+	
+\end{frame}
+\begin{frame}{How to solve the kernelized linear regression?}
+
+	For new $x$, predict 
+\begin{definitionbox}
+	\[	\phi(x)^{\top}\theta^*  =\phi)(x)^{\top} \Phi^{\top} (K+ \lambda I_n)y  = v^{\top} (K+ \lambda I_n)y  \],
+\end{definitionbox}
+where $v^{\top} = [K(x,x_1), K(x,x_2),\ldots, K(x,x_n)  ].$
+
+\end{frame}
+
+% Slide 70 | features-10
+\begin{frame}{How local is an RBF similarity?}
+\lead{Compare each input to $x=0$. Before fitting any regression coefficients.}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.54\textwidth}\input{figures/feat-rbf-similarity.tex}\end{column}
+\begin{column}{.42\textwidth}
+\begin{overlayarea}{\linewidth}{4.1cm}
+\only<1>{\vspace{.55cm}\large Which point is more similar?\par\bigskip
+$x=0.25$\quad or\quad $x=0.8$\par\bigskip
+\small What should ``nearby'' mean?}
+\only<2>{\vspace{.35cm}\begin{definitionbox}\[
+k_\ell(x,z)=e^{-\|x-z\|^2/(2\ell^2)}
+\]\end{definitionbox}\par\medskip
+\large At distance $\ell$:\par\medskip
+$k=e^{-1/2}\approx0.607$\par\medskip
+\small Predict the effect of increasing $\ell$.}
+\only<3>{\vspace{.35cm}
+\textcolor{redplot}{\textbf{$\ell=0.15$: narrow}}\par\medskip
+\textcolor{blueplot}{\textbf{$\ell=0.40$: intermediate}}\par\medskip
+\textcolor{lightplot}{\textbf{$\ell=1.00$: broad}}\par\medskip
+\large Scale inputs before measuring distance.}
+\end{overlayarea}
+\end{column}
+\end{columns}
+\vfill
+\uncover<3->{\begin{takeaway}The bandwidth sets similarity range; learned coefficients set the prediction.\end{takeaway}}
+\note{Suggested time: 4 minutes. Build 1: show only five input locations and ask which of 0.25 and 0.8 should be more similar to zero; wait 10 seconds. Build 2: reveal the RBF definition and its interpretable distance scale. Ask what happens when ell increases, then pause for a prediction. Build 3: reveal the three curves. At fixed nonzero distance, increasing ell increases similarity, broadening the neighborhood. The horizontal positions of points are their signed offsets from the fixed center zero; vertical zero is just a marker baseline, not a target value. The graph is a kernel section, not a fitted response curve. In kernel ridge, coefficients may be positive or negative, so similarity is not itself the final influence or prediction. For multiple input coordinates, scales determine distances; train-only standardization and a validated bandwidth are part of the model. The RBF has an infinite-dimensional feature representation, but KRR still solves the finite system from the previous slides.}
+\end{frame}
+
+% Slide 71 | features-11
+\begin{frame}{Bandwidth and penalty do different jobs}
+\lead{Same observations. Centered RBF kernel ridge with an unpenalized intercept.}
+\begin{columns}[t,onlytextwidth]
+\begin{column}{.49\textwidth}\centering
+\small\textbf{Change $\ell$; fix $\lambda=0.001$}\par
+\input{figures/feat-rbf-bandwidth.tex}\par
+{\scriptsize\textcolor{redplot}{$\ell=.12$}\quad\textcolor{blueplot}{$\ell=.40$}\quad\textcolor{lightplot}{$\ell=1.00$}}
+\end{column}
+\begin{column}{.49\textwidth}\centering
+\small\textbf{Change $\lambda$; fix $\ell=0.40$}\par
+\input{figures/feat-rbf-penalty.tex}\par
+{\scriptsize\textcolor{redplot}{$\lambda=.0001$}\quad\textcolor{blueplot}{$\lambda=.01$}\quad\textcolor{lightplot}{$\lambda=.30$}}
+\end{column}
+\end{columns}
+\vfill
+\begin{takeaway}Tune bandwidth and penalty together on validation data. They are not interchangeable.\end{takeaway}
+\note{Suggested time: 3 minutes. Both panels use the same 14 training observations and the same centered-kernel prediction formula as earlier. The left panel changes the kernel, hence which functions and norms the model prefers. The right panel keeps the kernel fixed and changes shrinkage within that feature space. For a fixed centered Gram eigenvalue d, the fitted-response filter is d/(d+n lambda); changing the bandwidth changes both eigenvectors and eigenvalues, not simply this scalar denominator. In the left panel the validation MSE for ell=.12,.40,1.00 at lambda=.001 is .03343,.02524,.01685. In the right panel the MSE for lambda=.0001,.01,.30 at ell=.40 is .02561,.02250,.15297. These are measured on the 13 validation observations already shown. Do not pick parameters from visual smoothness alone. A broad kernel combined with a very small penalty may still fit detail; neither ell nor lambda has a universal one-dimensional complexity ranking across arbitrary data and rescaling. The diagrams use constructed data, and no claim of global optimality among all hyperparameters is made.}
+\end{frame}
+
+% Slide 72 | features-12
+\begin{frame}{Beyond the observed range?}
+\lead{Both methods fit inside the blue window. What supports a prediction outside it?}
+\begin{columns}[c,onlytextwidth]
+\begin{column}{.56\textwidth}\input{figures/feat-extrapolation.tex}\end{column}
+\begin{column}{.40\textwidth}\small
+\textcolor{blueplot}{\textbf{Cubic OLS}}\par\medskip
+Powers continue globally.\par\bigskip
+\textcolor{redplot}{\textbf{RBF kernel ridge}}\par\medskip
+Local similarities fade.\par\bigskip
+\large Neither curve supplies evidence about an unseen regime.
+\end{column}
+\end{columns}
+\vfill
+\begin{takeaway}Match validation to the prediction domain. Feature expansion preserves the need for judgment.\end{takeaway}
+\note{Suggested time: 3 minutes. The blue band is the training input range [-1,1]. The two curves show a degree-three OLS fit and RBF KRR with ell=.4 and lambda=.001, each fit only to the same observations in that window. Both curves extend outside it by mathematical convention. The polynomial grows according to its highest-degree terms. For the RBF with an unpenalized intercept, as a new input moves infinitely far from every training input, raw kernel values tend to zero and the prediction tends to the fitted intercept b, which is not necessarily the sample response mean. With the centered formula and sum(alpha)=0, this limit is y_bar-(K1/n) transpose alpha. Do not say that centered RBF predictions always revert to y_bar. The plotted finite window need not have reached that limit. Ask students how they would validate for a factory switching to a much larger production range: an ordinary random split within the old range cannot directly test that new regime. The model and the dataset jointly determine what can be assessed. End with the lab: compare degree, basis, penalty, and bandwidth while keeping the validation split fixed.}
+\end{frame}
+
+% Slide 73 | synthesis
+\begin{frame}{Return to tomorrow's electricity forecast}
+\lead{Choose the model, solver, penalty, and representation for the prediction task}
+\begin{center}\begin{tikzpicture}[font=\small,every node/.style={align=center}]
+\node[fill=definitionblue,rounded corners,minimum width=2.8cm,minimum height=1.0cm] (a) {Operating range\\and data};
+\node[fill=definitionblue,rounded corners,minimum width=2.8cm,minimum height=1.0cm,right=.8cm of a] (b) {Features\\and penalty};
+\node[fill=definitionblue,rounded corners,minimum width=2.8cm,minimum height=1.0cm,right=.8cm of b] (c) {Stable fit\\and validation};
+\draw[-{Stealth},thick] (a)--(b);\draw[-{Stealth},thick] (b)--(c);
+\end{tikzpicture}\end{center}
+\small\begin{itemize}\setlength{\itemsep}{8pt}
+\item Can you derive the LSQ solution and state its rank condition?
+\item Can you distinguish numerical error, sensitivity, and overfitting?
+\item What evidence justifies Ridge, Lasso, polynomial features, or a kernel?
+\end{itemize}\vfill
+\begin{takeaway}Begin with an interpretable benchmark; add complexity when validation supports it.\end{takeaway}
+\note{Suggested time: 5 minutes. Return to the production plan used at the beginning and ask students to outline a complete forecasting procedure. They should specify which inputs are available before the target is observed, how the chronological split matches future deployment, and what baseline will be used. Ask a volunteer to derive the normal equations and another to explain why an invertible Gram matrix can still be a poor computational route. Then ask when shrinkage or a richer representation could improve generalization. A low training error does not answer those questions. Reserve two minutes for individual written answers and three minutes for discussion. The five sections should now form one chain: motivation, formulation, stability, regularization, and representation.}
+\end{frame}
+
+
+
+\begin{frame}[t]{Statistical assumptions}
+	\begin{definitionbox}
+		\[
+		\begin{gathered}
+			y=X \theta^*+\varepsilon,\qquad X\in\R^{n\times p},\qquad \rank(X)=p,\\[5pt]
+			\E[\varepsilon\mid X]=0,\qquad
+			\Cov(\varepsilon\mid X)=\sigma^2 I_n.
+		\end{gathered}
+		\]
+	\end{definitionbox}
+	\small
+	\begin{itemize}\setlength{\itemsep}{.18cm}
+		\item The conditional mean is linear in the chosen features.
+		\item $p$ counts every fitted coefficient, including an intercept.
+		\item For now, condition on $X$ and average over training noise.
+		\item Gaussian noise is unnecessary for the expectation identities.
+	\end{itemize}
+	\vfill
+	\begin{takeaway}Full column rank gives $n\ge p$. Equal noise variance and zero conditional mean are substantive assumptions.\end{takeaway}
+	\note{State these assumptions before writing an inverse. The noise coordinates need not be independent for the next mean and covariance calculations: zero conditional cross-covariances and a common variance suffice. Full rank permits n=p, although an unbiased residual variance estimator later requires n>p. A deterministic intercept column is included in p. The special random Gaussian design result later has a different, explicit no-intercept assumption. The parameter theta-star is fixed across repeated noise draws. General references: Hastie, Tibshirani and Friedman, The Elements of Statistical Learning, Chapters 3 and 7.}
+\end{frame}
+
+
+
+\begin{frame}[t]{Which error are we averaging?}
+	\small\renewcommand{\arraystretch}{1.65}
+	\begin{tabularx}{\textwidth}{@{}lY@{}}
+		\toprule
+		\textbf{Quantity}&\textbf{Squared error for one fitted model}\\
+		\midrule
+		Training error&$\widehat R_{\rm train}=\frac1n\lVert y-X\olshat\rVert^2$\\
+		Parameter error&$\lVert\olserr\rVert^2$\\
+		Mean prediction error at $X$&$\mathcal E_X=\frac1n\lVert X\olshat-X\olsstar\rVert^2$\\
+		Fresh-response error at $X$&$\frac1n\lVert y'-X\olshat\rVert^2$, with independent new noise\\
+		\bottomrule
+	\end{tabularx}
+	\vfill
+	\begin{takeaway}Predicting the true mean and predicting a noisy response differ by irreducible noise.\end{takeaway}
+	\note{Read each target aloud. Training error compares the fit with the responses that produced the fit. Mean prediction error compares the fit with the unobserved true means. Fresh-response error uses y-prime=X theta-star+epsilon-prime at the same rows, with a new zero-mean noise vector independent of the training noise conditional on X and covariance sigma-squared I. Parameter error depends on feature units. Every displayed squared error uses the full square, without a factor of one half: the previous optimization objective J is training MSE divided by two. New random input locations appear later.}
+\end{frame}
+
+
+
+
+\begin{frame}[t]{OLS estimation error}
+	\lead{Substitute the data-generating model into the closed-form solution}
+	\begin{definitionbox}
+		\[
+		\begin{aligned}
+			\olshat&=(X^{\mathsf T}X)^{-1}X^{\mathsf T}y\\[5pt]
+			&=(X^{\mathsf T}X)^{-1}X^{\mathsf T}(X\olsstar+\varepsilon)\\[5pt]
+			&=\olsstar+(X^{\mathsf T}X)^{-1}X^{\mathsf T}\varepsilon.
+		\end{aligned}
+		\]
+	\end{definitionbox}
+	\uncover<2->{\[
+		\boxed{\olserr=A\varepsilon},\qquad
+		A=(X^{\mathsf T}X)^{-1}X^{\mathsf T}\in\R^{p\times n}.
+		\]}
+		
+		The OLS estimator is unbiased: $\mathbb{E}[\hat{\theta}] = \theta^*$.
+\end{frame}
+
+% 05
+\begin{frame}[t]{Unbiasedness and covariance}
+	\begin{definitionbox}
+		\[
+		\begin{aligned}
+			\E[\olshat\mid X]
+			&=\olsstar+A\E[\varepsilon\mid X]=\olsstar,\\[7pt]
+			\Cov(\olshat\mid X)
+			&=A\Cov(\varepsilon\mid X)A^{\mathsf T}\\[4pt]
+			&=\sigma^2(X^{\mathsf T}X)^{-1}X^{\mathsf T}X(X^{\mathsf T}X)^{-1}\\[4pt]
+			&=\boxed{\sigma^2(X^{\mathsf T}X)^{-1}}.
+		\end{aligned}
+		\]
+	\end{definitionbox}
+	\vfill
+	\begin{takeaway}OLS is centered at the true parameter. Its variance can still be large.\end{takeaway}
+	\note{Unbiasedness concerns an average over hypothetical repeated datasets with the same inputs. It does not imply that a particular fit is accurate. Check the p by p covariance dimensions. The sandwich formula A Omega A-transpose remains valid under a general conditional noise covariance Omega; replacing it with sigma-squared times the inverse Gram matrix then requires the stated homoskedastic, uncorrelated-noise assumption.}
+\end{frame}
+
+% 06
+\begin{frame}[t]{Expected squared parameter error}
+	\lead{For any random vector $z$, $\E\lVert z\rVert^2=\lVert\E z\rVert^2+\olstr(\Cov(z))$}
+	\begin{definitionbox}
+		\[
+		\begin{aligned}
+			\E[\lVert\olserr\rVert^2\mid X]
+			&=\underbrace{\lVert\E[\olshat\mid X]-\olsstar\rVert^2}_{0}
+			+\olstr\!\left(\Cov(\olshat\mid X)\right)\\[7pt]
+			&=\sigma^2\olstr\!\left((X^{\mathsf T}X)^{-1}\right)\\[7pt]
+			&=\boxed{\sigma^2\sum_{j=1}^{p}\frac1{s_j^2}},\qquad s_j>0.
+		\end{aligned}
+		\]
+	\end{definitionbox}
+	\small Here $s_j$ are the singular values of $X$.
+	\note{For the trace identity, write the squared norm as trace of zz-transpose and use linearity of expectation, then decompose the second moment into covariance plus the outer product of the mean. In the last line, X-transpose X has eigenvalues s-j squared. This is coefficient error in the chosen coordinate system; rescaling features changes its numerical value. The condition number alone does not determine the error, because the absolute singular-value scale also matters.}
+\end{frame}
+
+% 07
+\begin{frame}[t]{Ill-conditioning and statistical error}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{.59\textwidth}\olsfig{spectrum}\end{column}
+		\begin{column}{.38\textwidth}\small
+			For $X=USV^{\mathsf T}$,
+			\[
+			\Var(v_j^{\mathsf T}\olshat\mid X)=\frac{\sigma^2}{s_j^2}.
+			\]
+			\vspace{.15cm}
+			\olsprompt{Which direction dominates?}
+			\uncover<2->{\par\vspace{.2cm}
+				With $\sigma^2=1$,
+				\[\E\lVert\olserr\rVert^2
+				\approx 101.12.\]
+				The weakest direction contributes $100$.}
+		\end{column}
+	\end{columns}
+	\vfill
+	\begin{takeaway}QR and SVD improve numerical computation. Weakly observed directions still have statistical uncertainty.\end{takeaway}
+	\note{All expectations here condition on the displayed design spectrum. The four variance contributions are 0.01, 1/9, 1, and 100, totaling 101.121111. Ask for the dominant direction before revealing the total. This connects the earlier ill-conditioning lecture to sampling uncertainty in exact arithmetic. Ridge can reduce variance along these directions by accepting bias, while additional informative observations can increase the weak singular values. Rescaling can improve numerical units without creating information.}
+\end{frame}
+
+% 08
+\begin{frame}[t]{Prediction error at one input}
+	\lead{Let $x_0\in\R^p$ be a fixed feature vector, including an intercept if used}
+	\begin{definitionbox}
+		\[
+		\begin{aligned}
+			\E[(x_0^{\mathsf T}\olshat-x_0^{\mathsf T}\olsstar)^2\mid X]
+			&=x_0^{\mathsf T}\Cov(\olshat\mid X)x_0\\[6pt]
+			&=\boxed{\sigma^2x_0^{\mathsf T}(X^{\mathsf T}X)^{-1}x_0}.
+		\end{aligned}
+		\]
+	\end{definitionbox}
+	\uncover<2->{\small For a fresh response $y_0=x_0^{\mathsf T}\olsstar+\varepsilon_0$,
+		\[
+		\E[(y_0-x_0^{\mathsf T}\olshat)^2\mid X]
+		=\underbrace{\sigma^2}_{\text{new response noise}}
+		+\underbrace{\sigma^2x_0^{\mathsf T}(X^{\mathsf T}X)^{-1}x_0}_{\text{estimation error}}.
+		\]}
+	\note{The first display averages over the training noise only. In the second, also average over epsilon-zero, which is independent of the training noise, has mean zero, and variance sigma-squared. The cross term vanishes. For a fixed x-zero, the quadratic form is a leverage-like measure of how well that feature direction is supported by the observed design. Large coefficient variance need not imply equally large prediction variance at every input.}
+\end{frame}
+% 10
+
+
+
+
+
+% 15
+\begin{frame}[t]{Prediction at new random inputs}
+	\lead{The test pair $(x_0,\varepsilon_0)$ is independent of the training sample. Let $Q=\E[x_0x_0^{\mathsf T}]$}
+	\begin{definitionbox}
+		\[
+		\begin{aligned}
+			R(\theta)&=\E_{x_0,\varepsilon_0}[(y_0-x_0^{\mathsf T}\theta)^2],\\[5pt]
+			y_0&=x_0^{\mathsf T}\olsstar+\varepsilon_0,
+			\quad \E[\varepsilon_0\mid x_0]=0,
+			\quad \E[\varepsilon_0^2\mid x_0]=\sigma^2,\\[5pt]
+			R(\theta)-R(\olsstar)
+			&=(\theta-\olsstar)^{\mathsf T}Q(\theta-\olsstar),
+			\quad R(\olsstar)=\sigma^2.
+		\end{aligned}
+		\]
+	\end{definitionbox}
+	\small For a realized $\olshat$, $R(\olshat)$ averages over a new test example.
+	\vfill
+	\begin{takeaway}$Q$ is a second-moment matrix. It equals a covariance matrix only when the feature mean is zero.\end{takeaway}
+	\note{First define R at a deterministic theta. After training, substitute the realized theta-hat: the remaining expectation in the definition still averages only over the test example. The next slide also averages over training noise. A constant intercept coordinate makes the feature vector nonzero-mean, so calling Q a covariance matrix would be incorrect. Finite second moments are required. The test model must share the same theta-star for this expression; a change in the true relationship adds further terms.}
+\end{frame}
+
+% 16
+\begin{frame}[t]{Expected excess prediction risk}
+	\lead{Average the population risk over the noise that produced $\olshat$}
+	\begin{definitionbox}
+		\[
+		\begin{aligned}
+			\E[R(\olshat)-R(\olsstar)\mid X]
+			&=\E[(\olserr)^{\mathsf T}Q(\olserr)\mid X]\\[5pt]
+			&=\olstr\!\left(Q\Cov(\olshat\mid X)\right)\\[5pt]
+			&=\boxed{\sigma^2\olstr\!\left(Q(X^{\mathsf T}X)^{-1}\right)}.
+		\end{aligned}
+		\]
+	\end{definitionbox}
+	\uncover<2->{\small If test inputs are uniform over the rows of $X$, their conditional second moment is $X^{\mathsf T}X/n$, recovering $\sigma^2p/n$.}
+	\vfill
+	\begin{takeaway}Error depends on how the test-input directions align with the directions learned from the training design.\end{takeaway}
+	\note{Use trace(Q zz-transpose) for the quadratic form and the zero conditional mean of the estimation error. The initial result assumes an independent test-input distribution with fixed second moment Q. The empirical-input example on the reveal is a separate conditional evaluation rule: sample a row index uniformly given X, so Q becomes Q-X=X-transpose X/n. Add sigma-squared to the displayed excess risk to obtain total response prediction risk. This is an exact conditional identity under the assumptions, not yet a distribution-free generalization guarantee.}
+\end{frame}
+
+% 17
+\begin{frame}[t]{An expected generalization bound}
+	\lead{A lower bound on the design eigenvalues gives a usable upper bound on risk}
+	\begin{definitionbox}
+		\[
+		\begin{gathered}
+			\widehat G=\frac1nX^{\mathsf T}X,\qquad
+			\lambda_{\min}(\widehat G)\ge a>0,\\[6pt]
+			\E[R(\olshat)-R(\olsstar)\mid X]
+			=\frac{\sigma^2}{n}\olstr(Q\widehat G^{-1})
+			\le \boxed{\frac{\sigma^2\olstr(Q)}{na}}.
+		\end{gathered}
+		\]
+	\end{definitionbox}
+	\small If $Q=I_p$, the bound becomes $\sigma^2p/(na)$.\par
+	\vspace{.15cm}
+	\uncover<2->{\olsprompt{When does an $O(p/n)$ statement become informative?}\par
+		\small When the design remains well supported: $a$ stays away from zero.}
+	\note{Since G-hat is at least a times the identity in positive-semidefinite order, its inverse is at most the identity divided by a. Multiplying within a trace by positive-semidefinite Q preserves the scalar inequality. This is a conditional bound in expectation over training noise. If X is random, a claim that its minimum eigenvalue exceeds a with high probability needs a separate design-distribution assumption and concentration argument. Do not silently replace this condition with n greater than p. In isotropic feature units Q=I, the bound shows the p/n scale and its dependence on a.}
+\end{frame}
+
+
+
+% 19
+\begin{frame}[t]{Learning curve under Gaussian inputs}
+	\begin{columns}[T,onlytextwidth]
+		\begin{column}{.59\textwidth}\olsfig{random-design}\end{column}
+		\begin{column}{.38\textwidth}\small
+			$p=10$, Gaussian inputs, no intercept.\par\medskip
+			\renewcommand{\arraystretch}{1.4}
+			\begin{tabular}{@{}rr@{}}
+				\toprule $n$&Excess risk$/\sigma^2$\\\midrule
+				$20$&$10/9\approx1.111$\\
+				$50$&$10/39\approx0.256$\\
+				$100$&$10/89\approx0.112$\\\bottomrule
+			\end{tabular}\par
+			\vspace{.3cm}
+			\olsprompt{How many samples are enough?}\par
+			Both $p$ and the tolerated error matter.
+		\end{column}
+	\end{columns}
+\end{frame}
+
+
+\begin{frame}{Regression Evaluation Metrics}
+	\small
+	\begin{itemize}
+		\setlength{\itemsep}{0.8em}
+		
+		\item  $
+		\mathrm{MAE}=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|$		
+		\item $
+		\mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2$
+		
+		\item 
+		$
+		\mathrm{RMSE}=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}
+		$
+		
+		\item
+		$
+		R^2=1-\frac{\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}
+		{\sum_{i=1}^{n}(y_i-\bar{y})^2}
+		$
+		
+		\item 
+		$
+		R_{\mathrm{adj}}^2=1-(1-R^2)\frac{n-1}{n-p}
+		$
+		
+		\item
+		$
+		\mathrm{MAPE}=\frac{100\%}{n}\sum_{i=1}^{n}
+		\left|\frac{y_i-\hat{y}_i}{y_i}\right|
+		$
+	\end{itemize}
+\end{frame}
+% 20

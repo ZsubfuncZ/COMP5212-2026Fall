@@ -1,0 +1,75 @@
+% Compile with: latexmk -pdf main.tex
+% All text, mathematics, tables, and plots are editable LaTeX source.
+\documentclass[t,aspectratio=169,11pt]{beamer}
+\input{theme.tex}
+
+\newcommand{\olsstar}{\theta^{\star}}
+\newcommand{\olshat}{\widehat\theta}
+\newcommand{\olserr}{\widehat\theta-\theta^{\star}}
+\newcommand{\olstr}{\operatorname{tr}}
+\newcommand{\olsfigpath}{figures/}
+\newcommand{\olsfig}[1]{\input{\olsfigpath#1.tex}}
+\newcommand{\olsprompt}[1]{\textcolor{titlered}{\textbf{#1}}}
+
+
+\title{Linear Regression}
+\author{Zihan Zhang}
+\institute{COMP 5212: Machine Learning}
+\date{}
+\hypersetup{
+  pdftitle={Linear Regression},
+  pdfauthor={Zihan Zhang},
+  pdfsubject={Graduate Machine Learning: COMP 5212},
+  pdfkeywords={linear regression, least squares, conditioning, ridge, lasso, polynomial features, kernels}
+}
+\newcommand{\SectionSlide}[2]{%
+	\begin{frame}
+		\centering
+		\vfill
+		{\color{slideorange}\fontsize{29}{34}\selectfont\bfseries #1\par}
+		\vspace{0.38cm}
+		{\color{midgray}\fontsize{16}{21}\selectfont #2\par}
+		\vfill
+	\end{frame}
+}
+
+\definecolor{slideorange}{HTML}{D62B09}
+\definecolor{midgray}{HTML}{666666}
+% Uncomment to include each slide with its speaker notes on a second screen.
+% \setbeameroption{show notes on second screen=right}
+
+\begin{document}
+\begin{frame}
+  \vspace{0.05cm}
+  \hspace{-0.38cm}\includegraphics[width=5.65cm]{assets/hkust-logo.png}
+  \vspace{-0.15cm}
+  \begin{center}
+    {\fontsize{29}{35}\selectfont COMP 5212\par}
+    \vspace{0.30cm}
+    {\fontsize{32}{38}\selectfont Machine Learning\par}
+    \vspace{0.35cm}
+    {\fontsize{17}{21}\selectfont Instructor: Zihan Zhang\par}
+    \vspace{0.25cm}
+    {\fontsize{14}{18}\selectfont Lecture 4: Linear Regression\par}
+    \vspace{0.12cm}
+   
+  \end{center}
+\end{frame}
+
+\begin{frame}[t]{Learning Goals}
+	\vspace{0.03cm}
+	{\fontsize{13.2}{16.2}\selectfont
+		By the end of this lecture, you should be able to:
+		\begin{itemize}
+			\setlength{\itemsep}{0.18cm}
+			\item formulate linear regression and justify the squared-error loss;
+			\item derive and apply the ordinary least squares (OLS) solution;
+			\item explain and compare Ridge and Lasso regularization;
+			\item use polynomial features and kernels to model nonlinear relationships;
+			\item interpret an OLS generalization bound and explain its assumptions.
+		\end{itemize}
+	}
+\end{frame}
+
+\input{frames.tex}
+\end{document}

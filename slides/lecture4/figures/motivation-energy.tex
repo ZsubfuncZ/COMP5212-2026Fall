@@ -1,0 +1,18 @@
+% Constructed daily production/electricity observations; stages hide both answers.
+\begin{tikzpicture}
+\begin{axis}[width=\linewidth,height=4.65cm,font=\scriptsize,
+ xmin=3.8,xmax=6.2,ymin=150,ymax=250,xtick={4,4.5,5,5.5,6},ytick={160,180,200,220,240},
+ xlabel={Production (tonnes/day)},ylabel={Electricity (kWh/day)},
+ grid=major,grid style={black!8},axis line style={black!40},tick style={black!40},
+ scaled ticks=false,clip=true]
+\addplot[only marks,mark=*,mark size=2pt,black!75] coordinates {
+ (4.0,164.00) (4.2,178.92) (4.4,174.08) (4.6,189.48) (4.8,191.12)
+ (5.0,206.00) (5.2,204.12) (5.4,218.48) (5.6,217.08) (5.8,231.92) (6.0,238.00)};
+\only<2->{\addplot[lightplot,densely dashed,very thick,domain=3.8:6.2]{201.2};}
+\only<3->{
+ \addplot[blueplot,very thick,domain=3.8:6.2]{23.4727272727+35.5454545455*x};
+ \draw[redplot,densely dashed] (axis cs:5.5,150)--(axis cs:5.5,218.9727272727);
+ \addplot[only marks,mark=*,mark size=3pt,redplot] coordinates {(5.5,218.9727272727)};
+}
+\end{axis}
+\end{tikzpicture}

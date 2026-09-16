@@ -1,0 +1,25 @@
+% Constructed isotropic squared-loss contours centered at (2,0.4).
+\begin{tikzpicture}[x=1.12cm,y=1.12cm,font=\small]
+\path[use as bounding box] (-1.7,-1.85) rectangle (9.1,2.05);
+\foreach \shift/\lab in {0/Ridge,5.9/Lasso}{
+  \begin{scope}[shift={(\shift,0)}]
+  \draw[-{Stealth},gray!65] (-1.5,0)--(3.05,0) node[right,text=black] {$\theta_1$};
+  \draw[-{Stealth},gray!65] (0,-1.4)--(0,1.6);
+  \node[text=black,anchor=east] at (-.08,1.43) {$\theta_2$};
+  \node[font=\bfseries] at (.6,1.92) {\lab};
+  \foreach \r in {.55,.894427,1.2}{\draw[redplot!55] (2,.4) circle[radius=\r];}
+  \fill[redplot] (2,.4) circle[radius=.055];
+  \node[above right,font=\footnotesize] at (2,.4) {OLS};
+  \end{scope}
+}
+\draw[blueplot,very thick] (0,0) circle[radius=1.2];
+\draw[blueplot,very thick] (7.1,0)--(5.9,1.2)--(4.7,0)--(5.9,-1.2)--cycle;
+\node at (.6,-1.63) {$\|\theta\|_2\leq t$};
+\node at (6.5,-1.63) {$\|\theta\|_1\leq t$};
+\only<2->{
+  \draw[redplot,thick] (2,.4) circle[radius=.839608];
+  \fill[black] (1.176697,.235339) circle[radius=.085];
+  \fill[black] (7.1,0) circle[radius=.085];
+  \node[below right,font=\footnotesize] at (7.1,0) {$\widehat \theta_2=0$};
+}
+\end{tikzpicture}

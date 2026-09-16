@@ -1,0 +1,44 @@
+% Generated from work/deck/chart-data-en.mjs; numeric data preserved.
+% Input in a column; rocpr is intended for full frame width.
+\begingroup
+\definecolor{blueplot}{HTML}{4E79A7}
+\definecolor{redplot}{HTML}{D95F59}
+\definecolor{inkplot}{HTML}{111111}
+\definecolor{lightplot}{HTML}{8FB8DA}
+\begin{tikzpicture}
+\begin{axis}[
+width=4.65cm,
+height=4.65cm,
+font=\scriptsize,
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+axis line style={black!45},
+tick style={black!45},
+grid=major,
+grid style={black!10},
+xmin=-0.5,
+xmax=2.5,
+ymin=-0.5,
+ymax=2.5,
+xlabel={Sample 1 coordinate},
+ylabel={Sample 2 coordinate},
+scaled ticks=false,
+tick label style={/pgf/number format/fixed},
+clip=true,
+unbounded coords=jump,
+legend style={font=\scriptsize,draw=none,fill=none,at={(0.5,-0.29)},anchor=north,legend cell align=left,column sep=0.12cm,row sep=0.03cm},
+legend columns=2,
+axis equal image,
+xtick={0,1,2},
+ytick={0,1,2}
+]
+\addplot+[no marks,draw=lightplot,line width=1.3pt,densely dashed] coordinates {(-0.3,-0.3) (2.5,2.5)};
+\addplot+[no marks,draw=redplot,line width=1pt] coordinates {(1,1) (2,0)};
+\addplot+[only marks,mark=*,mark size=2.3pt,draw=inkplot,fill=inkplot,mark options={draw=inkplot,fill=inkplot}] coordinates {(2,0)};
+\addplot+[only marks,mark=*,mark size=2.3pt,draw=blueplot,fill=blueplot,mark options={draw=blueplot,fill=blueplot}] coordinates {(1,1)};
+\node[anchor=north east,font=\scriptsize] at (axis cs:2,0) {$y=(2,0)$};
+\node[anchor=south east,font=\scriptsize,text=inkplot] at (axis cs:1,1) {$\hat y=(1,1)$};
+\node[anchor=east,font=\scriptsize,text=inkplot] at (axis cs:1.5,2) {$\operatorname{Col}(X)$};
+\end{axis}
+\end{tikzpicture}
+\endgroup

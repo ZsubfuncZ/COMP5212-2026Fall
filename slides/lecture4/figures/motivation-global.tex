@@ -1,0 +1,13 @@
+\begin{tikzpicture}
+\begin{axis}[width=\linewidth,height=4.65cm,font=\scriptsize,
+ xmin=0,xmax=10,ymin=0,ymax=470,xtick={0,2,4,6,8,10},ytick={0,100,200,300,400},
+ xlabel={Production (tonnes/day)},ylabel={Mean electricity (kWh/day)},
+ grid=major,grid style={black!8},axis line style={black!40},tick style={black!40},scaled ticks=false]
+\only<2->{\path[fill=bulletgreen,opacity=.35] (axis cs:4,0) rectangle (axis cs:6,470);}
+\addplot[blueplot,very thick,domain=0:10,samples=80]{100+5*x+3*x*x};
+\only<3->{
+ \addplot[redplot,thick,dashed,domain=0:10]{25+35*x};
+ \addplot[black,only marks,mark=*,mark size=2pt] coordinates {(5,200)};
+}
+\end{axis}
+\end{tikzpicture}

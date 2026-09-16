@@ -1,0 +1,44 @@
+% Generated from work/deck/chart-data-en.mjs; numeric data preserved.
+% Input in a column; rocpr is intended for full frame width.
+\begingroup
+\definecolor{blueplot}{HTML}{4E79A7}
+\definecolor{redplot}{HTML}{D95F59}
+\definecolor{inkplot}{HTML}{111111}
+\definecolor{lightplot}{HTML}{8FB8DA}
+\begin{tikzpicture}
+\begin{axis}[
+width=\linewidth,
+height=4.4cm,
+font=\scriptsize,
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+axis line style={black!45},
+tick style={black!45},
+grid=major,
+grid style={black!10},
+xmin=0,
+xmax=10,
+ymin=-4,
+ymax=10,
+xlabel={Input $x$},
+ylabel={Response $y$},
+scaled ticks=false,
+tick label style={/pgf/number format/fixed},
+clip=true,
+unbounded coords=jump,
+legend style={font=\scriptsize,draw=none,fill=none,at={(0.5,-0.29)},anchor=north,legend cell align=left,column sep=0.12cm,row sep=0.03cm},
+legend columns=2,
+xtick={0,2,4,6,8,10},
+ytick={-4,-2,0,2,4,6,8,10}
+]
+\addplot+[only marks,mark=*,mark size=1.4pt,draw=inkplot,fill=inkplot,mark options={draw=inkplot,fill=inkplot}] coordinates {(0,1) (0.666666666667,1.85319688631) (1.33333333333,2.04798694077) (2,2.28122732517) (2.66666666667,3.17062907889) (3.33333333333,3.98326130559) (4,4.14421543001) (4.66666666667,4.41999646) (5.33333333333,5.3407498107) (6,6.1090104885) (6.66666666667,6.241204272) (7.33333333333,6.56303642733) (8,7.50986077722)};
+\addlegendentry{Observations}
+\addplot+[only marks,mark=*,mark size=2.1pt,draw=redplot,fill=redplot,mark options={draw=redplot,fill=redplot}] coordinates {(9,-3)};
+\addlegendentry{Outlier}
+\addplot+[no marks,draw=blueplot,line width=1pt] coordinates {(0,1.0519335496) (10,8.93447952224)};
+\addlegendentry{Original OLS}
+\addplot+[no marks,draw=redplot,line width=1pt] coordinates {(0,2.42173720737) (10,5.33322151873)};
+\addlegendentry{With outlier}
+\end{axis}
+\end{tikzpicture}
+\endgroup
