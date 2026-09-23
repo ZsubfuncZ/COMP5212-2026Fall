@@ -1,0 +1,22 @@
+% Analytical winning regions for z=(u1,u2,0). No fitted or empirical observations.
+% The black segments are only the portions of pairwise ties where both classes win.
+\begin{tikzpicture}
+\begin{axis}[
+  width=\linewidth,height=5.0cm,
+  xmin=-2,xmax=2,ymin=-2,ymax=2,
+  xlabel={$u_1$},ylabel={$u_2$},
+  xtick={-2,-1,0,1,2},ytick={-2,-1,0,1,2},
+  font=\scriptsize,tick label style={font=\scriptsize},
+  axis line style={black!45},tick style={black!45},
+  axis on top,scaled ticks=false,clip=true
+]
+\path[fill=blueplot!18,draw=none] (axis cs:0,0) -- (axis cs:0,-2) -- (axis cs:2,-2) -- (axis cs:2,2) -- cycle;
+\path[fill=redplot!18,draw=none] (axis cs:0,0) -- (axis cs:2,2) -- (axis cs:-2,2) -- (axis cs:-2,0) -- cycle;
+\path[fill=bulletgreen!40,draw=none] (axis cs:-2,-2) -- (axis cs:0,-2) -- (axis cs:0,0) -- (axis cs:-2,0) -- cycle;
+\addplot[inkplot,thick,no marks,forget plot] coordinates {(0,-2) (0,0) (2,2)};
+\addplot[inkplot,thick,no marks,forget plot] coordinates {(-2,0) (0,0)};
+\node[align=center,text=blueplot!75!black,font=\small] at (axis cs:1.2,-0.8) {Scratch\\$\widehat y=1$};
+\node[align=center,text=redplot!75!black,font=\small] at (axis cs:-0.95,1.05) {Dent\\$\widehat y=2$};
+\node[align=center,text=inkplot,font=\small] at (axis cs:-1.05,-1.05) {Stain\\$\widehat y=3$};
+\end{axis}
+\end{tikzpicture}

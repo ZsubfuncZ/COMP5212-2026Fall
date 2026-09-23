@@ -1,0 +1,93 @@
+\section{Problem formulation}
+
+% Plan: binary model / equation or figure / reveal where marked.
+\begin{frame}[t]{The logistic function}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.59\textwidth}\logfig{sigmoid}\end{column}
+\begin{column}{.38\textwidth}\small
+\[\sigm(z)=\frac{1}{1+e^{-z}}.\]
+\vspace{.15cm}\par
+\begin{itemize}\setlength{\itemsep}{.18cm}
+\item $\sigm(0)=1/2$.
+\item $0<\sigm(z)<1$ for finite $z$.
+\item $\sigm(-z)=1-\sigm(z)$.
+\end{itemize}
+\uncover<2->{\[\sigm'(z)=\sigm(z)(1-\sigm(z)).\]}
+\end{column}
+\end{columns}
+\vfill
+\begin{takeaway}The score is unbounded. The probability stays between zero and one.\end{takeaway}
+\note{Ask students to identify the score for probability one half and the scores needed for probabilities near zero or one. Derive the derivative by differentiating (1+exp(-z)) inverse. Its maximum is one quarter at zero, and it becomes small in either tail. This saturation will matter for curvature in gradient-based optimization. The logistic function is a modeling choice, not the only possible link for binary probabilities.}
+\end{frame}
+
+% Plan: binary model / equation or figure / reveal where marked.
+\begin{frame}[t]{A linear model for log-odds}
+\lead{For $0<\pi(x)<1$, odds are $\pi(x)/(1-\pi(x))$}
+\begin{definitionbox}
+\[
+\begin{aligned}
+\log\frac{\pi(x)}{1-\pi(x)}&=b+w^{\mathsf T}x=z,\\[6pt]
+\frac{\pi(x)}{1-\pi(x)}&=e^z,\\[6pt]
+\pi(x)&=\frac{e^z}{1+e^z}=\boxed{\sigm(b+w^{\mathsf T}x)}.
+\end{aligned}
+\]
+\end{definitionbox}
+\uncover<2->{\begin{takeaway}Logistic regression assumes that log-odds are linear in the chosen features.\end{takeaway}}
+\note{The transformation turns a probability in (0,1) into any real number, making an additive linear model possible. Stress that this is an assumption about conditional log-odds, not a theorem that every binary dataset must satisfy. Local linear approximation to a smooth log-odds function is one motivation for a useful baseline. Feature expansion can make the log-odds nonlinear in the original measurements while preserving linearity in the fitted coefficients.}
+\end{frame}
+
+
+% Plan: precise formulation / equations and examples / progressive when marked.
+\begin{frame}[t]{Decision thresholds and boundaries}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.59\textwidth}\logfig{boundary}\end{column}
+\begin{column}{.38\textwidth}\small
+For $0<\tau<1$, predict class $1$ if $\pi(x)\ge\tau$.
+\[
+b+w^{\mathsf T}x\ge\log\frac{\tau}{1-\tau}.
+\]
+\vspace{.1cm}\par
+$\tau=0.5$: score boundary $0$.\par
+$\tau=0.8$: score boundary $\log 4$.
+\end{column}
+\end{columns}
+\vfill
+\begin{takeaway}Changing the threshold moves the decision boundary without refitting the probability model.\end{takeaway}
+\note{The figure uses score -1+x1+0.8x2, with constructed class labels. Since the logistic function is strictly increasing, taking the logit of the threshold yields the displayed inequality. For fixed linear features and nonzero w, the boundary is a hyperplane. Raising the threshold shrinks the region classified as positive. This plot illustrates fixed-model decisions, not estimates fitted to the shown points.}
+\end{frame}
+
+% Plan: precise formulation / equations and examples / progressive when marked.
+\begin{frame}[t]{Worked example: score to decision}
+\lead{$z=-2+0.8x$, $\pi=\sigm(z)$, decision threshold $\tau=0.7$}
+\small\renewcommand{\arraystretch}{1.7}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cccc@{}}
+\toprule $x$&\textbf{Score $z$}&\textbf{Probability $\pi$}&\textbf{Predicted class}\\\midrule
+$2$&\uncover<2->{$-0.4$}&\uncover<2->{$0.401$}&\uncover<2->{$0$}\\
+$4$&\uncover<2->{$1.2$}&\uncover<2->{$0.769$}&\uncover<2->{$1$}\\\bottomrule
+\end{tabular*}\par
+\vspace{.35cm}
+\logprompt{At what sensor value does the decision change?}
+\uncover<3->{\[
+x=\frac{2+\log(0.7/0.3)}{0.8}\approx3.559.
+\]}
+\note{Give students 20 seconds for the table, then reveal it. Pause again before the threshold calculation. Distinguish the raw measurement x, the real-valued score z, the probability pi and the binary decision. The threshold is an application choice separate from the model parameters. At exactly the boundary, the chosen greater-than-or-equal convention predicts class one.}
+\end{frame}
+
+% Plan: parameter-fitting problem / model definition / reveal loss question.
+\begin{frame}[t]{What do we learn from the data?}
+\begin{definitionbox}
+\[
+\mathcal D=\{(x_i,y_i)\}_{i=1}^n,\qquad y_i\in\{0,1\},
+\qquad \pi_i(\theta)=\sigm(\widetilde x_i^{\mathsf T}\theta).
+\]
+\[
+\widehat\theta=\argmin_{\theta\in\R^p}J(\theta).
+\]
+\end{definitionbox}
+\vspace{.2cm}
+\logprompt{Which objective rewards good probability predictions?}
+\uncover<2->{\par\vspace{.15cm}\small
+Compare the probability assigned to each observed label.
+\begin{takeaway}Maximum likelihood turns this requirement into a loss function.\end{takeaway}}
+\note{The probability model has been specified; the fitting criterion is still to be derived. Accuracy alone treats probability .51 and .99 the same for a positive label. Likelihood provides a differentiable probability-based criterion. An argmin is a useful formulation here, but the separation caveat later explains when no finite unregularized optimizer exists.}
+\end{frame}

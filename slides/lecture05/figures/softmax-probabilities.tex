@@ -1,0 +1,21 @@
+% Original analytical example, z=(2,1,0). Recomputed by examples/softmax_examples.py.
+\begin{tikzpicture}
+\begin{axis}[
+  width=\linewidth,height=4.5cm,
+  ymin=0,ymax=0.82,xmin=0.45,xmax=3.55,
+  xtick={1,2,3},xticklabels={Scratch,Dent,Stain},
+  ytick={0,0.2,0.4,0.6,0.8},ylabel={Probability},
+  font=\scriptsize,tick label style={font=\scriptsize},
+  axis line style={black!45},tick style={black!45},
+  ymajorgrids,grid style={black!10},
+  scaled ticks=false,bar width=16pt,
+  nodes near coords,nodes near coords style={font=\scriptsize},
+  point meta=y,every node near coord/.append style={
+    /pgf/number format/fixed,/pgf/number format/precision=3},
+  clip=false
+]
+\addplot[ybar,bar shift=0pt,fill=blueplot,draw=blueplot] coordinates {(1,0.665240956)};
+\addplot[ybar,bar shift=0pt,fill=redplot,draw=redplot] coordinates {(2,0.244728471)};
+\addplot[ybar,bar shift=0pt,fill=bulletgreen,draw=bulletgreen!60!black] coordinates {(3,0.090030573)};
+\end{axis}
+\end{tikzpicture}

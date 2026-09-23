@@ -1,0 +1,229 @@
+% Maximum-likelihood module. Uses the shared theme and logistic-macros.tex.
+% Notation: X has rows x-tilde_i^T; theta includes the intercept.
+\section{Maximum likelihood: from least squares to cross-entropy}
+
+% MLE 01. Point: likelihood varies parameters while the observed sample stays fixed.
+% Layout: one conditional-likelihood display, followed by a staged factorization.
+% Reveal: 2 adds conditional independence; 3 states the estimation principle.
+\begin{frame}[t]{What does conditional likelihood measure?}
+\small
+We observe the inputs $X$ and responses $y$. A model assigns them
+\[
+\mathcal L(\theta;y\mid X)=f_\theta(y\mid X).
+\]
+As a likelihood, this is a function of $\theta$, with $X$ and $y$ held fixed.
+
+\uncover<2->{
+\vspace{.15cm}
+If the responses are independent conditional on $X$,
+\[
+f_\theta(y\mid X)=\prod_{i=1}^n
+f_\theta(y_i\mid\widetilde x_i).
+\]}
+\uncover<3->{
+\begin{takeaway}
+Maximum likelihood chooses parameters that give the observed responses the
+largest joint probability mass or density, within the chosen model.
+\end{takeaway}}
+\note{The same expression has two roles. As a sampling model, theta is fixed and y varies; as a likelihood, the observed y is fixed and theta varies. We condition on the inputs, so we do not need a probability model for X to define this criterion. The displayed factorization assumes conditionally independent responses and that each response distribution depends on X through its own feature vector. For a continuous response, f is a density, not the probability of observing an exact real number. A likelihood is also not a probability distribution over theta. We first revisit Gaussian linear regression, then return to the binary response model.}
+\end{frame}
+
+% MLE 02. Point: the Gaussian error assumption turns a residual into a density.
+% Layout: analytic residual-density plot beside the conditional model.
+% Reveal: 2 connects increasing absolute residual to decreasing density.
+\begin{frame}[t]{Gaussian errors assign density to residuals}
+\small
+For this comparison, first let the response be real-valued: $y_i\in\R$.
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.56\textwidth}
+\logfig{mle-gaussian-residual}
+\end{column}
+\begin{column}{.41\textwidth}
+\[
+Y_i=\widetilde x_i^{\mathsf T}\theta+\varepsilon_i,
+\]
+\[
+\varepsilon_i\mid X\overset{\mathrm{iid}}{\sim}
+\mathcal N(0,\sigma^2),\qquad\sigma>0.
+\]
+For the observed response, the residual is
+\[
+r_i(\theta)=y_i-\widetilde x_i^{\mathsf T}\theta.
+\]
+\uncover<2->{
+At fixed $\sigma$, a larger $|r_i|$ receives a smaller Gaussian density.}
+\end{column}
+\end{columns}
+\note{We temporarily change the response family to revisit linear regression; this slide is not a Gaussian model for a binary variable. Conditional on the design, the errors are independent and identically distributed with mean zero and the same positive variance. Consequently the responses are independent but generally have different conditional means. The plotted curve is the analytic standard normal density, so sigma equals one in the illustration. The marked residuals zero and two have densities about 0.399 and 0.054. These are density heights, not point probabilities; the area over an interval gives a probability. The Gaussian assumption is what connects this particular likelihood calculation to squared residuals.}
+\end{frame}
+
+% MLE 03. Point: the Gaussian negative log-likelihood differs from SSE only by fixed terms and scale.
+% Layout: product likelihood, negative logarithm, then the coefficient optimization.
+% Reveal: 2 takes the logarithm; 3 discards theta-independent terms for fixed sigma.
+\begin{frame}[t]{The Gaussian likelihood leads to squared error}
+\small
+\[
+\mathcal L(\theta,\sigma;y\mid X)
+=\prod_{i=1}^n\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\!\left[-\frac{(y_i-\widetilde x_i^{\mathsf T}\theta)^2}{2\sigma^2}\right].
+\]
+\uncover<2->{
+\[
+-\log\mathcal L
+=\underbrace{\frac n2\log(2\pi\sigma^2)}_{\text{constant in }\theta}
++\frac{1}{2\sigma^2}\underbrace{\sum_{i=1}^n
+(y_i-\widetilde x_i^{\mathsf T}\theta)^2}_{\operatorname{Square Error}(\theta)}.
+\]}
+\uncover<3->{
+\begin{takeaway}
+For any fixed $\sigma>0$, maximizing this likelihood over $\theta$ is equivalent to
+\[
+\min_\theta\operatorname{Square Error}(\theta)
+=\min_\theta\lVert y-X\theta\rVert_2^2.
+\]
+\end{takeaway}}
+\note{Take the negative logarithm one factor at a time. The exponential contributes the squared residual divided by twice the variance, and the normalizing factors contribute n/2 times log(2 pi sigma squared). At any fixed positive sigma, the first term is constant in theta and the second has a positive scale, so the minimizers are exactly the least-squares solutions. If sigma is also estimated and the minimum SSE is positive, the joint Gaussian MLE has a least-squares coefficient vector and variance SSE/n. If the data can be fit exactly, the likelihood becomes unbounded as sigma approaches zero, so a joint finite MLE with strictly positive variance need not exist. We keep sigma fixed here to isolate the coefficient argument.}
+\end{frame}
+
+
+
+% MLE 05. Point: full rank determines unique coefficients; rank deficiency leaves a family.
+% Layout: full-rank result above a staged rank-deficient alternative.
+% Reveal: 2 adds the pseudoinverse family and the minimum-norm selection.
+
+
+% MLE 06. Point: a Bernoulli model rewards probability assigned to the realized label.
+% Layout: binary conditional model followed by a two-case probability expression.
+% Reveal: 2 writes both cases in one algebraic formula.
+\begin{frame}[t]{The probability of an observed binary label}
+\small
+Now $y_i\in\{0,1\}$ and
+\[
+Y_i\mid\widetilde x_i;\theta\sim\operatorname{Bernoulli}(\pi_i),
+\qquad \pi_i=\sigm(\widetilde x_i^{\mathsf T}\theta).
+\]
+The model assigns the observed label probability
+\[
+\Pr(Y_i=y_i\mid\widetilde x_i;\theta)
+=\begin{cases}
+\pi_i,&y_i=1,\\[4pt]
+1-\pi_i,&y_i=0.
+\end{cases}
+\]
+\uncover<2->{
+\begin{definitionbox}
+\[
+\Pr(Y_i=y_i\mid\widetilde x_i;\theta)
+=\boxed{\pi_i^{y_i}(1-\pi_i)^{1-y_i}}.
+\]
+\end{definitionbox}}
+\note{We now return to the binary labels and logistic mean model introduced earlier. Ask the audience to check the exponents separately for y equal to zero and one. Pi is always the probability of class one; it is not always the probability of the label we actually observed. A negative label receives probability one minus pi. The Bernoulli model specifies conditional variance pi times one minus pi, so there is no separate constant residual variance parameter analogous to sigma squared. The logistic link was already chosen as a model for the mean; the Bernoulli likelihood by itself does not determine that link.}
+\end{frame}
+
+% MLE 07. Point: conditional Bernoulli likelihood becomes average binary cross-entropy.
+% Layout: product, log, and mean negative log-likelihood in separate display bands.
+% Reveal: 2 takes the log; 3 changes sign and divides by n.
+\begin{frame}[t]{Bernoulli likelihood and binary cross-entropy}
+\small
+Conditional independence gives
+\[
+\mathcal L(\theta;y\mid X)
+=\prod_{i=1}^n\pi_i^{y_i}(1-\pi_i)^{1-y_i}.
+\]
+\uncover<2->{
+\[
+\log\mathcal L(\theta)
+=\sum_{i=1}^n\left[y_i\log\pi_i+(1-y_i)\log(1-\pi_i)\right].
+\]}
+\uncover<3->{
+\begin{definitionbox}
+\[
+J(\theta)=-\frac1n\log\mathcal L(\theta)
+=\frac1n\sum_{i=1}^n
+\underbrace{\left[-y_i\log\pi_i-(1-y_i)\log(1-\pi_i)\right]}_{\text{binary cross-entropy }\ell_i(\theta)}.
+\]
+\end{definitionbox}
+Natural logarithms are used throughout. Averaging preserves any unpenalized optimum.}
+\note{Independence is the step that makes the joint probability a product. Because log is strictly increasing, maximizing the product and maximizing its log have the same optimizers when they exist. Negating converts a maximization into a minimization; dividing by n yields the mean loss used in the optimization section. The division changes gradient scale and must be coordinated with a penalty coefficient when a regularizer is added. Products of many probabilities may underflow numerically, another reason to work with log-likelihoods. Calling this maximum likelihood does not guarantee a finite maximizer: separation can send coefficient magnitudes to infinity. That existence issue is examined later.}
+\end{frame}
+
+% MLE 08. Point: substituting the logistic link gives softplus minus the observed-label score.
+% Layout: two log identities, one substitution, then the boxed score-space loss.
+% Reveal: 2 substitutes into BCE; 3 cancels the two softplus coefficients.
+\begin{frame}[t]{Express the same loss through the score}
+\small
+For $z_i=\widetilde x_i^{\mathsf T}\theta$, define
+$\softplus(z)=\log(1+e^z)$. Then
+\[
+\log\pi_i=z_i-\softplus(z_i),
+\qquad
+\log(1-\pi_i)=-\softplus(z_i).
+\]
+\uncover<2->{
+\[
+\ell_i(\theta)
+=-y_i\bigl[z_i-\softplus(z_i)\bigr]
++(1-y_i)\softplus(z_i).
+\]}
+\uncover<3->{
+\begin{definitionbox}
+\[
+\boxed{\ell_i(\theta)=\softplus(z_i)-y_i z_i},
+\qquad
+J(\theta)=\frac1n\sum_{i=1}^n\ell_i(\theta).
+\]
+\end{definitionbox}
+This is binary cross-entropy expressed through the logistic score.}
+\note{Use pi equal to exp(z) divided by one plus exp(z), and one minus pi equal to one divided by one plus exp(z), to obtain the two log identities. After substitution, the coefficients multiplying softplus are y and one minus y, so they add to one. This form will make the derivative particularly simple in the next module. It is exactly the earlier Bernoulli loss composed with the logistic link, not a different statistical criterion. The literal evaluation log(1+exp(z)) can overflow. A stable implementation uses max(z,0)-y z+log1p(exp(-abs(z))) or a library binary-cross-entropy-with-logits routine. The displayed formula is for the mathematical derivation.}
+\end{frame}
+
+% MLE 09. Point: pi is class-one probability; likelihood uses each observed label's probability.
+% Layout: three-observation table, then joint likelihood and average loss.
+% Reveal: 2 fills the observed-label probabilities; 3 computes product and mean NLL.
+\begin{frame}[t]{Which probabilities enter the likelihood?}
+\small
+Illustrative predictions for three conditionally independent observations:\par
+\vspace{.08cm}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cccl@{}}
+\toprule
+$i$&$y_i$&$\pi_i$&\textbf{Observed-label probability}\\
+\midrule
+$1$&$1$&$0.8$&\uncover<2->{$0.8$}\\
+$2$&$0$&$0.7$&\uncover<2->{$1-0.7=0.3$}\\
+$3$&$1$&$0.4$&\uncover<2->{$0.4$}\\
+\bottomrule
+\end{tabular*}
+\uncover<3->{
+\[
+\mathcal L=0.8\times0.3\times0.4=0.096,
+\qquad J=-\frac13\log(0.096)\approx0.781.
+\]
+The second observation contributes $-\log(0.3)$, because its label is $0$.}
+\note{These probabilities are constructed for arithmetic practice, not estimated from an empirical dataset. Before revealing the last column, ask which factor should be used for the second observation. The correct factor is 0.3, not 0.7. The individual negative log-likelihoods are approximately 0.2231, 1.2040, and 0.9163, which sum to 2.3434 and average to 0.7811. No thresholded prediction enters this calculation. A probability of 0.4 for a positive label contributes a finite loss even if a threshold of one half would classify it incorrectly. Changing the decision threshold cannot change this likelihood when the fitted probabilities are held fixed.}
+\end{frame}
+
+% MLE 10. Point: the response family and mean model determine the likelihood-based loss.
+% Layout: compact Gaussian/Bernoulli comparison, followed by two modeling caveats.
+% Reveal: 2 distinguishes the fitting principle from the link choice and from the definition of OLS.
+\begin{frame}[t]{Response models and their fitting losses}
+\small
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{@{}lYY@{}}
+\toprule
+&\textbf{Gaussian linear regression}&\textbf{Logistic regression}\\
+\midrule
+Response family&Gaussian on $\R$&Bernoulli on $\{0,1\}$\\
+Conditional mean&$\widetilde x_i^{\mathsf T}\theta$&$\sigm(\widetilde x_i^{\mathsf T}\theta)$\\
+Conditional variance&$\sigma^2$&$\pi_i(1-\pi_i)$\\
+Fitting loss&Squared error&Binary cross-entropy\\
+\bottomrule
+\end{tabularx}
+\uncover<2->{
+\vspace{.2cm}
+\begin{itemize}\setlength{\itemsep}{.12cm}
+\item A Bernoulli likelihood still needs a mean model. MLE does not force the logistic link.
+\item OLS is defined by minimizing squared error. Gaussian errors give it one likelihood interpretation.
+\end{itemize}}
+\note{The loss row suppresses positive scale factors and parameter-independent terms from the fixed-variance Gaussian negative log-likelihood. The two choices in a conditional regression model are a response family and a model for its mean. A Bernoulli family combined with a probit mean, for example, is also fit by maximum likelihood but is not logistic regression. Conversely, least squares is an optimization criterion that remains defined without Gaussian noise, including when applied to binary observations. Its statistical properties then depend on the assumptions appropriate to that setting. The Gaussian assumptions in this module explain a likelihood interpretation of least squares; they are not prerequisites for writing or solving the OLS problem. Next we differentiate the logistic objective and examine how to optimize it.}
+\end{frame}

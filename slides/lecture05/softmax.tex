@@ -1,0 +1,335 @@
+% Final main lecture section. Requires theme.tex and logistic-macros.tex.
+% Notation: raw x_i has p-1 coordinates; augmented tilde x_i is a p-vector.
+% Rows of X are the transposes of augmented tilde x_i, including the intercept.
+% W is p x K, with one class parameter vector per column.
+% All figures are original analytical teaching examples, not measured data.
+\section{Softmax regression}
+
+% S01 POINT: A categorical task needs one distribution over mutually exclusive labels.
+% LAYOUT: Short motivation above a three-row table. REVEAL: Static.
+\begin{frame}{One item, one defect label}
+  \lead{An inspection system records the primary defect on each rejected item.}
+  \begin{center}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{cll}
+      \toprule
+      Class & Label & Possible visual evidence \\
+      \midrule
+      \textcolor{blueplot}{$1$} & Scratch & Elongated surface mark \\
+      \textcolor{redplot}{$2$} & Dent & Local indentation \\
+      $3$ & Stain & Discolored region \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  \begin{definitionbox}
+    The model assigns $\pi_k(x)=\Pr(y=k\mid x)$ for $k=1,2,3$,
+    with $\pi_1(x)+\pi_2(x)+\pi_3(x)=1$.
+  \end{definitionbox}
+  \note{This is a constructed inspection task, not an empirical dataset. The label policy selects one primary defect even if several physical defects could coexist. If the task instead records every defect present, it becomes a multilabel problem and the categorical model here no longer expresses that target. Ask students what information is lost by collapsing all three labels into defective versus nondefective. Reference for the categorical setup: CS229 notes, Section 2.3, \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S02 POINT: Each class has a linear score, with classes stored as columns.
+% LAYOUT: Definition box and dimension equation. REVEAL: Static.
+\begin{frame}{One linear score for each class}
+  \lead{For $x\in\R^{p-1}$, include the intercept in $\widetilde x=(1,x^\top)^\top\in\R^p$.}
+  \begin{definitionbox}
+    \[
+      z_k(x)=\widetilde x^\top w_k,\qquad
+      W=[\,w_1\ \cdots\ w_K\,]\in\R^{p\times K}.
+    \]
+    The real-valued scores $z_k$ are called \textbf{logits}.
+  \end{definitionbox}
+  \[
+    \underbrace{Z}_{n\times K}
+    =\underbrace{X}_{n\times p}\,
+     \underbrace{W}_{p\times K}.
+  \]
+  \begin{itemize}
+    \item Row $i$ of $X$ is $\widetilde x_i^\top$.
+    \item Each column of $W$ describes one class.
+  \end{itemize}
+  \note{The raw feature vector is x. Its augmented vector is tilde x, with a leading one. Each row of X is the transpose of an augmented vector, so the first column of X consists of ones and the first row of W holds the K intercepts. This orientation matters later: X transposed times a matrix of probability residuals has exactly the same p by K shape as W. A logit is an unrestricted real score. It becomes a log odds only after taking a difference between two class scores. Source: CS229 notes, Section 2.3, \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S03 POINT: Exponentiation and shared normalization produce one categorical distribution.
+% LAYOUT: Central definition and two consequences. REVEAL: Static.
+\begin{frame}{Softmax probabilities}
+  \begin{definitionbox}
+    \[
+      \pi_k(x)=\frac{\exp(z_k(x))}{\sum_{j=1}^{K}\exp(z_j(x))},
+      \qquad k=1,\ldots,K.
+    \]
+  \end{definitionbox}
+  \begin{itemize}
+    \item Finite logits give positive probabilities that sum to one.
+    \item Every class shares the same denominator.
+  \end{itemize}
+  \[
+    \widehat y(x)=\operatorname*{arg\,max}_{k}\pi_k(x)
+                 =\operatorname*{arg\,max}_{k}z_k(x).
+  \]
+  \begin{takeaway}
+    Predicting a label requires only the largest score.
+    Likelihood training uses the entire normalized distribution.
+  \end{takeaway}
+  \note{Exponentiation preserves score ordering, and the common positive denominator preserves it again. The displayed decision rule minimizes expected zero-one loss under the model, with a fixed rule for ties. Different error costs can require a different decision rule. Contrast the shared denominator with independently fitted binary probabilities: K independent sigmoid outputs need not sum to one. Source: CS229 notes, Section 2.3, \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S04 POINT: Score differences, not raw magnitudes, determine a concrete probability vector.
+% LAYOUT: Numerical table left, native probability bars right.
+% REVEAL: Scores/exponentials first; probabilities and bars on step 2 (uncover).
+\begin{frame}{Three scores, three probabilities}
+  \lead{Constructed example: $z=(2,1,0)^\top$.}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.47\textwidth}
+      \vspace{0.15cm}
+      \small
+      \renewcommand{\arraystretch}{1.35}
+      \begin{tabular}{lrrr}
+        \toprule
+        Class & $z_k$ & $e^{z_k}$ & $\pi_k$ \\
+        \midrule
+        Scratch & $2$ & $7.389$ & \uncover<2->{$0.665$} \\
+        Dent & $1$ & $2.718$ & \uncover<2->{$0.245$} \\
+        Stain & $0$ & $1.000$ & \uncover<2->{$0.090$} \\
+        \bottomrule
+      \end{tabular}
+      \vspace{0.25cm}
+      \par The normalizer is $11.107$.
+      \uncover<2->{\par A one-unit score advantage multiplies the probability ratio by $e$.}
+    \end{column}
+    \begin{column}{0.50\textwidth}
+      \uncover<2->{\logfig{softmax-probabilities}}
+    \end{column}
+  \end{columns}
+  \note{These values come directly from the analytical softmax formula and are rounded only for display. The exact probabilities are approximately 0.665240956, 0.244728471, and 0.090030573. Scratch is the predicted class, but the other classes retain positive probability. A ratio such as pi1 divided by pi2 equals exp(2 minus 1), without needing the normalizing constant. The example is original. Formula reference: \url{https://cs229.stanford.edu/main_notes.pdf}, Section 2.3.}
+\end{frame}
+
+% S05 POINT: Conditional categorical likelihood turns observed labels into a fitting criterion.
+% LAYOUT: One-hot definition, likelihood, MLE.
+% REVEAL: Categorical likelihood first; MLE and interpretation on step 2 (uncover).
+\begin{frame}{Categorical likelihood}
+  \lead{Write $Y_{ik}=\mathbf{1}\{y_i=k\}$ and $P_{ik}=\pi_k(x_i)$.}
+  \[
+    L(W)=\prod_{i=1}^{n}\prod_{k=1}^{K}P_{ik}^{Y_{ik}}
+        =\prod_{i=1}^{n}P_{i,y_i}.
+  \]
+  \uncover<2->{\begin{definitionbox}
+    \[
+      \widehat W\in\operatorname*{arg\,max}_{W}\log L(W)
+      =\operatorname*{arg\,max}_{W}
+        \sum_{i=1}^{n}\sum_{k=1}^{K}Y_{ik}\log P_{ik}.
+    \]
+  \end{definitionbox}
+  \begin{itemize}
+    \item The observed class selects one probability from each row.
+    \item The product assumes conditionally independent labels given the inputs.
+  \end{itemize}}
+  \note{Condition on the observed design X. The one-hot vector contains exactly one entry equal to one, so each categorical likelihood term reduces to the probability assigned to the observed class. The argmax notation describes the maximum-likelihood objective. A finite maximizer can fail to exist on separable data, as in binary logistic regression, and the unrestricted K-column parameterization has a common-shift ambiguity discussed shortly. No optimization algorithm is introduced here. Source: CS229 notes, Section 2.3, \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S06 POINT: Cross-entropy is the average negative log-likelihood and has a simple logit form.
+% LAYOUT: Two displayed equations and one numerical interpretation.
+% REVEAL: Average cross-entropy first; logit form and example on step 2 (uncover).
+\begin{frame}{Cross-entropy and log-sum-exp}
+  \[
+    J(W)=-\frac{1}{n}\log L(W)
+    =-\frac{1}{n}\sum_{i=1}^{n}\sum_{k=1}^{K}Y_{ik}\log P_{ik}.
+  \]
+  \uncover<2->{\begin{definitionbox}
+    For one observation with true class $y$,
+    \[
+      \ell(z,y)
+      =\underbrace{\log\!\left(\sum_{k=1}^{K}e^{z_k}\right)}_{
+        \operatorname{LSE}(z)}-z_y.
+    \]
+  \end{definitionbox}
+  \begin{takeaway}
+    For $z=(2,1,0)^\top$ and true class Dent,
+    the loss is $-\log(0.2447)\approx1.408$ nats.
+  \end{takeaway}}
+  \note{Substitute log P_ik equals z_ik minus log-sum-exp of the row. Since the one-hot row sums to one, the normalization term appears once, leaving LSE(z) minus the true class score. Natural logarithms measure the loss in nats. For the same logits, the losses for Scratch, Dent, and Stain are about 0.407606, 1.407606, and 2.407606. The example illustrates that the probability of the observed label controls the loss even when the predicted label stays unchanged. Source: CS229 notes, Section 2.3, \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S07 POINT: The categorical gradient is the matrix form of probability minus target.
+% LAYOUT: Per-logit derivative above dimensioned matrix gradient. REVEAL: Static.
+\begin{frame}{The gradient is a probability residual}
+  \[
+    \frac{\partial\ell(z_i,y_i)}{\partial z_{ik}}
+       =P_{ik}-Y_{ik}.
+  \]
+  \begin{definitionbox}
+    \[
+      \underbrace{\nabla_W J}_{p\times K}
+        =\frac{1}{n}\,
+          \underbrace{X^\top}_{p\times n}
+          \underbrace{(P-Y)}_{n\times K}.
+    \]
+  \end{definitionbox}
+  \begin{itemize}
+    \item $P$ applies softmax independently to each row of $XW$.
+    \item Each class column accumulates feature-weighted probability errors.
+  \end{itemize}
+  \note{Differentiate log-sum-exp to obtain softmax, then differentiate minus the selected score to obtain minus the one-hot target. Apply the chain rule to z_ik equals augmented tilde x_i transposed w_k and average across observations. The design X has those augmented feature vectors as rows. This gives the displayed p by K matrix without a transposition ambiguity. Because each row of P minus Y sums to zero, the gradient columns also sum to zero. That identity foreshadows the common-shift invariance. The formula is for the unregularized mean negative log-likelihood. Source: CS229 notes, equations 2.16--2.19, \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S08 POINT: Binary logistic regression uses the difference of two softmax logits.
+% LAYOUT: Binary identity followed by general pairwise log odds. REVEAL: Static.
+\begin{frame}{Binary logistic regression is the $K=2$ case}
+  \[
+    \pi_1(x)
+      =\frac{e^{z_1}}{e^{z_1}+e^{z_2}}
+      =\frac{1}{1+e^{-(z_1-z_2)}}
+      =\sigm\!\left(\widetilde x^\top(w_1-w_2)\right).
+  \]
+  \begin{definitionbox}
+    For any pair of classes,
+    \[
+      \log\frac{\pi_j(x)}{\pi_k(x)}
+        =z_j(x)-z_k(x)=\widetilde x^\top(w_j-w_k).
+    \]
+  \end{definitionbox}
+  \begin{takeaway}
+    Softmax regression makes every pairwise log odds linear in the features.
+  \end{takeaway}
+  \note{For the binary comparison, map class 1 to binary target one and class 2 to binary target zero. The binary coefficient vector is the difference w1 minus w2. Setting w2 to zero recovers the familiar single-vector logistic parameterization. For K classes, a single logit has no absolute probabilistic meaning. Its difference from another logit specifies their log probability ratio. These identities are algebraic consequences of softmax. Background definitions: \url{https://cs229.stanford.edu/main_notes.pdf}, Sections 2.1 and 2.3.}
+\end{frame}
+
+% S09 POINT: Common score shifts produce identical distributions, so choose a reference.
+% LAYOUT: Invariance equation and baseline parameterization. REVEAL: Static.
+\begin{frame}{A reference class removes redundant parameters}
+  \[
+    \operatorname{softmax}(z+c\mathbf{1})
+      =\operatorname{softmax}(z),\qquad c\in\R.
+  \]
+  \lead{Adding the same $a\in\R^p$ to every column of $W$ changes no prediction.}
+  \begin{definitionbox}
+    Choose class $K$ as the baseline:
+    \[
+      w'_k=w_k-w_K\ (k<K),\qquad w'_K=0.
+    \]
+    This leaves $(K-1)p$ free coefficients.
+  \end{definitionbox}
+  \begin{itemize}
+    \item The fitted probabilities survive the change of coordinates.
+    \item The baseline fixes this ambiguity, not rank deficiency or separation.
+  \end{itemize}
+  \note{The common factor exp(c) cancels in numerator and denominator. At parameter level, replacing W by W plus a times the all-ones row adds c(x)=tilde x transposed a to every score for that input. Here tilde x is the augmented feature vector. Subtracting w_K from all columns therefore preserves the entire conditional distribution. A sum-to-zero constraint is another possible convention. Additional data conditions are needed for a unique finite maximum-likelihood solution. A penalty can select a representative, so a penalty specified in one parameterization must be transformed carefully before claiming equivalence to another. The proof here is direct algebra from the softmax definition in \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S10 POINT: Subtracting the row maximum avoids exponent overflow without changing probabilities.
+% LAYOUT: Stable probability and loss equations. REVEAL: Static.
+\begin{frame}{Stable computation uses score differences}
+  \lead{For one row, set $m=\max_k z_k$.}
+  \[
+    \pi_k=\frac{e^{z_k-m}}{\sum_j e^{z_j-m}}.
+  \]
+  \begin{definitionbox}
+    \[
+      \ell(z,y)=(m-z_y)+\log\sum_j e^{z_j-m}.
+    \]
+    Every exponential is at most $1$, and at least one equals $1$.
+  \end{definitionbox}
+  \begin{takeaway}
+    $(1002,1001,1000)$ gives exactly the same probabilities as $(2,1,0)$.
+    Compute the loss from logits to avoid taking $\log(0)$ after underflow.
+  \end{takeaway}
+  \note{This is a numerical use of common-shift invariance, distinct from choosing a fixed baseline class to parameterize the model. Large negative shifted logits can underflow to zero, but the denominator still contains a one. Computing the log-likelihood directly in the displayed form retains a finite loss for ordinary finite logits even when a tiny probability would round to zero. Prefer a library's fused log-softmax or cross-entropy operation. The subtract-maximum procedure is described in Bengio et al., A Neural Probabilistic Language Model, page 1146, \url{https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf}.}
+\end{frame}
+
+% S11 POINT: Linear logits create linear winning-class boundaries in the feature plane.
+% LAYOUT: Two-dimensional native decision-region figure with compact equations. REVEAL: Static.
+\begin{frame}{Three classes partition the feature plane}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.58\textwidth}
+      \logfig{softmax-boundaries}
+    \end{column}
+    \begin{column}{0.39\textwidth}
+      \small
+      Constructed scores:
+      \[
+        z_1=u_1,\quad z_2=u_2,\quad z_3=0.
+      \]
+      A boundary between winning classes $j$ and $k$ satisfies
+      \[
+        \widetilde x^\top(w_j-w_k)=0.
+      \]
+      Here $\widetilde x=(1,u_1,u_2)^\top$.
+      \par Black segments mark ties for the largest score.
+    \end{column}
+  \end{columns}
+  \note{The regions are analytical, not estimated from a dataset. Class 1 wins when u1 is at least u2 and at least zero. Class 2 wins when u2 is at least u1 and at least zero. Class 3 wins when both features are nonpositive. A pairwise equality line is an actual decision boundary only where those tied classes achieve the largest score. For example, the negative part of u1 equals u2 lies inside class 3 and is not a boundary. The geometry is linear in the chosen features. A nonlinear learned feature map can yield curved boundaries in the original inputs. Reference for the underlying logits: \url{https://cs229.stanford.edu/main_notes.pdf}.}
+\end{frame}
+
+% S12 POINT: Temperature changes confidence for fixed logits without changing their order.
+% LAYOUT: Analytical temperature curves and two caveats. REVEAL: Static.
+\begin{frame}{Temperature changes concentration}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.55\textwidth}
+      \logfig{softmax-temperature}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \small
+      For fixed logits and $T>0$,
+      \[
+        \pi_k(T)=\frac{e^{z_k/T}}{\sum_j e^{z_j/T}}.
+      \]
+      \begin{itemize}
+        \item Larger $T$ spreads probability more evenly.
+        \item The largest score and predicted class stay unchanged.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \begin{takeaway}
+    Softer probabilities do not automatically imply better calibration.
+    Fit a calibration temperature on held-out labeled data.
+  \end{takeaway}
+  \note{The graph fixes z=(2,1,0). As T tends to infinity the distribution approaches uniform. As T tends to zero from above it concentrates on the unique maximum here; tied maxima would share the limiting mass. Positive temperature preserves all score orderings, although it changes sampling behavior. Calibration concerns whether predicted probabilities match observed frequencies over data, not how uncertain one output looks. A temperature chosen to minimize held-out negative log-likelihood is a fitted calibration method, with generalization assessed separately. Source: Guo et al., On Calibration of Modern Neural Networks, Section 4, \url{https://proceedings.mlr.press/v70/guo17a/guo17a.pdf}.}
+\end{frame}
+
+% S13 POINT: Learned features let the same categorical output likelihood serve vision and language.
+% LAYOUT: Two vertically separated application equations. REVEAL: Static.
+\begin{frame}{Categorical outputs in vision and language}
+  \textbf{Image classification}\par\vspace{-2pt}
+  \[
+    \Pr(y=k\mid\text{image})
+      =\operatorname{softmax}\!\left(A^\top h(\text{image})+b\right)_k.
+  \]
+  {\small AlexNet used a 1000-class softmax output above learned visual features.}
+
+  \vspace{0.18cm}
+  \textbf{Next-token prediction}\par\vspace{-2pt}
+  \[
+    \Pr(v_t=k\mid v_{<t})=\operatorname{softmax}(z_t)_k,
+    \qquad J_{\mathrm{seq}}=-\sum_t\log\Pr(v_t\mid v_{<t}).
+  \]
+  {\small The observed next token selects one vocabulary probability at each position.}
+  \note{A neural classifier can learn h jointly with its linear output layer. Its final softmax has the categorical likelihood studied here, while the full model can be nonlinear in the original input. AlexNet's 1000-way output and multinomial logistic objective are described in Section 3.5: \url{https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf}. Neural language models also use a categorical output distribution, historically over words and now often over subword tokens. Bengio et al. give the softmax output and corpus log-likelihood on page 1142: \url{https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf}. The Transformer's decoder-output softmax appears in Section 3.4: \url{https://arxiv.org/html/1706.03762v7}. The sequence factorization conditions on preceding tokens; it does not assume the tokens themselves are independent.}
+\end{frame}
+
+% S14 POINT: Attention normalizes weights over positions, which is a different statistical role.
+% LAYOUT: Attention equation followed by a two-row comparison. REVEAL: Static.
+\begin{frame}{Softmax also supplies attention weights}
+  \[
+    A=\operatorname{softmax}_{\mathrm{row}}\!\left(
+      \frac{QK_{\!\mathrm{key}}^\top}{\sqrt{d_k}}\right),
+    \qquad H=A V.
+  \]
+  \begin{center}
+    \small
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabularx}{0.97\textwidth}{lYY}
+      \toprule
+      Use & Normalize over & Meaning of an entry \\
+      \midrule
+      Output classifier & Classes or vocabulary & Probability of a target label \\
+      Attention row & Available key positions & Weight in a mixture of value vectors \\
+      \bottomrule
+    \end{tabularx}
+  \end{center}
+  \begin{takeaway}
+    Softmax attention is not itself a label-likelihood classifier.
+    Its weights help construct the representations used for prediction.
+  \end{takeaway}
+  \note{For each query, softmax normalizes compatibility scores across available key positions. The resulting row weights mix value vectors. In the displayed equation, K_key denotes the key matrix, distinct from the number K of output classes, and d_k is the key dimension. Without dropout, and with at least one allowed key, each attention row sums to one. Causal masks remove forbidden positions before normalization. The standard attention layer does not assign a categorical target label to each query and train that row with the supervised label likelihood derived earlier. The output layer can separately use a softmax over vocabulary with a token likelihood. Source: Vaswani et al., Attention Is All You Need, Sections 3.2.1 and 3.4, \url{https://arxiv.org/html/1706.03762v7}; canonical paper record: \url{https://arxiv.org/abs/1706.03762}.}
+\end{frame}

@@ -1,0 +1,224 @@
+\section{Optimization with gradient descent}
+% Plan: interpret per-observation loss / probability-loss curves / static.
+\begin{frame}[t]{A confident mistake incurs a large loss}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.60\textwidth}\logfig{logloss}\end{column}
+\begin{column}{.36\textwidth}\small
+\[
+\ell(y,\pi)=\begin{cases}
+-\log\pi,&y=1,\\[3pt]
+-\log(1-\pi),&y=0.
+\end{cases}
+\]
+For an observed positive label:
+\[
+\pi=0.9\Rightarrow\ell\approx0.105,
+\]
+\[
+\pi=0.01\Rightarrow\ell\approx4.605.
+\]
+\end{column}
+\end{columns}
+\begin{takeaway}The loss uses probability confidence, not just the predicted class.\end{takeaway}
+\note{This is loss as a function of a single predicted probability. It is different from the later optimization curve, which shows average loss against iteration. For a positive label the loss diverges as its assigned probability approaches zero; the negative-label curve is reflected horizontally. The curves are analytical and the numerical examples use natural logs.}
+\end{frame}
+
+% Plan: derive the score derivative / progressive derivation / reveal cancellation.
+\begin{frame}[t]{The derivative becomes a prediction residual}
+\lead{For one observation: $\ell=-y\log\pi-(1-y)\log(1-\pi)$ and $\pi=\sigm(z)$}
+\begin{definitionbox}
+\[
+\frac{\partial\ell}{\partial\pi}=-\frac{y}{\pi}+\frac{1-y}{1-\pi},
+\qquad \frac{\partial\pi}{\partial z}=\pi(1-\pi).
+\]
+\uncover<2->{\[
+\frac{\partial\ell}{\partial z}
+=\left(-\frac{y}{\pi}+\frac{1-y}{1-\pi}\right)\pi(1-\pi)
+=\boxed{\pi-y}.
+\]}
+\end{definitionbox}
+\uncover<2->{\begin{takeaway}The model probability minus the observed label drives the update.\end{takeaway}}
+\note{Pause before multiplying the two derivatives. The sigmoid derivative cancels the denominators introduced by the Bernoulli log loss. For a positive example with low probability, pi minus y is negative, so descent tends to increase its score. Do not add another sigmoid-derivative factor after this cancellation. All expressions are for finite scores.}
+\end{frame}
+
+% Plan: assemble gradients / matrix equations / reveal link to OLS.
+\begin{frame}[t]{From one observation to the whole sample}
+\begin{definitionbox}
+\[
+\nabla_\theta\ell_i=(\pi_i-y_i)\widetilde x_i,
+\qquad J(\theta)=\frac1n\sum_{i=1}^n\ell_i.
+\]
+\[
+\boxed{\nabla J(\theta)=\frac1nX^{\mathsf T}(\pi-y)},
+\qquad \pi=\sigm(X\theta).
+\]
+\end{definitionbox}
+\uncover<2->{\small
+\begin{tabularx}{\textwidth}{@{}lYY@{}}\toprule
+&\textbf{Prediction}&\textbf{Gradient of mean loss}\\\midrule
+Least squares&$X\theta$&$X^{\mathsf T}(X\theta-y)/n$\\
+Logistic regression&$\sigm(X\theta)$&$X^{\mathsf T}(\pi-y)/n$\\\bottomrule
+\end{tabularx}}
+\note{Least squares in this table uses SSE divided by 2n; logistic regression uses mean binary cross-entropy without a factor of one half. The algebraic pattern is the same, but the predictions and curvature differ. The intercept is already represented by the first column of X.}
+\end{frame}
+
+% Plan: curvature and convexity / two equations / reveal implication.
+\begin{frame}[t]{The logistic objective is convex}
+\begin{definitionbox}
+\[
+\nabla^2J(\theta)=\frac1nX^{\mathsf T}D(\theta)X,
+\quad D(\theta)=\diag\!\bigl(\pi_i(1-\pi_i)\bigr).
+\]
+\[
+v^{\mathsf T}\nabla^2J(\theta)v
+=\frac1n\sum_i\pi_i(1-\pi_i)(\widetilde x_i^{\mathsf T}v)^2\ge0.
+\]
+\end{definitionbox}
+\uncover<2->{\small
+\begin{itemize}\setlength{\itemsep}{.15cm}
+\item Every finite stationary point is a global minimum.
+\item Full column rank gives positive curvature at finite $\theta$.
+\end{itemize}
+\begin{takeaway}Convexity does not by itself guarantee that a finite minimizer exists.\end{takeaway}}
+\note{D has strictly positive diagonal entries at finite scores, so a full-column-rank X gives a positive-definite Hessian there. Curvature can nevertheless approach zero as scores diverge. Later the two-point separation example shows a strictly convex objective with an unattained infimum. Feature scaling and near-collinearity still influence optimization.}
+\end{frame}
+
+% Plan: algorithm / numbered procedure / static.
+\begin{frame}[t]{Gradient descent for logistic regression}
+\lead{No general OLS-style closed form. Initialize $\theta^{(0)}=0$; choose $\eta>0$}
+\begin{definitionbox}
+\[
+\begin{aligned}
+z^{(t)}&=X\theta^{(t)},\\[3pt]
+\pi^{(t)}&=\sigm\!\left(z^{(t)}\right),\\[3pt]
+g^{(t)}&=\frac1nX^{\mathsf T}(\pi^{(t)}-y),\\[3pt]
+\theta^{(t+1)}&=\theta^{(t)}-\eta g^{(t)}.
+\end{aligned}
+\]
+\end{definitionbox}
+\small Monitor the objective and $\|g^{(t)}\|_2$; use a maximum iteration count.
+\note{This is full-batch gradient descent. Each update costs O(np) and does not require a matrix inverse. At zero initialization all binary probabilities equal one half. For large datasets one can replace the full gradient by a mini-batch average, producing stochastic rather than necessarily monotone loss traces. Fit any feature scaling on training data only.}
+\end{frame}
+
+% Plan: arithmetic example / table and reveal / two stages.
+\begin{frame}[t]{One gradient step by hand}
+\lead{A separate three-observation example: $\theta^{(0)}=(b,w)=(0,0)$ and $\eta=1$}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.34\textwidth}
+\small\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}rrr@{}}\toprule
+$x_i$&$y_i$&$\pi_i^{(0)}$\\\midrule
+$-1$&$0$&$1/2$\\
+$0$&$0$&$1/2$\\
+$1$&$1$&$1/2$\\\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{.61\textwidth}
+\logprompt{Compute the average residual and its feature-weighted average.}
+\uncover<2->{\[
+g^{(0)}=\begin{bmatrix}1/6\\-1/3\end{bmatrix},
+\qquad\theta^{(1)}=\begin{bmatrix}-1/6\\1/3\end{bmatrix}.
+\]
+\[J(\theta^{(0)})=0.69315\;\longrightarrow\;0.56688.\]}
+\end{column}
+\end{columns}
+\note{Pause before the numerical gradient. Average the residuals (.5,.5,-.5) to get 1/6. Average x times residual to get -1/3. At the new parameters, the three scores are (-.5,-1/6,1/6). The loss is computed using natural logarithms. This three-point example is separable and is only used to show one update; the following convergence experiment uses the earlier 20-point overlapping sample.}
+\end{frame}
+
+% Plan: learning-rate guarantee / spectral bound / reveal safe step.
+\begin{frame}[t]{How large can the learning rate be?}
+\lead{Since $0<\pi_i(1-\pi_i)\le1/4$, the curvature has a global bound}
+\begin{definitionbox}
+\[
+0\preceq\nabla^2J(\theta)\preceq\frac{X^{\mathsf T}X}{4n},
+\qquad \overline L=\frac{\|X\|_2^2}{4n}.
+\]
+\uncover<2->{\[
+J(\theta-\eta g)\le J(\theta)
+-\eta\left(1-\frac{\overline L\eta}{2}\right)\|g\|_2^2.
+\]}
+\end{definitionbox}
+\uncover<2->{\begin{takeaway}$0<\eta\le1/\overline L$ is a conservative choice for monotone descent.\end{takeaway}}
+\note{The norm of X is its spectral norm, so its square is the largest eigenvalue of X transpose X. The displayed descent inequality follows from the smoothness bound with g equal to the gradient. The inequality also gives descent for 0<eta<2/Lbar, but eta at most 1/Lbar is a simple conservative rule. This bound concerns the unregularized mean BCE objective; adding a slope ridge penalty changes the bound. Backtracking is a practical alternative.}
+\end{frame}
+
+% Plan: actual optimization experiment / full-width numerical plot / static.
+\begin{frame}[t]{Loss curves: the step size changes the trajectory}
+\lead{The 20-point defect sample; feature $x=(x_{\rm raw}-5)/2$; $\theta^{(0)}=0$}
+\begin{center}\begin{minipage}{.89\textwidth}\logfig{opt-loss}\end{minipage}\end{center}
+\small $\overline L=0.47308$. All curves minimize the same mean binary cross-entropy.
+\note{This figure is generated by examples/generate_optimization.py, not drawn by hand. The rates are .1/Lbar, 1/Lbar and 10/Lbar. All use the same fixed 20 observations. The safe rate decreases the loss from .693147 to .411371; the very large rate oscillates. A rate above the sufficient bound need not diverge on every dataset, so describe the observed oscillation rather than asserting a universal outcome. This is a training loss curve and does not by itself establish generalization.}
+\end{frame}
+
+% Plan: optimization geometry / native contours and trajectory / static.
+\begin{frame}[t]{Gradient descent moves across loss contours}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.65\textwidth}\logfig{opt-contour}\end{column}
+\begin{column}{.31\textwidth}\small
+Each contour has the same mean loss.
+\vspace{.2cm}\par
+Start: $(b,w)=(0,0)$.
+\vspace{.2cm}\par
+Shown: first ten updates with $\eta=1/\overline L$.
+\vspace{.2cm}\par
+The same run produces the green loss curve.
+\end{column}
+\end{columns}
+\note{All contour coordinates are computed from the actual mean BCE of the fixed defect sample. They are not arbitrary ellipses. The script solves for points on five loss levels and checks their objective residuals. The star marks the independently computed optimum. The feature is still (raw intensity minus five)/two, and the axes are intercept and slope in these coordinates.}
+\end{frame}
+
+% Plan: connect fitted loss to probabilities / plot plus numerical values / static.
+\begin{frame}[t]{The optimized score gives a probability curve}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.63\textwidth}\logfig{opt-fit}\end{column}
+\begin{column}{.33\textwidth}\small
+Scaled input:
+\[x=\frac{x_{\rm raw}-5}{2}.\]
+Fitted score:
+\[z=-0.09815+1.57004x.\]
+\[J\approx0.41137.\]
+The labels overlap; the optimum has finite coefficients.
+\end{column}
+\end{columns}
+\vfill\begin{takeaway}A good probability fit need not assign probability one to every observed label.\end{takeaway}
+\note{The fit is the converged gradient-descent solution for the same 20-point dataset. An independent Newton computation supplies a high-accuracy reference, and the script checks agreement; Newton is not a required lecture topic. The observations are constructed. The sensor feature scaling is explicit because it determines both the coefficient units and the safe learning-rate bound.}
+\end{frame}
+
+% Plan: finite-MLE caveat / analytical curve and equation / static.
+\begin{frame}[t]{Separable data can send the MLE to infinity}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.55\textwidth}
+\begin{tikzpicture}\begin{axis}[width=\linewidth,height=4.3cm,xmin=0,xmax=9,ymin=0,ymax=.75,grid=major,grid style={black!10},xlabel={Slope $w$},ylabel={Mean logistic loss},font=\scriptsize,tick label style={font=\scriptsize},label style={font=\scriptsize}]
+\addplot[blueplot,thick,domain=0:9,samples=101]{ln(1+exp(-x))};
+\end{axis}\end{tikzpicture}
+\end{column}
+\begin{column}{.41\textwidth}\small
+Two observations: $(-1,0)$ and $(1,1)$; let $b=0$.
+\[
+J(w)=\log(1+e^{-w}).
+\]
+\[
+J(w)\downarrow0\quad\text{as }w\to\infty.
+\]
+No finite $w$ attains zero loss.
+\end{column}
+\end{columns}
+\begin{takeaway}A vanishing loss can accompany exploding coefficients. Regularization can prevent this behavior.\end{takeaway}
+\note{This simple full-rank two-observation example is completely separable. The infimum is zero but no finite unregularized maximum-likelihood estimate exists. For this example adding lambda w squared over two with lambda>0 yields a finite optimum. In general an unpenalized intercept can still diverge when only one class is observed. Near separation also leads to weak curvature.}
+\end{frame}
+
+% Plan: numerical implementation / equivalent loss formula / static.
+\begin{frame}[t]{Evaluate the loss without overflow}
+\begin{definitionbox}
+\[
+\ell(y,z)=\log(1+e^z)-yz
+=\boxed{\max(z,0)-yz+\log(1+e^{-|z|})}.
+\]
+\end{definitionbox}
+\small
+\begin{itemize}\setlength{\itemsep}{.24cm}
+\item Compute cross-entropy directly from scores (logits).
+\item Avoid taking $\log$ of probabilities rounded to $0$ or $1$.
+\item Check training loss, held-out performance, and coefficient size.
+\end{itemize}
+\end{frame}

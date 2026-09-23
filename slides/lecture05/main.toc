@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{Motivation}{3}{0}{1}
+\beamer@sectionintoc {2}{Problem formulation}{12}{0}{2}
+\beamer@sectionintoc {3}{Maximum likelihood: from least squares to cross-entropy}{23}{0}{3}
+\beamer@sectionintoc {4}{Optimization with gradient descent}{45}{0}{4}
+\beamer@sectionintoc {5}{Softmax regression}{63}{0}{5}

@@ -1,0 +1,23 @@
+% Native analytic figure: standard Gaussian residual density, not empirical data.
+\begin{tikzpicture}
+\begin{axis}[
+  width=\linewidth,height=4.35cm,
+  xmin=-3.4,xmax=3.4,ymin=0,ymax=.445,
+  axis lines=left,
+  xlabel={$r=y-\widetilde x^{\mathsf T}\theta$},
+  ylabel={density},
+  xtick={-3,-2,-1,0,1,2,3},
+  ytick={0,.2,.4},
+  tick label style={font=\small},
+  label style={font=\small},
+  grid=major,grid style={black!8},
+  clip=false,
+  samples=121,domain=-3.4:3.4,
+  title={$\sigma=1$},title style={font=\small}
+]
+\addplot[blueplot,very thick] {exp(-x^2/2)/sqrt(2*pi)};
+\addplot[redplot,densely dashed,thick] coordinates {(2,0) (2,.0539909665)};
+\addplot[only marks,mark=*,mark size=2.3pt,redplot]
+  coordinates {(0,.3989422804) (2,.0539909665)};
+\end{axis}
+\end{tikzpicture}

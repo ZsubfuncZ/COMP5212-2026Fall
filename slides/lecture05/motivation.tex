@@ -1,0 +1,99 @@
+
+% Plan: learning goals / short list / static.
+\begin{frame}[t]{Learning Goals}
+\vspace{.03cm}
+{\fontsize{13.2}{16.2}\selectfont
+By the end of the lecture, you should be able to:
+\begin{itemize}\setlength{\itemsep}{.18cm}
+\item formulate logistic regression for binary outcomes;
+\item derive least squares and logistic loss from likelihood;
+\item derive and apply the gradient-descent update;
+\item explain softmax regression and its categorical likelihood;
+\item recognize softmax in classifiers, language models, and attention.
+\end{itemize}}
+\note{Use these goals as the map. Students already know least squares and basic matrix derivatives; connect each new expression to those earlier ideas. The final application distinguishes class probabilities from attention weights.}
+\end{frame}
+
+\section{Motivation}
+% Plan: bridge from previous lecture / comparison / reveal probability.
+\begin{frame}[t]{Same inputs, a different prediction}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.47\textwidth}
+\begin{definitionbox}
+\textbf{Linear regression}\par
+Sensor readings $x$\par\vspace{3pt}
+$\longrightarrow$ electricity consumption $Y\in\R$
+\[\widehat y=b+w^{\mathsf T}x.\]
+\end{definitionbox}
+\end{column}
+\begin{column}{.47\textwidth}
+\begin{definitionbox}
+\textbf{Binary classification}\par
+Sensor readings $x$\par\vspace{3pt}
+$\longrightarrow$ defective or acceptable $Y\in\{0,1\}$
+\uncover<2->{\[\pi(x)=\Pr(Y=1\mid x).\]}
+\end{definitionbox}
+\end{column}
+\end{columns}
+\vspace{.3cm}
+\logprompt{What should replace a real-valued prediction?}
+\uncover<2->{\begin{takeaway}Predict a probability first; use it to make a decision.\end{takeaway}}
+\note{Pause before revealing the right-hand probability. Reuse the manufacturing setting from the linear-regression lecture: the inputs can be similar even though the output is now an event. This changes the conditional response model and the fitting criterion.}
+\end{frame}
+% Plan: application / figure or comparison / staged reveal.
+\begin{frame}[t]{Motivation: detecting defective parts}
+\lead{A sensor measures process intensity. Inspection records whether each part is defective}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.59\textwidth}\logfig{motivation}\end{column}
+\begin{column}{.38\textwidth}\small
+$x$: sensor measurement\par
+$y=1$: defective\par
+$y=0$: acceptable
+\vspace{.25cm}\par
+\logprompt{What should we predict for the next part?}
+\uncover<2->{\vspace{.15cm}\par
+\[\Pr(Y=1\mid x).\]
+A probability expresses uncertainty.}
+\end{column}
+\end{columns}
+\note{Ask students whether the next part must have the same label as its nearest neighbor. The overlap motivates a probability rather than a deterministic physical rule. The sensor is only one available feature; temperature, vibration and machine age could also be included. This is a realistic application setting, but the observations are deliberately constructed, not an industrial dataset. Do not imply the association is causal.}
+\end{frame}
+
+% Plan: application / figure or comparison / staged reveal.
+\begin{frame}[t]{Probabilities and decisions}
+\small\renewcommand{\arraystretch}{1.6}
+\begin{tabularx}{\textwidth}{@{}cYY@{}}
+\toprule
+\textbf{Part}&\textbf{Predicted defect probability}&\textbf{Decision at threshold $0.5$}\\\midrule
+A&$0.55$&Flag\\
+B&$0.95$&Flag\\\bottomrule
+\end{tabularx}\par
+\vspace{.35cm}
+\logprompt{Do these predictions carry the same information?}
+\uncover<2->{\vspace{.2cm}\par\small
+\begin{itemize}\setlength{\itemsep}{.2cm}
+\item Probabilities help rank inspection priorities.
+\item A decision also depends on the cost of each mistake.
+\end{itemize}}
+\vfill
+\begin{takeaway}First estimate a probability. Then choose the action appropriate to the application.\end{takeaway}
+\note{The two probabilities are hypothetical. A binary flag discards the difference between 55 percent and 95 percent risk. Ask which part should be inspected first when only one inspection slot is available and costs are otherwise equal. The decision threshold can be selected according to the application; this lecture focuses on fitting the probabilities. A numerical probability is useful only to the extent that it agrees with the data-generating distribution; logistic form alone does not guarantee calibration.}
+\end{frame}
+
+% Plan: application / figure or comparison / staged reveal.
+\begin{frame}[t]{OLS with binary responses}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.59\textwidth}\logfig{ols-binary}\end{column}
+\begin{column}{.38\textwidth}\small
+For $Y\in\{0,1\}$,
+\[\E[Y\mid x]=\Pr(Y=1\mid x).\]
+\vspace{.12cm}\par
+An unconstrained line can predict below $0$ or above $1$.
+\uncover<2->{\vspace{.2cm}\par
+\logprompt{How can a linear score become a valid probability?}}
+\end{column}
+\end{columns}
+\vfill
+\begin{takeaway}OLS can fit binary labels. Its unrestricted linear predictions need not respect probability bounds.\end{takeaway}
+\note{Avoid claiming that least squares cannot be applied to binary outcomes or that it requires Gaussian responses simply to define an estimator. The issue shown here is the unrestricted linear probability model: its predictions can leave the unit interval, and the Bernoulli conditional variance changes with the mean. Squared probability error is itself a valid proper scoring rule; the Bernoulli likelihood motivates the cross-entropy used in this lecture. The OLS line is computed from the same constructed data as the motivation plot.}
+\end{frame}

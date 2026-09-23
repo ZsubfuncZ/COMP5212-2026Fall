@@ -1,0 +1,77 @@
+% Beamer style rebuilt from the supplied lecture3.pdf reference.
+% Standard TeX Live / Overleaf packages only. No system font paths.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usefonttheme[onlymath]{serif}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{graphicx}
+\usepackage{tikz,pgfplots}
+\usepackage[most]{tcolorbox}
+\usepackage{pgfpages}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{calc,arrows.meta,positioning}
+
+\definecolor{titlered}{HTML}{D62B09}
+\definecolor{bulletgreen}{HTML}{A8C99F}
+\definecolor{definitionblue}{HTML}{E9F0F9}
+\definecolor{takeawaypeach}{HTML}{FBECE6}
+\definecolor{blueplot}{HTML}{4E79A7}
+\definecolor{redplot}{HTML}{D95F59}
+\definecolor{lightplot}{HTML}{8FB8DA}
+\definecolor{inkplot}{HTML}{111111}
+\setbeamercolor{normal text}{fg=black,bg=white}
+\setbeamercolor{frametitle}{fg=titlered,bg=white}
+\setbeamercolor{structure}{fg=titlered}
+\setbeamercolor{itemize item}{fg=bulletgreen}
+\setbeamercolor{itemize subitem}{fg=bulletgreen}
+\setbeamercolor{footline}{fg=black,bg=white}
+\setbeamercolor{block title}{fg=black,bg=definitionblue}
+\setbeamercolor{block body}{fg=black,bg=definitionblue}
+\setbeamersize{text margin left=0.75cm,text margin right=0.75cm}
+\setbeamerfont{frametitle}{size=\fontsize{22}{25},series=\bfseries}
+\setbeamerfont{footline}{size=\fontsize{5.5}{7}\selectfont}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\raise0.1ex\hbox{\small$\bullet$}}
+\setbeamertemplate{itemize subitem}{\raise0.1ex\hbox{\scriptsize$\bullet$}}
+\setbeamertemplate{frametitle}{%
+  \vskip0.08cm
+  \begin{beamercolorbox}[wd=\textwidth,center,sep=0pt]{frametitle}
+    \usebeamerfont{frametitle}\strut\insertframetitle\strut\par
+  \end{beamercolorbox}
+  \vskip0.25cm
+}
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=0.25cm,dp=0.10cm,center]{footline}
+    \usebeamerfont{footline}\insertframenumber
+  \end{beamercolorbox}
+}
+\setlength{\parskip}{3pt}
+\setlength{\abovedisplayskip}{6pt}
+\setlength{\belowdisplayskip}{6pt}
+\setlength{\abovedisplayshortskip}{4pt}
+\setlength{\belowdisplayshortskip}{4pt}
+
+\newcommand{\lead}[1]{{\small #1\par}\vspace{0.12cm}}
+\newtcolorbox{definitionbox}{enhanced,colback=definitionblue,
+  colframe=definitionblue,boxrule=0pt,arc=3pt,
+  fontupper=\small,
+  before upper={\setlength{\abovedisplayskip}{4pt}\setlength{\belowdisplayskip}{4pt}\setlength{\jot}{2pt}},
+  left=6pt,right=6pt,top=4pt,bottom=4pt,
+  before skip=4pt,after skip=5pt}
+\newtcolorbox{takeaway}{enhanced,colback=takeawaypeach,
+  colframe=takeawaypeach,boxrule=0pt,arc=3pt,
+  fontupper=\small,left=6pt,right=6pt,top=4pt,bottom=4pt,
+  before skip=6pt,after skip=0pt}
+\newcommand{\demolink}[1]{\href{https://regression-lab-graduate-2026.whu38f.chatgpt.site/\##1}{\textcolor{titlered}{\textbf{Open web demo: #1}}}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Col}{Col}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\setbeameroption{hide notes}
