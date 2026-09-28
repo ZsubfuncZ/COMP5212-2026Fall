@@ -1,0 +1,98 @@
+{
+  "seed": 5212,
+  "n_train": 64,
+  "n_validation": 800,
+  "noise_sd": 0.32,
+  "root_depth": 0,
+  "depth_results": [
+    {
+      "depth": 1,
+      "train_mse": 0.1710721862262165,
+      "validation_mse": 0.23190860369969404
+    },
+    {
+      "depth": 2,
+      "train_mse": 0.10666992760991306,
+      "validation_mse": 0.18680962026633774
+    },
+    {
+      "depth": 3,
+      "train_mse": 0.07415036930573154,
+      "validation_mse": 0.16614171678687498
+    },
+    {
+      "depth": 4,
+      "train_mse": 0.04849579290655061,
+      "validation_mse": 0.14811595618942225
+    },
+    {
+      "depth": 5,
+      "train_mse": 0.030127235314025974,
+      "validation_mse": 0.1837996709248481
+    },
+    {
+      "depth": 6,
+      "train_mse": 0.01629448085597302,
+      "validation_mse": 0.18867499117403852
+    },
+    {
+      "depth": 7,
+      "train_mse": 0.007417762149765219,
+      "validation_mse": 0.19226431231452012
+    },
+    {
+      "depth": 8,
+      "train_mse": 0.0033738736658903397,
+      "validation_mse": 0.19766608192262314
+    },
+    {
+      "depth": 9,
+      "train_mse": 0.0014754380684917805,
+      "validation_mse": 0.19785759167402261
+    },
+    {
+      "depth": 10,
+      "train_mse": 0.0002974372351651608,
+      "validation_mse": 0.19817358934881113
+    }
+  ],
+  "ols_intercept": 3.200176816083634,
+  "ols_slope": -1.544479062157898,
+  "tree_depth2": {
+    "value": 2.403708884525107,
+    "n": 64,
+    "cut": 0.46339004781192233,
+    "left": {
+      "value": 3.0308207373555236,
+      "n": 28,
+      "cut": 0.06287214945131314,
+      "left": {
+        "value": 2.3475310009632255,
+        "n": 3
+      },
+      "right": {
+        "value": 3.1128155057225997,
+        "n": 25
+      }
+    },
+    "right": {
+      "value": 1.9159552212125606,
+      "n": 36,
+      "cut": 0.8558716942750438,
+      "left": {
+        "value": 1.7736105855266746,
+        "n": 28
+      },
+      "right": {
+        "value": 2.4141614461131606,
+        "n": 8
+      }
+    }
+  },
+  "bootstrap_B": 100,
+  "single_depth8_valid_mse": 0.19766608192262314,
+  "bagged_valid_mse": 0.15302375984955585,
+  "oob_fraction_mean": 0.36109375,
+  "six_point_sse_threshold_2.5": 10.75,
+  "six_point_sse_threshold_3.5": 1.3333333333333384
+}

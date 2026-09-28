@@ -1,0 +1,92 @@
+\documentclass[aspectratio=169,12pt]{beamer}
+\input{course-style.tex}
+\usepackage{booktabs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{matrix,fit,calc,backgrounds}
+\definecolor{forestgreen}{HTML}{4C7954}
+\setbeamercolor{enumerate item}{fg=forestgreen}
+\setbeamercolor{enumerate subitem}{fg=forestgreen}
+\setbeamercolor{block title}{fg=slideorange,bg=white}
+\setbeamercolor{block body}{fg=black,bg=white}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Gain}{\operatorname{Gain}}
+\newcommand{\sigmoid}{\operatorname{sigmoid}}
+\newcommand{\src}[1]{\SourceNote{#1}}
+\newcommand{\spaceditems}{\setlength{\itemsep}{0.30cm}}
+\tikzset{
+  decision/.style={draw=black,rounded corners=3pt,fill=bulletgray!25,align=center,minimum height=.70cm,inner sep=7pt,font=\small},
+  leaf/.style={draw=forestgreen,rounded corners=3pt,fill=bulletgreen!20,align=center,minimum height=.65cm,inner sep=7pt,font=\small},
+  orangebox/.style={draw=slideorange,rounded corners=3pt,fill=slideorange!5,align=center,minimum height=.7cm,inner sep=7pt,font=\small},
+  flow/.style={-{Latex[length=2.5mm]},line width=.8pt},
+  treeline/.style={line width=.8pt},
+}
+\hypersetup{pdftitle={Decision Trees, Random Forests, and XGBoost},pdfauthor={Zihan Zhang},pdfsubject={COMP 5212 Machine Learning}}
+\pdfstringdefDisableCommands{\def\translate#1{#1}}
+
+\newcommand{\SectionSlideN}[2]{%
+	\begin{frame}
+		\centering
+		\vfill
+		{\color{slideorange}\fontsize{29}{34}\selectfont\bfseries #1\par}
+		\vspace{0.38cm}
+		{\color{midgray}\fontsize{16}{21}\selectfont #2\par}
+		\vfill
+	\end{frame}
+}
+\definecolor{slideorange}{HTML}{FF5500}
+\definecolor{midgray}{HTML}{666666}
+
+\begin{document}
+
+% 1 ---------------------------------------------------------------------------
+\begin{frame}
+	\begin{tikzpicture}[remember picture, overlay]
+		\node[anchor=north west, inner sep=10pt] at (current page.north west)
+		{\includegraphics[width=6cm]{../source/logo.png}};
+	\end{tikzpicture}
+	
+	\centering
+	\vspace*{1.15cm}
+	{\fontsize{28}{32}\selectfont COMP 5212\par}
+	\vspace{0.35cm}
+	{\fontsize{30}{33}\selectfont Machine Learning\par}
+	\vspace{0.75cm}
+	{\Large Instructor: Zihan Zhang\par}
+	\vspace{0.35cm}
+	{\large Lecture 7: Decision Tree, Random Forest and XGboost\par}
+	
+\end{frame}
+% 2 ---------------------------------------------------------------------------
+\begin{frame}{Learning Goals}
+	  %	\centering
+  \begin{tikzpicture}[node distance=.65cm]
+    \node[decision,text width=3.1cm] (dt) {\textbf{Decision tree}\\Learn a partition};
+    \node[leaf,text width=3.1cm,right=of dt] (rf) {\textbf{Random forest}\\Average trees};
+    \node[orangebox,text width=3.1cm,right=of rf] (xgb) {\textbf{XGBoost}\\Add useful corrections};
+    \draw[flow] (dt)--(rf); \draw[flow] (rf)--(xgb);
+  \end{tikzpicture}
+  \vspace{.5cm}
+  
+\noindent By the end of the lecture, you should be able to:
+	\begin{itemize}\setlength{\itemsep}{.24cm}
+		\item explain the high-level idea of ensemble learning
+		\item explain how AdaBoost combines simple rules into a stronger classifier;
+		\item connect residual fitting to gradient descent in prediction space;
+	\end{itemize}
+
+\end{frame}
+
+	\SectionSlideN{Decision Trees}{}
+\input{sections/decision-trees.tex}
+	\SectionSlideN{Random Forests}{}
+\input{sections/random-forests.tex}
+\input{sections/rf-application.tex}
+	\SectionSlideN{XGboost}{}
+\input{sections/xgboost.tex}
+\input{sections/xgb-applications.tex}
+\input{sections/closing.tex}
+%\appendix
+%\input{sections/appendix.tex}
+\end{document}

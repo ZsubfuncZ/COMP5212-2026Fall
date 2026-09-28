@@ -1,0 +1,15 @@
+\begin{frame}[t]{Phase 3: Learning a Correction}
+\vspace{.42cm}
+\lead{We have built an additive classifier and seen how combinations can improve predictions.}
+\vspace{.28cm}
+\begin{definitionbox}
+\centering\vspace{.26cm}
+{\fontsize{21}{26}\selectfont What should the next model learn?\par}
+\vspace{.26cm}
+\end{definitionbox}
+\vspace{.48cm}
+\begin{takeaway}
+\textbf{Next:} Start with the current residuals, then let the loss define the correction targets.
+\end{takeaway}
+\note{Keep the additive model but change the fitting target. Squared loss leads to ordinary residuals; other differentiable losses lead to negative-gradient targets. The preceding recommendation case demonstrates model combination and should not be identified with the discrete AdaBoost algorithm. The next phase derives a sequential correction procedure explicitly.}
+\end{frame}

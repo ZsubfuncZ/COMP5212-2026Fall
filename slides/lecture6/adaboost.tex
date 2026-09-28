@@ -1,0 +1,319 @@
+% AdaBoost: behavior and computed example first, then exact stagewise theory.
+\section{AdaBoost}
+
+\begin{frame}[t]{Can Weak Rules Work Together?}
+\lead{Eight constructed observations. A threshold rule (a \emph{decision stump}) makes one split.}
+\centering\fig{adaboost-stump}
+\uncover<2->{\begin{takeaway}
+\prompt{Keep the first rule. Which observations should the next rule emphasize?}
+\end{takeaway}}
+\note{Open the ensemble mathematics with this concrete example. A stump is simply an if-then rule with one threshold: here predict minus one when x is below 2.5, otherwise plus one. No general tree construction is needed yet. The labels alternate in blocks: minus, plus, minus, plus. No one-dimensional stump can represent all three changes. The shown stump predicts minus below 2.5 and plus above it; observations 5 and 6 are wrong. Pause before revealing the question. All data are deliberately constructed, not measured. Both stump orientations are allowed. Here labels are minus one and plus one, unlike the zero/one convention used for Bernoulli likelihood.}
+\end{frame}
+
+\begin{frame}[t]{Two Kinds of Weight}
+\lead{Use labels $y_i\in\{-1,+1\}$ and rules $h_t(x)\in\{-1,+1\}$.}
+\begin{columns}[T,onlytextwidth]
+\column{.48\textwidth}
+\begin{definitionbox}
+\textbf{Weights on observations: $D_t(i)$}
+\[
+D_t(i)\ge0,\qquad \sum_iD_t(i)=1.
+\]
+Weighted error of the next rule:
+\[
+\epsilon_t=\sum_iD_t(i)\ind\{y_i\ne h_t(x_i)\}.
+\]
+\end{definitionbox}
+Start with $D_1(i)=1/n$; change the emphasis after each fitted rule.
+\column{.48\textwidth}
+\begin{definitionbox}
+\textbf{Weights on rules: $\alpha_t$}
+\[
+F_T(x)=\sum_{t=1}^{T}\alpha_t h_t(x).
+\]
+Prediction is a weighted vote:
+\[
+\widehat y(x)=\operatorname{sign}(F_T(x)).
+\]
+\end{definitionbox}
+A larger positive $\alpha_t$ gives that rule a stronger vote.
+\end{columns}
+\begin{takeaway}
+Fit a rule, set its vote weight, then change which observations matter most.
+\end{takeaway}
+\note{Introduce notation without an optimization objective yet. D is a probability distribution over the n training observations; it is not a distribution over labels. Alpha is a coefficient on a fitted rule and need not sum to one across rounds. F is a real-valued score and is not restricted to minus one and plus one. A positive F predicts plus one, a negative F predicts minus one; use a fixed tie rule. Later rounds reweight relative to correctness of the latest fitted rule, equivalently in proportion to exponential loss under the accumulated score. Weak in this introductory discussion describes a limited rule class, not an unqualified theorem assumption. The positive-edge condition needed for the guarantee will be stated explicitly when deriving the bound.}
+\end{frame}
+
+\begin{frame}[t]{AdaBoost: The Algorithm}
+\lead{Initialize $F_0(x)=0$ and $D_1(i)=1/n$. For $t=1,\ldots,T$:}
+\begin{enumerate}
+\setlength{\itemsep}{.12cm}
+\item Fit $h_t$ using observation weights $D_t$; calculate
+\[
+\epsilon_t=\sum_iD_t(i)\ind\{y_i\ne h_t(x_i)\}.
+\]
+\item If $0<\epsilon_t<1/2$, set $\displaystyle\alpha_t=\frac12\log\frac{1-\epsilon_t}{\epsilon_t}$.
+\item Update the score: $F_t(x)=F_{t-1}(x)+\alpha_t h_t(x)$.
+\item Update and normalize: $D_{t+1}(i)\propto D_t(i)e^{-\alpha_t y_i h_t(x_i)}$.
+\end{enumerate}
+\begin{takeaway}
+Predict $\widehat y(x)=\operatorname{sign}(F_T(x))$; fix a rule for ties.\par
+Stop for a perfect learner; stop or revise the rule class if no rule has $\epsilon_t<1/2$.
+\end{takeaway}
+\note{Present the recipe now and use the next two slides to see it work; derive both formulas from a single loss afterward. This is discrete binary AdaBoost, not multiclass SAMME or Real AdaBoost. For now the base learner searches simple threshold rules and their reversed orientations. With a perfect learner, one can return that learner directly, which avoids the infinite coefficient. If the weighted error is above one half and the learner class is closed under sign reversal, flip the prediction first; at one half there is no edge. A finite requested T is a maximum, not an obligation to proceed through these boundary cases. Use validation data to select model size in applications. Primary source: Freund and Schapire 1997; Schapire 2003 Figure 1 in the symmetric coefficient convention.}
+\end{frame}
+
+\begin{frame}[t]{One Update, New Weights}
+\begin{columns}[T,onlytextwidth]
+\column{.43\textwidth}
+\lead{The first stump misses points 5 and 6.}
+\[
+\epsilon_1=\frac28=\frac14,
+\quad \alpha_1=\frac12\log3\approx0.549.
+\]
+\begin{definitionbox}
+After normalization:
+\[
+D_2(i)=
+\begin{cases}
+1/4,&i\in\{5,6\},\\[2pt]
+1/12,&\text{otherwise}.
+\end{cases}
+\]
+\end{definitionbox}
+\begin{takeaway}
+The two mistakes now receive $1/2$ of the total weight.
+\end{takeaway}
+\column{.54\textwidth}
+\centering\fig{adaboost-weights}
+\end{columns}
+\note{Work out the normalization explicitly if time permits: raw correct weights are one over eight times one over square root three, raw mistake weights are one over eight times square root three, and Z is square root three over two. The bar chart is generated from exact rational weights, not hand-adjusted numbers. D2 is used to choose h2. It is not a prediction probability for any class. Reproducible evidence is in examples/adaboost_example.py and adaboost-results.json.}
+\end{frame}
+
+\begin{frame}[t]{Three Stumps, One Classifier}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\small
+\begin{tabular}{@{}cccc@{}}
+\toprule
+$t$ & $h_t(x)=+1$ when & $\epsilon_t$ & $\alpha_t$\\
+\midrule
+1 & $x\ge2.5$ & $1/4$ & $0.549$\\
+2 & $x\ge6.5$ & $1/6$ & $0.805$\\
+3 & $x<4.5$ & $1/5$ & $0.693$\\
+\bottomrule
+\end{tabular}
+\vspace{.18cm}
+\[
+F_3=0.549h_1+0.805h_2+0.693h_3.
+\]
+\begin{definitionbox}
+\[
+\begin{aligned}
+F_3(5)&=0.549-0.805-0.693<0,\\[3pt]
+F_3(3)&=0.549-0.805+0.693>0.
+\end{aligned}
+\]
+\end{definitionbox}
+\column{.50\textwidth}
+\centering\fig{adaboost-votes}
+\small Blue: $y=-1$.\quad Red: $y=+1$.
+\end{columns}
+\begin{takeaway}
+Training error after rounds 1, 2, 3: $25\%,\ 25\%,\ 0\%$.\quad
+No single stump can fit this pattern.
+\end{takeaway}
+\note{The numerical search considers thresholds 1.5 through 7.5 and both stump orientations. It breaks ties by the smallest threshold, then the positive orientation. The second-round distribution has individual weights one twelfth except observations 5 and 6 at one fourth. After round two, D3 for the pairs 1--2, 3--4, 5--6, 7--8 is respectively 0.05, 0.25, 0.15, 0.05 per observation. The third learner therefore has weighted error one fifth although its unweighted error is one half. Every round's exponential loss falls: 0.8660, 0.6455, 0.5164. Training classification error need not decrease on each round, because the optimized criterion is exponential loss. Zero training error here says nothing by itself about test performance. Displayed coefficients are rounded; the plotted scores use full precision.}
+\end{frame}
+
+\input{transition-02-theory.tex}
+
+\begin{frame}[t]{A Loss for the Accumulated Vote}
+\begin{columns}[T,onlytextwidth]
+\column{.46\textwidth}
+\begin{definitionbox}
+Labels: $y_i,h_t(x)\in\{-1,+1\}$.
+\[
+F_T(x)=\sum_{t=1}^{T}\alpha_t h_t(x).
+\]
+Predict the sign of $F_T(x)$.
+\end{definitionbox}
+Margin: $m_i=y_iF_T(x_i)$.\par
+$m_i>0$: correct.\quad $m_i<0$: incorrect.
+\begin{takeaway}
+Fit by reducing exponential loss:
+\[
+J(F)=\frac1n\sum_{i=1}^{n}e^{-y_iF(x_i)}.
+\]
+\end{takeaway}
+\column{.51\textwidth}
+\centering\fig{adaboost-margin}
+\end{columns}
+\note{We have seen the algorithm succeed on the constructed example. Now derive the algorithm from an objective, beginning with the signed margin. Recall that F is a real-valued score, not a probability. A positive margin means agreement between the observed sign and the predicted sign. Zero is a tie; fix a deterministic tie convention, and later count all zero margins as errors for a conservative bound. A correct example with a small margin still has nonzero loss. A very negative margin has a rapidly growing penalty. We use the mean loss; multiplying by n would not change the minimizer. Exponential loss is the optimization criterion for this derivation, not Bernoulli negative log likelihood.}
+\end{frame}
+
+\begin{frame}[t]{Stagewise Fitting and Weights}
+\lead{Hold $F_{t-1}$ fixed and add one new weak learner: $F_t=F_{t-1}+\alpha h$.}
+\[
+\begin{aligned}
+J(F_{t-1}+\alpha h)
+&=\frac1n\sum_i e^{-y_iF_{t-1}(x_i)}e^{-\alpha y_i h(x_i)}.
+\end{aligned}
+\]
+\uncover<2->{
+\begin{definitionbox}
+Normalize the old losses into a distribution over observations:
+\[
+D_t(i)=\frac{e^{-y_iF_{t-1}(x_i)}}{\sum_j e^{-y_jF_{t-1}(x_j)}},
+\qquad \sum_iD_t(i)=1.
+\]
+\end{definitionbox}
+\[
+J(F_{t-1}+\alpha h)
+=J(F_{t-1})\underbrace{\sum_iD_t(i)e^{-\alpha y_i h(x_i)}}_{Z_t(\alpha,h)}.
+\]
+}
+\note{The old model is fixed throughout this round, so its total exponential loss is a positive constant with respect to the new learner and its coefficient. Minimizing the new loss therefore means minimizing Z. This algebra derives the sample weights from the objective; reweighting is not an extra heuristic. An example with a large positive margin receives little weight, and an example with a negative margin receives more. At F zero, all weights are one over n. Source: Schapire's 2003 overview, Section 3; forward stagewise viewpoint in Friedman, Hastie and Tibshirani.}
+\end{frame}
+
+\begin{frame}[t]{Choosing a Weak Learner}
+\lead{For a binary prediction, $y_i h(x_i)$ is either $+1$ or $-1$.}
+\[
+\epsilon_t(h)=\sum_iD_t(i)\ind\{y_i\ne h(x_i)\}.
+\]
+\[
+\begin{aligned}
+Z_t(\alpha,h)
+&=\sum_{\text{correct}}D_t(i)e^{-\alpha}
+  +\sum_{\text{incorrect}}D_t(i)e^{\alpha}\\[3pt]
+&=\bigl(1-\epsilon_t(h)\bigr)e^{-\alpha}
+  +\epsilon_t(h)e^{\alpha}\\[3pt]
+&=e^{-\alpha}+\epsilon_t(h)\bigl(e^{\alpha}-e^{-\alpha}\bigr).
+\end{aligned}
+\]
+\uncover<2->{\begin{takeaway}
+For $\alpha>0$, choose a weak learner with the smallest weighted error:
+\[
+h_t\in\argmin_{h\in\mathcal H}\epsilon_t(h).
+\]
+\end{takeaway}}
+\note{The sum of weights on correct predictions is one minus epsilon because D is normalized. For a positive coefficient, the multiplier of epsilon is positive, so the same weak learner minimizes the objective at every fixed positive coefficient. In the finite example we enumerate all candidate stumps exactly. A practical tree-growing procedure may only approximately minimize weighted error. Assume the selected learner has an edge, epsilon below one half; when both orientations are available a learner worse than chance can be flipped.}
+\end{frame}
+
+\begin{frame}[t]{Deriving the Vote Weight}
+\lead{Fix $h_t$ and write $\epsilon_t=\epsilon_t(h_t)$, with $0<\epsilon_t<\tfrac12$.}
+\[
+Z_t(\alpha)=(1-\epsilon_t)e^{-\alpha}+\epsilon_t e^\alpha.
+\]
+\[
+\frac{dZ_t}{d\alpha}
+=-(1-\epsilon_t)e^{-\alpha}+\epsilon_t e^\alpha=0
+\quad\Longrightarrow\quad
+e^{2\alpha}=\frac{1-\epsilon_t}{\epsilon_t}.
+\]
+\uncover<2->{\begin{definitionbox}
+\[
+\boxed{\alpha_t=\frac12\log\frac{1-\epsilon_t}{\epsilon_t}}
+\qquad\text{and}\qquad
+Z_t''(\alpha)>0.
+\]
+\end{definitionbox}
+\begin{takeaway}
+Smaller weighted error gives a larger vote.\quad
+$\epsilon_t\uparrow\tfrac12\ \Longrightarrow\ \alpha_t\downarrow0$.
+\end{takeaway}}
+\note{Differentiate before revealing the solution. The second derivative is the original positive Z expression, so this stationary point is the unique minimizer in alpha. These are weights on learners, whereas D contains weights on observations. For epsilon equal to zero, the optimum is approached as alpha goes to infinity; stop with the perfect weak learner rather than computing an infinite coefficient. At epsilon equal to one half, alpha is zero and there is no improvement. The exact coefficient here uses no learning-rate shrinkage; adding shrinkage changes the exact-normalizer conclusions later.}
+\end{frame}
+
+\begin{frame}[t]{Why Mistakes Receive More Weight}
+\lead{Insert $F_t=F_{t-1}+\alpha_t h_t$ into the definition of $D_{t+1}$.}
+\begin{definitionbox}
+\[
+\boxed{D_{t+1}(i)=\frac{D_t(i)e^{-\alpha_t y_i h_t(x_i)}}{Z_t}},
+\qquad
+Z_t=\sum_jD_t(j)e^{-\alpha_t y_jh_t(x_j)}.
+\]
+\end{definitionbox}
+\[
+e^{-\alpha_t y_i h_t(x_i)}=
+\begin{cases}
+e^{-\alpha_t},&\text{correct prediction},\\[2pt]
+e^{+\alpha_t},&\text{incorrect prediction}.
+\end{cases}
+\]
+\uncover<2->{\begin{takeaway}
+The weight of a mistake \emph{relative to a correct example} is multiplied by
+\[
+e^{2\alpha_t}=\frac{1-\epsilon_t}{\epsilon_t}>1.
+\]
+\end{takeaway}}
+\note{The normalizer keeps weights summing to one. The displayed relative multiplier holds for any one mistaken and one correctly classified observation, even if their previous weights differed. With the exact alpha formula and an error strictly between zero and one half, mistakes collectively have mass one half under the next distribution. That does not mean the next learner has error one half: the next learner is a different rule. The weak learner can fit weighted data directly; this update does not require resampling observations.}
+\end{frame}
+
+\begin{frame}[t]{Bounding the Training Error}
+\lead{Start from $F_0=0$, so $J(F_0)=1$. Count a zero margin as an error.}
+\[
+\frac1n\sum_i\ind\{y_iF_T(x_i)\le0\}
+\le\frac1n\sum_i e^{-y_iF_T(x_i)}
+=\prod_{t=1}^{T}Z_t.
+\]
+At the derived step size, $Z_t=2\sqrt{\epsilon_t(1-\epsilon_t)}$.
+\uncover<2->{\begin{definitionbox}
+Writing the weak learner's edge as $\delta_t=\tfrac12-\epsilon_t>0$,
+\[
+\prod_tZ_t=\prod_t\sqrt{1-4\delta_t^2}
+\le\exp\!\left(-2\sum_t\delta_t^2\right).
+\]
+If every round has $\delta_t\ge\delta>0$, the bound is at most $e^{-2T\delta^2}$.
+\end{definitionbox}
+\begin{takeaway}
+This controls training error. Generalization still requires separate analysis.
+\end{takeaway}}
+\note{The first inequality follows observation by observation: a nonpositive margin has exponential loss at least one, while the indicator is zero for a positive margin. The product identity follows by repeatedly using J at round t equals J at round t minus one times Zt. Substituting the exact unshrunk alpha gives the square root expression. Use log(1-u) less than or equal to minus u to obtain the exponential bound. This finite-run conclusion is conditional on a uniform positive edge under every distribution D_t encountered along the run. A standard sufficient weak-learning assumption is that the base learner can achieve this edge for any distribution over the training observations. Being slightly better than chance under D1 alone is insufficient. No weak-learning condition is guaranteed merely by choosing a simple model class. The bound can be loose: the example has zero training error but exponential loss about 0.5164 after three rounds. Source: Freund and Schapire 1997 and Schapire 2003 Section 3.}
+\end{frame}
+
+\begin{frame}[t]{When Labels Are Wrong}
+\begin{columns}[T,onlytextwidth]
+\column{.52\textwidth}
+\centering\fig{adaboost-loss-comparison}
+\column{.45\textwidth}
+\begin{definitionbox}
+\raggedright
+Very negative margins produce large losses and large weights.
+\end{definitionbox}
+\vspace{.15cm}
+\begin{itemize}
+\setlength{\itemsep}{.18cm}
+\item A useful signal can receive more attention.
+\item A mislabeled observation can receive more attention too.
+\item Select the number of rounds using validation data.
+\end{itemize}
+\begin{takeaway}
+Changing the loss changes which errors dominate the next update.
+\end{takeaway}
+\end{columns}
+\note{The two curves use the common margin m equals yF. Exponential loss grows exponentially as a prediction becomes confidently wrong; logistic loss grows approximately linearly in the same limit. Both are unbounded, so the contrast does not establish absolute robustness of logistic loss. Sensitivity to mislabeled examples follows directly from the reweighting formula; do not claim every AdaBoost fit overfits or that boosting cannot generalize well. In practice inspect persistent high-weight observations, validate stopping and learner depth, and consider losses appropriate to the problem. The next module develops a method that can use differentiable losses other than the exponential loss.}
+\end{frame}
+
+\begin{frame}[t]{Back to Logistic Regression}
+\lead{At a fixed $x$, let $p=\Pr(Y=+1\mid x)$, with $0<p<1$.}
+\[
+R(F\mid x)=\E[e^{-YF}\mid x]=pe^{-F}+(1-p)e^F.
+\]
+\[
+\frac{\partial R}{\partial F}=-pe^{-F}+(1-p)e^F=0
+\quad\Longrightarrow\quad
+F^*(x)=\frac12\log\frac{p}{1-p}.
+\]
+\uncover<2->{\begin{definitionbox}
+The unrestricted population optimum satisfies
+\[
+p=\sigm\!\left(2F^*(x)\right).
+\]
+\end{definitionbox}
+\begin{takeaway}
+AdaBoost optimizes exponential loss.\par
+We can build an additive model by optimizing other losses too.
+\end{takeaway}}
+\note{This is a pointwise, unrestricted population-risk result. At probability zero or one the optimum is approached at an infinite score. The factor two is essential for the convention alpha equal to half log odds: the AdaBoost exponential-risk score is half the log odds, whereas the logistic score previously used is the full log odds. A finite constrained AdaBoost model does not automatically provide calibrated probabilities through this conversion, and exponential loss is not the Bernoulli negative log likelihood. This provides the conceptual bridge to gradient boosting: choose a loss, then add simple functions to reduce it. After the recommendation-system application, the next method module starts with squared error because fitting residuals makes the update tangible, then extends the idea to logistic loss. Source: Friedman, Hastie and Tibshirani's additive logistic regression paper, exponential criterion lemma; Schapire 2003 Section 6.}
+\end{frame}

@@ -1,0 +1,12 @@
+% Analytic exponential loss, not fitted data.
+\begin{tikzpicture}
+\begin{axis}[width=.98\linewidth,height=4.7cm,xmin=-2,xmax=3,ymin=0,ymax=8,
+ xlabel={Margin $m=yF(x)$},ylabel={Loss},axis lines=left,xtick={-2,0,2},ytick={0,1,4,8},
+ tick label style={font=\small},label style={font=\small},clip=false]
+\addplot[blueplot,very thick,domain=-2:3,samples=90] {exp(-x)};
+\addplot[inkplot,dashed] coordinates {(0,0) (0,8)};
+\node[font=\small,text=blueplot] at (axis cs:1.5,2.2) {$e^{-m}$};
+\node[font=\scriptsize,anchor=north east] at (axis cs:-.1,7.8) {wrong};
+\node[font=\scriptsize,anchor=north west] at (axis cs:.1,7.8) {correct};
+\end{axis}
+\end{tikzpicture}

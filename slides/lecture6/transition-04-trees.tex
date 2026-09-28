@@ -1,0 +1,15 @@
+\begin{frame}[t]{Phase 4: A Brief Look at Trees}
+\vspace{.42cm}
+\lead{Our boosting models learned a sequence of simple corrections.}
+\vspace{.28cm}
+\begin{definitionbox}
+\centering\vspace{.26cm}
+{\fontsize{21}{26}\selectfont How does a decision tree\\build one prediction?\par}
+\vspace{.26cm}
+\end{definitionbox}
+\vspace{.48cm}
+\begin{takeaway}
+\textbf{Next:} Partition the feature space, fit a value in each leaf, and examine what changes when the data change.
+\end{takeaway}
+\note{Introduce just enough tree mechanics for the coming bagging discussion: a recursive partition, a leaf prediction, a greedy split, and sensitivity to the training data. Earlier boosting corrections included threshold rules and piecewise-constant functions, while the electricity application used spline learners. Trees are a common choice of base learner, not a requirement of gradient boosting.}
+\end{frame}

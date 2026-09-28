@@ -1,0 +1,60 @@
+% Compile with pdfLaTeX: latexmk -pdf main.tex
+\documentclass[t,aspectratio=169,11pt]{beamer}
+\input{theme.tex}
+\input{macros.tex}
+\title{Ensemble Learning: From Weak Models to Strong Predictors}
+\author{Zihan Zhang}
+\institute{COMP 5212: Machine Learning}
+\date{}
+\hypersetup{pdftitle=,pdfauthor={Zihan Zhang}}
+% Uncomment for presenter notes on a second screen:
+% \setbeameroption{show notes on second screen=right}
+\definecolor{slideorange}{HTML}{FF5500}
+\definecolor{midgray}{HTML}{666666}
+\newcommand{\SectionSlide}[2]{%
+	\begin{frame}
+		\centering
+		\vfill
+		{\color{slideorange}\fontsize{29}{34}\selectfont\bfseries #1\par}
+		\vspace{0.38cm}
+		{\color{midgray}\fontsize{16}{21}\selectfont #2\par}
+		\vfill
+	\end{frame}
+}
+\begin{document}
+	
+		\begin{frame}
+		\vspace{0.05cm}
+		\hspace{-0.38cm}\includegraphics[width=5.65cm]{../source/logo.png}
+		\vspace{-0.15cm}
+		\begin{center}
+			{\fontsize{29}{35}\selectfont COMP 5212\par}
+			\vspace{0.30cm}
+			{\fontsize{32}{38}\selectfont Machine Learning\par}
+			\vspace{0.35cm}
+			{\fontsize{17}{21}\selectfont Instructor: Zihan Zhang\par}
+			\vspace{0.25cm}
+			{\fontsize{14}{18}\selectfont Lecture 6: Ensemble Learning \par}
+			\vspace{0.12cm}
+			
+		\end{center}
+	\end{frame}
+	\SectionSlide{Introduction}{}
+\input{intro.tex}
+% Optional one-minute GLM connection (excluded by default):
+% \input{optional-glm.tex}
+\input{case-roadmap.tex}
+	\SectionSlide{Adaboost}{}
+\input{adaboost.tex}
+\input{case-recommendations.tex}
+	\SectionSlide{Learning the Correction}{}
+\input{boosting.tex}
+%\input{case-clicks.tex}
+\input{case-load.tex}
+%\input{foundations.tex}
+	\SectionSlide{Bagging: Learning by Averaging}{}
+	\input{bagging.tex}
+%\input{case-forests.tex}
+%\input{closing.tex}
+%\input{case-references.tex}
+\end{document}

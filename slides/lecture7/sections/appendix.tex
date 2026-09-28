@@ -1,0 +1,87 @@
+\SectionSlide{Additional Details}
+
+\begin{frame}{Evaluate Models Under the Intended Use}
+  \begin{itemize}\setlength{\itemsep}{.4cm}
+    \item Split by time or group when observations are dependent.
+    \item Fit preprocessing and tune hyperparameters using training/validation data.
+    \item Compare a simple baseline, a tree, a forest, and boosted trees under the same protocol.
+    \item Select a metric for the decision: error, ranking, calibration, or cost.
+    \item Measure operational impact separately from offline predictive accuracy.
+  \end{itemize}
+  \src{An OOB score is useful for suitable i.i.d. settings; it does not replace a time-aware or group-aware test.}
+\end{frame}
+
+\begin{frame}{A Newton Step as Weighted Least Squares}
+  For $h_i>0$, complete the square:
+  \[
+    g_i f(x_i)+\frac12h_i f(x_i)^2
+    =\frac12h_i\left(f(x_i)+\frac{g_i}{h_i}\right)^2
+      -\frac{g_i^2}{2h_i}.
+  \]
+  \pause
+  \vspace{.3cm}
+  \begin{columns}[T,onlytextwidth]
+    \column{.47\textwidth}
+    \textbf{Pseudo-target}\par
+    \[z_i=-\frac{g_i}{h_i}.\]
+    \column{.47\textwidth}
+    \textbf{Sample weight}\par
+    \[h_i.\]
+  \end{columns}
+  \vspace{.25cm}
+  Fit a tree to these weighted targets, with the tree regularizer added.\par
+  \vspace{.2cm}
+  For squared loss, $h_i=1$ and $z_i=y_i-s_i$: ordinary residuals.
+\end{frame}
+
+\begin{frame}{Multiclass Scores and Softmax}
+  Let $s_c(x)$ be the score for class $c\in\{1,\ldots,C\}$.
+  \[p_c(x)=\frac{e^{s_c(x)}}{\sum_{k=1}^{C}e^{s_k(x)}}.\]
+  \[\ell(y,\boldsymbol s)=-\log p_y(x).\]
+  \pause
+  \vspace{.3cm}
+  \begin{itemize}\spaceditems
+    \item Trees provide real-valued score increments for the classes.
+    \item A common formulation fits one scalar-output tree per class per round.
+    \item Predict $\widehat y=\arg\max_c p_c(x)$.
+  \end{itemize}
+  \src{This is the usual class-wise scalar-tree view. Multiclass curvature and vector-leaf variants require additional details.}
+\end{frame}
+
+\begin{frame}{Efficient Split Search Uses Histograms}
+  \begin{enumerate}\spaceditems
+    \item Map each numerical feature into a set of bins.
+    \item Accumulate $G$ and $H$ in each bin.
+    \item Scan bin boundaries using prefix sums to evaluate split gain.
+  \end{enumerate}
+  \vspace{.2cm}
+  \centering
+  \begin{tikzpicture}
+    \foreach \i/\hh in {0/.6,1/1.0,2/1.8,3/1.2,4/.8,5/1.6,6/.9,7/.4}{
+      \draw[fill=bulletgreen!45,draw=forestgreen] (\i*.9,0) rectangle +(0.85,\hh);
+    }
+    \draw[slideorange,very thick] (3.55,-.2)--(3.55,2.0);
+    \node[above,text=slideorange,font=\small] at (3.55,2.0) {candidate boundary};
+  \end{tikzpicture}
+  \vspace{.3cm}
+  \par For missing values, compare adding their $G,H$ to the left or right child.
+  \src{Schematic histogram.}
+\end{frame}
+
+\begin{frame}{OOB Coverage Across the Forest}
+  For independent bootstrap samples across $B$ trees:
+  \[q=\left(1-\frac1n\right)^m,\qquad
+    K_i=|\mathcal B_i|\sim\operatorname{Binomial}(B,q).\]
+  \[\E[K_i]=Bq,\qquad P(K_i=0)=(1-q)^B.\]
+  \pause
+  \vspace{.25cm}
+  For large $n$, with $m=5n$ and $B=100$, each sample has about a $51\%$ probability of having no OOB tree.
+  \vspace{.2cm}
+  \begin{itemize}\spaceditems
+    \item OOB error evaluates subensembles with varying numbers of trees.
+    \item Repeated tuning against the OOB score can overfit the evaluation.
+    \item Time dependence and grouped observations need suitable validation splits.
+  \end{itemize}
+\end{frame}
+
+\input{sections/application-references.tex}

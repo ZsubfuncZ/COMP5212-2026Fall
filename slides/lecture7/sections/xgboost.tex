@@ -1,0 +1,304 @@
+% 19 --------------------------------------------------------------------------
+\begin{frame}{Boosting Learns Successive Corrections}
+  \begin{columns}[T,onlytextwidth]
+    \column{.45\textwidth}
+    {\large\color{slideorange}\textbf{Random forest}}
+    \vspace{.25cm}
+    \par Trees can be trained independently.\par
+    \vspace{.25cm}
+    \[\widehat f(x)=\frac1B\sum_{b=1}^{B}T_b(x).\]
+    Average diverse predictions.
+    \column{.51\textwidth}
+    {\large\color{slideorange}\textbf{Gradient boosting}}
+    \vspace{.25cm}
+    \par Each new tree depends on the current model.\par
+    \vspace{.25cm}
+    \[F_t(x)=F_{t-1}(x)+\eta f_t(x).\]
+    Add a correction to the current score.
+  \end{columns}
+  \vspace{.6cm}
+  \centering
+  \begin{tikzpicture}[node distance=.7cm]
+    \node[decision] (a) {Current scores};
+    \node[orangebox,right=of a] (b) {Loss derivatives};
+    \node[leaf,right=of b] (c) {New tree};
+    \node[decision,right=of c] (d) {Updated scores};
+    \draw[flow] (a)--(b);\draw[flow] (b)--(c);\draw[flow] (c)--(d);
+  \end{tikzpicture}
+  \src{Connection to AdaBoost: sequential learning; the loss determines how later learners respond to errors.}
+\end{frame}
+
+% 20 --------------------------------------------------------------------------
+\begin{frame}{Squared Loss Leads to Residual Fitting}
+  Start with $F_0(x)=5$. Fit a regression stump to $r_i=y_i-F_0(x_i)$.
+  \vspace{.3cm}
+  \centering
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{c|rrrr}
+    $x_i$ & 1 & 2 & 3 & 4\\
+    $y_i$ & 1 & 2 & 8 & 9\\
+    Residual $r_i$ & $-4$ & $-3$ & $3$ & $4$\\ \midrule
+    \uncover<2->{Stump $f_1(x_i)$} & \uncover<2->{$-3.5$} & \uncover<2->{$-3.5$} & \uncover<2->{$3.5$} & \uncover<2->{$3.5$}\\
+    \uncover<3->{$F_1(x_i)$, with $\eta=0.5$} & \uncover<3->{$3.25$} & \uncover<3->{$3.25$} & \uncover<3->{$6.75$} & \uncover<3->{$6.75$}
+  \end{tabular}
+  \uncover<3->{
+  \vspace{.25cm}
+  \[F_1(x)=5+0.5f_1(x).\]
+  \centering The next tree fits what remains after this update.
+  }
+  \src{Constructed example: unregularized squared loss. Later we restart it with XGBoost regularization.}
+\end{frame}
+
+% 21 --------------------------------------------------------------------------
+\begin{frame}{A Tree Outputs a Score, Also for Classification}
+  \[s(x)=b+\sum_{t=1}^{T}\eta f_t(x),\qquad f_t(x)=w_{t,q_t(x)}.\]
+  \vspace{.2cm}
+  \begin{columns}[T,onlytextwidth]
+    \column{.47\textwidth}
+    \textbf{Squared-error regression}
+    \[\widehat y=s,\]
+    \[\ell(y,s)=\tfrac12(s-y)^2.\]
+    A leaf changes the predicted value.
+    \pause
+    \column{.49\textwidth}
+    \textbf{Binary classification: $y\in\{0,1\}$}
+    \[p=\sigma(s)=\frac{1}{1+e^{-s}},\]
+    \[\ell(y,s)=\log(1+e^s)-ys.\]
+    A leaf changes the logit; sigmoid gives a probability.
+  \end{columns}
+  \vspace{.25cm}
+  \centering $q_t(x)$ identifies a leaf; $w_{t,v}$ is that leaf's real-valued output.
+\end{frame}
+
+% 22 --------------------------------------------------------------------------
+\begin{frame}{One Round Optimizes One New Tree}
+  Fix the existing ensemble, with current scores $s_i=F_{t-1}(x_i)$.
+  \vspace{.25cm}
+  \[
+    \mathcal L_t(f_t)=\sum_{i=1}^{n}\ell\bigl(y_i,s_i+f_t(x_i)\bigr)
+      +\Omega(f_t).
+  \]
+  \[
+    \Omega(f_t)=\gamma J+\frac\lambda2\sum_{v=1}^{J}w_v^2.
+  \]
+  \pause
+  \begin{itemize}\spaceditems
+    \item Learn the partition and its $J$ leaf values.
+    \item $\gamma$ penalizes additional leaves; $\lambda$ shrinks leaf values.
+    \item First derive an unshrunk tree; apply learning rate $\eta$ afterward.
+  \end{itemize}
+  \src{L2-regularized scalar-tree formulation.}
+\end{frame}
+
+% 23 --------------------------------------------------------------------------
+\begin{frame}{Approximate the Loss Around the Current Score}
+  For each sample, expand in the proposed correction $f_t(x_i)$:
+  \[
+    \ell\bigl(y_i,s_i+f_t(x_i)\bigr)
+    \approx \ell(y_i,s_i)+g_if_t(x_i)+\tfrac12h_if_t(x_i)^2.
+  \]
+  \pause
+  \[g_i=\left.\frac{\partial\ell(y_i,s)}{\partial s}\right|_{s=s_i},
+    \qquad h_i=\left.\frac{\partial^2\ell(y_i,s)}{\partial s^2}\right|_{s=s_i}.\]
+  \pause
+  \vspace{.2cm}
+  Drop terms that are constant with respect to the new tree:
+  \[
+    \widetilde{\mathcal L}_t
+     =\sum_i\left[g_if_t(x_i)+\tfrac12h_if_t(x_i)^2\right]+\Omega(f_t).
+  \]
+  \centering Exact for squared loss; a local approximation for logistic loss.
+\end{frame}
+
+% 24 --------------------------------------------------------------------------
+\begin{frame}{The Loss Supplies Two Numbers per Sample}
+  \centering
+  \renewcommand{\arraystretch}{1.65}
+  \begin{tabular}{lcc}
+    \toprule
+    Loss & Gradient $g_i$ & Hessian $h_i$\\ \midrule
+    $\tfrac12(s_i-y_i)^2$ & $s_i-y_i$ & $1$\\
+    Binary cross-entropy & $p_i-y_i$ & $p_i(1-p_i)$\\ \bottomrule
+  \end{tabular}
+  \vspace{.3cm}
+  \par In classification, $p_i=\sigma(s_i)$.
+  \pause
+  \vspace{.5cm}
+  \begin{tikzpicture}
+    \node[orangebox,text width=11.3cm] {Compute $g_i,h_i$ from the existing ensemble once per round.\\[5pt]
+    Keep them fixed while growing this round's tree.};
+  \end{tikzpicture}
+  \vspace{.35cm}
+  \par Candidate leaves only need sums of these statistics.
+\end{frame}
+
+% 25 --------------------------------------------------------------------------
+\begin{frame}{Each Leaf Has an Optimal Constant Correction}
+  For samples $I_v$ reaching leaf $v$, define
+  \[G_v=\sum_{i\in I_v}g_i,\qquad H_v=\sum_{i\in I_v}h_i.\]
+  \pause
+  Its contribution to the approximate objective is
+  \[Q_v(w_v)=G_vw_v+\frac12(H_v+\lambda)w_v^2+\gamma.\]
+  \pause
+  \[\frac{\partial Q_v}{\partial w_v}=G_v+(H_v+\lambda)w_v=0
+    \quad\Longrightarrow\quad
+    \boxed{w_v^*=-\frac{G_v}{H_v+\lambda}}.\]
+  \vspace{.2cm}
+  \centering For squared loss and $\lambda=0$, this is the mean residual in the leaf.
+  \src{A leaf value is a score correction contributed by this tree.}
+\end{frame}
+
+% 26 --------------------------------------------------------------------------
+\begin{frame}{Split Gain Chooses the Tree Structure}
+  \centering
+  \begin{tikzpicture}
+    \node[decision] (p) at (0,0) {Parent: $G,H$};
+    \node[leaf] (l) at (-2.6,-1.3) {Left: $G_L,H_L$};
+    \node[leaf] (r) at (2.6,-1.3) {Right: $G_R,H_R$};
+    \draw[flow] (p)--(l);\draw[flow] (p)--(r);
+  \end{tikzpicture}
+  \pause
+  \vspace{.15cm}
+  \[
+    \boxed{\Gain=\frac12\left[
+      \frac{G_L^2}{H_L+\lambda}+\frac{G_R^2}{H_R+\lambda}
+      -\frac{G^2}{H+\lambda}\right]-\gamma}
+  \]
+  \pause
+  \begin{itemize}\setlength{\itemsep}{.2cm}
+    \item Compare the optimized parent leaf with two optimized child leaves.
+    \item Search candidate features and thresholds; prefer the largest allowed gain.
+    \item Recurse, with growth constraints and pruning controlling complexity.
+  \end{itemize}
+  \src{Here $G=G_L+G_R$, $H=H_L+H_R$. The displayed gain already subtracts $\gamma$.}
+\end{frame}
+
+% 27 --------------------------------------------------------------------------
+\begin{frame}{Worked Example: Start a Regularized Round}
+  Restart from $s_i=5$ for all samples. Use squared loss, $\lambda=1$, $\gamma=0$.
+  \vspace{.3cm}
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{ccccc}
+    \toprule
+    Feature $x_i$ & Target $y_i$ & Score $s_i$ & $g_i=s_i-y_i$ & $h_i$\\ \midrule
+    1 & 1 & 5 & \uncover<2->{$4$} & \uncover<2->{1}\\
+    2 & 2 & 5 & \uncover<2->{$3$} & \uncover<2->{1}\\
+    3 & 8 & 5 & \uncover<2->{$-3$} & \uncover<2->{1}\\
+    4 & 9 & 5 & \uncover<2->{$-4$} & \uncover<2->{1}\\ \bottomrule
+  \end{tabular}
+  \uncover<2->{
+  \vspace{.35cm}
+  \[G=0,\qquad H=4.\]
+  \centering Candidate thresholds: $1.5$, $2.5$, and $3.5$.
+  }
+  \src{Constructed example. Set maximum depth to 1 to focus on a single split.}
+\end{frame}
+
+% 28 --------------------------------------------------------------------------
+\begin{frame}{Compare the Candidates and Set Leaf Values}
+  For $x\le2.5$: $G_L=7$, $H_L=2$, $G_R=-7$, $H_R=2$.
+  \[\Gain=\frac12\left[\frac{49}{3}+\frac{49}{3}-\frac0{5}\right]
+      =\frac{49}{3}\approx16.33.\]
+  \pause
+  \begin{columns}[c,onlytextwidth]
+    \column{.43\textwidth}
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{cc}
+      \toprule
+      Threshold & Gain\\ \midrule
+      $1.5$ & $6$\\
+      \textcolor{forestgreen}{$2.5$} & \textcolor{forestgreen}{$16.33$}\\
+      $3.5$ & $6$\\ \bottomrule
+    \end{tabular}
+    \pause
+    \column{.53\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \node[decision] (r) at (0,0) {$x\le2.5$?};
+      \node[leaf] (l) at (-1.45,-1.5) {$w_L=-7/3$};
+      \node[leaf] (rr) at (1.45,-1.5) {$w_R=+7/3$};
+      \draw[flow] (r)--(l); \draw[flow] (r)--(rr);
+    \end{tikzpicture}
+  \end{columns}
+  \vspace{.35cm}
+  \centering The split groups samples that need similar corrections.
+\end{frame}
+
+% 29 --------------------------------------------------------------------------
+\begin{frame}{Shrink the New Tree, Then Update the Scores}
+  \[F_t(x)=F_{t-1}(x)+\eta f_t(x).\]
+  \centering
+  With $\eta=0.3$:
+  \vspace{.25cm}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{c|rrrr}
+    $x_i$ & 1 & 2 & 3 & 4\\ \midrule
+    Old score & 5 & 5 & 5 & 5\\
+    New tree $f_t(x_i)$ & $-7/3$ & $-7/3$ & $7/3$ & $7/3$\\
+    \uncover<2->{Applied correction} & \uncover<2->{$-0.7$} & \uncover<2->{$-0.7$} & \uncover<2->{$0.7$} & \uncover<2->{$0.7$}\\
+    \uncover<2->{\textbf{New score}} & \uncover<2->{\textbf{4.3}} & \uncover<2->{\textbf{4.3}} & \uncover<2->{\textbf{5.7}} & \uncover<2->{\textbf{5.7}}\\
+    Target & 1 & 2 & 8 & 9
+  \end{tabular}
+  \vspace{.35cm}
+  \par\uncover<2->{The next round recomputes gradients from these updated scores.}
+\end{frame}
+
+% 30 --------------------------------------------------------------------------
+\begin{frame}{In Classification, Leaves Correct the Logit}
+  A leaf contains labels $(1,1,1,0)$; currently $s_i=0$, so $p_i=0.5$.
+  \pause
+  \[
+    G_v=(-0.5)+(-0.5)+(-0.5)+0.5=-1,\qquad H_v=4(0.25)=1.
+  \]
+  With $\lambda=0$, the leaf value is $w_v=-G_v/H_v=1$.
+  \pause
+  \vspace{.4cm}
+  \centering
+  \begin{tikzpicture}[node distance=.8cm]
+    \node[decision,text width=3cm] (a) {Current logit\\$s=0$};
+    \node[orangebox,text width=3cm,right=of a] (b) {Add $\eta w_v$\\$0.3\times1$};
+    \node[leaf,text width=3cm,right=of b] (c) {New logit\\$s=0.3$};
+    \draw[flow] (a)--(b); \draw[flow] (b)--(c);
+  \end{tikzpicture}
+  \vspace{.3cm}
+  \[p_{\mathrm{new}}=\sigma(0.3)\approx0.574.\]
+  \centering Sum tree outputs first; apply sigmoid to the ensemble score.
+\end{frame}
+
+% 31 --------------------------------------------------------------------------
+\begin{frame}{One XGBoost Round, End to End}
+  \begin{enumerate}\setlength{\itemsep}{.32cm}
+    \item Compute current ensemble scores $s_i$ and derivatives $g_i,h_i$.
+    \item Start a tree at the root; aggregate $G,H$ for its samples.
+    \pause
+    \item Search feature--threshold candidates using split gain.
+    \item Continue growing subject to constraints; set final leaf values.
+    \pause
+    \item Update $s_i\leftarrow s_i+\eta w_{q_t(x_i)}$.
+  \end{enumerate}
+  \vspace{.3cm}
+  \centering
+  \begin{tikzpicture}
+    \node[leaf,text width=11cm] {Recompute derivatives for the next tree.\\Keep the existing trees fixed in this additive training scheme.};
+  \end{tikzpicture}
+\end{frame}
+
+% 32 --------------------------------------------------------------------------
+\begin{frame}{Regularization Acts at Several Levels}
+  \centering
+  \small\renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{8.0cm}}
+    \toprule
+    Control & What it changes\\ \midrule
+    Maximum depth & Limits the complexity of interactions in one tree.\\
+    \texttt{min\_child\_weight} & Requires enough Hessian mass $H$ in each child.\\
+    $\lambda$ and $\gamma$ & Shrink leaf values and penalize extra leaves.\\
+    Learning rate $\eta$ & Shrinks each tree's contribution to the ensemble.\\
+    Row/feature subsampling & Adds randomness during tree construction.\\ \bottomrule
+  \end{tabular}
+  \vspace{.4cm}
+  \normalsize\par Select boosting rounds on validation data.\par
+  Reserve the test set for final evaluation.
+\end{frame}

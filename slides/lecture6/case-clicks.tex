@@ -1,0 +1,42 @@
+% Two application slides, placed after the gradient-boosting module.
+\begin{frame}[t]{Ad clicks: learn features with trees}
+\lead{Facebook case study, 2014: will an ad impression receive a click?}
+\vspace{.02cm}
+\centering\fig{case-clicks-pipeline}\par
+\vspace{.05cm}
+\uncover<2->{\begin{definitionbox}
+\centering
+\(\displaystyle \phi_{m\ell}(x)=\ind\{x\text{ reaches leaf }\ell\text{ of tree }m\}\)
+\[\Pr(Y=1\mid x)=\sigm\!\biggl(b+\sum_{m,\ell}w_{m\ell}\phi_{m\ell}(x)\biggr).\]
+\end{definitionbox}
+\begin{takeaway}Trees discover interactions; logistic regression weights their rules.\end{takeaway}}
+\vfill
+{\scriptsize\raggedright He et al., ADKDD 2014, Fig.~1 and Sec.~3.1. \href{https://quinonero.net/Publications/predicting-clicks-facebook.pdf}{\textcolor{blueplot}{Paper}}\par}
+\note{A tree is a sequence of feature-threshold questions; a leaf is its final region. This case previews that structure before the brief formal tree primer. Each tree contributes one active leaf indicator. The learned logistic weights replace the original leaf scores; the output is not a sigmoid of their original sum. The diagram is schematic.}
+\end{frame}
+
+\begin{frame}[t]{Does the hybrid predict clicks better?}
+\lead{Offline comparison: Facebook ad data from one week in Q4 2013}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.64\textwidth}
+\centering\fig{case-clicks-results}
+\end{column}
+\begin{column}{.32\textwidth}
+\vspace{.38cm}
+\begin{definitionbox}
+\textbf{Lower is better}
+\[\mathrm{NE}=\frac{\text{mean log loss}}{H(\bar p)}.\]
+\(\bar p\): training click rate.
+\end{definitionbox}
+\vspace{.14cm}
+\begin{takeaway}
+\textbf{3.42\% lower NE}\par
+than trees alone.
+\end{takeaway}
+\end{column}
+\end{columns}
+\small Prediction loss; no revenue or click-lift measurement.
+\vfill
+{\scriptsize\raggedright He et al., ADKDD 2014, Sec.~2 and Table~1. \href{https://quinonero.net/Publications/predicting-clicks-facebook.pdf}{\textcolor{blueplot}{Paper}}\par}
+\note{Trees denotes boosted trees. Values are NE ratios, not absolute NE. Here H(p)=-p log(p)-(1-p)log(1-p). The table implies a 2.87 percent improvement over LR; use it instead of the inconsistent prose. Sample counts were undisclosed.}
+\end{frame}

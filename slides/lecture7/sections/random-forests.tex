@@ -1,0 +1,118 @@
+% 12 --------------------------------------------------------------------------
+\begin{frame}{Random Forest: Two Sources of Randomness}
+  \centering
+  \begin{tikzpicture}
+    \node[decision,text width=2cm] (data) at (0,0) {Training data};
+    \foreach \k/\yy in {1/1.5,2/0,3/-1.5}{
+      \node[decision,text width=2.1cm] (s\k) at (3.8,\yy) {Bootstrap sample $\k$};
+      \node[leaf,text width=2cm] (t\k) at (7.4,\yy) {Tree $\k$};
+      \draw[flow] (data)--(s\k); \draw[flow] (s\k)--(t\k);
+    }
+    \node[orangebox,text width=1.8cm] (out) at (10.9,0) {Aggregate};
+    \foreach \k in {1,2,3}{\draw[flow] (t\k)--(out);}
+  \end{tikzpicture}
+  \vspace{.3cm}
+  \begin{itemize}\spaceditems
+    \item Sample training rows with replacement for each tree.
+    \pause
+    \item At each node, search a random subset of the features.
+  \end{itemize}
+  \src{Regression: average predictions. Classification: vote or average class probabilities, depending on implementation.}
+\end{frame}
+
+% 13 --------------------------------------------------------------------------
+\begin{frame}{Random Features Reduce Shared Errors}
+  Suppose one feature dominates the split score in many bootstrap samples.
+  \vspace{.3cm}
+  \begin{columns}[T,onlytextwidth]
+    \column{.47\textwidth}
+    \textbf{Search every feature}\par\vspace{.2cm}
+    Many trees select similar early splits.\par\vspace{.2cm}
+    Their prediction errors can be strongly correlated.
+    \column{.47\textwidth}
+    \pause
+    \textbf{Search a random subset}\par\vspace{.2cm}
+    Some nodes must use alternative predictors.\par\vspace{.2cm}
+    Trees can become more diverse.
+  \end{columns}
+  \pause
+  \vspace{.25cm}
+  \centering
+  \begin{tikzpicture}
+    \node[leaf,text width=10.5cm] {Tradeoff: fewer candidate features can reduce correlation,\\but may also weaken individual trees.};
+  \end{tikzpicture}
+\end{frame}
+
+% 14 --------------------------------------------------------------------------
+\begin{frame}{Correlation Limits the Gain from Averaging}
+  At a fixed input, suppose trees have variance $\sigma^2$ and pairwise correlation $\rho$.
+  \pause
+  \[\Var\!\left(\frac1B\sum_{b=1}^{B}T_b(x)\right)
+      =\rho\sigma^2+\frac{1-\rho}{B}\sigma^2.\]
+  \pause
+  \begin{columns}[c,onlytextwidth]
+    \column{.56\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[width=7.1cm,height=3.5cm,xmin=1,xmax=80,ymin=0,ymax=1,
+        xlabel={Number of trees $B$},ylabel={Variance / $\sigma^2$},
+        tick label style={font=\scriptsize},label style={font=\small},
+        legend style={font=\scriptsize,draw=none,at={(.5,1.03)},anchor=south,legend columns=3},
+        axis lines=left,ytick={0,.2,.6,1}]
+        \addplot[black,thick,domain=1:80,samples=160]{1/x};\addlegendentry{$\rho=0$}
+        \addplot[forestgreen,thick,domain=1:80,samples=160]{.2+.8/x};\addlegendentry{$\rho=0.2$}
+        \addplot[slideorange,thick,domain=1:80,samples=160]{.6+.4/x};\addlegendentry{$\rho=0.6$}
+      \end{axis}
+    \end{tikzpicture}
+    \column{.4\textwidth}
+    More trees reduce the second term.\par\vspace{.35cm}
+    Lower correlation reduces the limiting variance.
+  \end{columns}
+  \src{An explanatory equal-variance/equal-correlation model; the plot is calculated from this formula.}
+\end{frame}
+
+% 15 --------------------------------------------------------------------------
+\begin{frame}{OOB Is Defined Separately for Each Tree}
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lcccc}
+    \toprule
+     & Tree 1 & Tree 2 & Tree 3 & Tree 4\\ \midrule
+    Sample A & in-bag & \textcolor{forestgreen}{OOB} & in-bag & \textcolor{forestgreen}{OOB}\\
+    Sample B & \textcolor{forestgreen}{OOB} & in-bag & in-bag & in-bag\\
+    Sample C & in-bag & in-bag & \textcolor{forestgreen}{OOB} & \textcolor{forestgreen}{OOB}\\ \bottomrule
+  \end{tabular}
+  \pause
+  \vspace{.25cm}
+  \par For sample A, aggregate predictions from trees 2 and 4 only.
+  \pause
+  \vspace{.35cm}
+  \[\widehat f_{\mathrm{OOB}}(x_i)
+    =\frac{1}{|\mathcal B_i|}\sum_{b\in\mathcal B_i}T_b(x_i),
+    \qquad\mathcal B_i=\{b:i\notin D_b\},\quad |\mathcal B_i|>0.\]
+  \centering Compare each sample's OOB prediction with its observed target.
+  \src{Formula shown for regression; classification can aggregate OOB class probabilities.}
+\end{frame}
+
+% 16 --------------------------------------------------------------------------
+\begin{frame}{OOB Depends on Draws per Tree}
+  Original data: $n$ samples. Each tree draws $m$ times with replacement.
+  \pause
+  \[q=P(i\text{ is OOB for one tree})=
+    \left(1-\frac1n\right)^m\approx e^{-m/n}.\]
+  \pause
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lcc}
+    \toprule
+    Draws per tree & OOB probability $q$ & Expected OOB trees, $B=100$\\ \midrule
+    $m=n$ & $36.8\%$ & $36.8$\\
+    $m=2n$ & $13.5\%$ & $13.5$\\
+    $m=5n$ & $0.67\%$ & $0.67$\\ \bottomrule
+  \end{tabular}
+  \vspace{.3cm}
+  \par Increasing $B$ gives more OOB predictions per sample.\par
+  \vspace{.18cm}
+  Increasing $m/n$ makes exclusion from any one tree less likely.
+  \src{Large-$n$ approximations. Standard bootstrap usually takes $m=n$; $m>n$ rows are illustrative variants.}
+\end{frame}

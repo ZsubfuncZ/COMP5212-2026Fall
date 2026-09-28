@@ -1,0 +1,10 @@
+% Original explanatory diagram of the cited task, not measured data.
+\begin{tikzpicture}[font=\small,>=Latex]
+\node[draw=blueplot,fill=definitionblue,rounded corners,text width=3.1cm,align=center,minimum height=.7cm] (a) at (0,1.1) {Weather};
+\node[draw=blueplot,fill=definitionblue,rounded corners,text width=3.1cm,align=center,minimum height=.7cm] (b) at (0,0) {Calendar};
+\node[draw=blueplot,fill=definitionblue,rounded corners,text width=3.1cm,align=center,minimum height=.7cm] (c) at (0,-1.1) {Past demand};
+\node[draw=titlered,fill=takeawaypeach,rounded corners,text width=3.6cm,align=center,minimum height=1.2cm] (m) at (5.1,0) {Boost smooth\\predictor effects};
+\node[draw=blueplot,fill=definitionblue,rounded corners,text width=3.0cm,align=center,minimum height=1.2cm] (y) at (10.1,0) {Hourly demand\\per zone};
+\draw[->,thick] (a.east)--(m.west);\draw[->,thick] (b.east)--(m.west);\draw[->,thick] (c.east)--(m.west);\draw[->,thick] (m.east)--(y.west);
+\node[font=\scriptsize,text=black!65] at (5.05,-1.65) {Explanatory pipeline};
+\end{tikzpicture}

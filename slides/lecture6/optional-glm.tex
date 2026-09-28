@@ -1,0 +1,20 @@
+% Optional one-minute bridge; enable the indicated line in main.tex.
+\begin{frame}[t]{GLMs: a brief connection}
+\lead{A generalized linear model links a conditional mean to a linear predictor.}
+\begin{definitionbox}
+\[\mu(x)=\E[Y\mid x],\qquad g(\mu(x))=\beta_0+x^\top\beta.\]
+A conditional exponential-family distribution specifies the likelihood.
+\end{definitionbox}
+\vspace{.1cm}
+\centering\small\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lll@{}}\toprule
+Response model & Mean & Link $g(\mu)$\\\midrule
+Gaussian & real-valued & $\mu$\\
+Bernoulli & probability & $\log\!\frac{\mu}{1-\mu}$\\
+Poisson & positive count mean & $\log\mu$\\\bottomrule
+\end{tabular}
+\vspace{.15cm}
+\begin{takeaway}For ensembles, our next step is to learn the predictor as a sum of simple functions.\end{takeaway}
+\vfill{\scriptsize\href{https://web.stanford.edu/class/stats305b/notes/GLM_I.html}{Taylor, Stanford STATS 305B: Generalized linear models.}}
+\note{This is optional background only and takes about one minute. The displayed links are canonical examples, not a claim that every GLM must use its canonical link. A GLM specifies distribution, predictor and link. The link acts on the conditional mean, not directly on the observed response. No exponential-family derivation is needed for the subsequent ensemble material. In this lecture the main path runs directly from the regression recap to ensembles, without this slide.}
+\end{frame}

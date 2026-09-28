@@ -1,0 +1,16 @@
+% Editable conceptual architecture; no fabricated sample or trained tree.
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  stage/.style={rounded corners=3pt,draw=none,fill=definitionblue,
+    minimum width=2.8cm,minimum height=1.30cm,align=center,font=\small}]
+\path[use as bounding box] (-.2,-1.00) rectangle (13.85,1.05);
+\node[stage] (x) at (1.4,0) {User/ad history\\and context};
+\node[stage] (trees) at (4.7,0) {Boosted\\trees};
+\node[stage] (leaves) at (8.0,0) {Leaf\\indicators};
+\node[stage,fill=takeawaypeach] (lr) at (11.3,0) {Logistic\\regression};
+\draw[->,thick,blueplot] (x.east) -- (trees.west);
+\draw[->,thick,blueplot] (trees.east) -- (leaves.west);
+\draw[->,thick,blueplot] (leaves.east) -- (lr.west);
+\draw[->,thick,blueplot] (lr.east) -- (13.25,0);
+\node[font=\small,anchor=west] at (13.25,0) {$p$};
+\node[font=\scriptsize,text=black!65] at (6.7,-.90) {Schematic: each leaf is a region defined by a sequence of split rules.};
+\end{tikzpicture}

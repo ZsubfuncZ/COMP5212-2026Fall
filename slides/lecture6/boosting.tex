@@ -1,0 +1,119 @@
+\section{Residual Learning and Gradient Boosting}
+\begin{frame}[t]{Keep the model; learn a correction}
+\lead{AdaBoost already builds an additive model, one simple function at a time}
+\begin{definitionbox}
+\[F_m(x)=\underbrace{F_{m-1}(x)}_{\text{keep the current fit}}
+       +\underbrace{\eta_m h_m(x)}_{\text{add a correction}}.\]
+\end{definitionbox}
+\vspace{.15cm}
+\small For regression, the current prediction may be too high or too low.
+\uncover<2->{
+\[\underbrace{y_i-F_{m-1}(x_i)}_{\text{desired correction at }x_i}
+\quad\longrightarrow\quad
+\underbrace{h_m(x)}_{\text{a simple fitted function}}.\]
+\begin{takeaway}Fit what is left to explain. Then recompute what is left.\end{takeaway}}
+\note{This is the conceptual transition from AdaBoost's additive classification score to boosting for a continuous response. The weak model now produces a real-valued correction, not a class label. Start with the ordinary residual intuition under squared loss; the next slides derive why it is the correct target in that case. For other losses the fitting targets are negative loss derivatives, and generally are not y minus F. A simple fitted function may be a one-split rule, a smooth spline, or another restricted regression function. The existing model stays fixed while the next correction is learned.}
+\end{frame}
+
+\begin{frame}[t]{One correction lowers squared error}
+\lead{Squared loss: $\ell(y,F)=\tfrac12(y-F)^2$. Start from the mean response}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.55\textwidth}\fig{boosting-residual}\end{column}
+\begin{column}{.42\textwidth}\small
+\[y=(1,1,3,3),\qquad F_0=2.\]
+\[r_1=y-F_0=(-1,-1,1,1).\]
+A one-split rule predicts $-1$ for $x\le2.5$ and $+1$ otherwise.
+\uncover<2->{\begin{definitionbox}
+With shrinkage $\nu=\tfrac12$,
+\[F_1=F_0+\nu h_1\]
+\[\phantom{F_1}=(1.5,1.5,2.5,2.5).\]
+\end{definitionbox}}
+\end{column}\end{columns}
+\note{Retain the original four-point example before introducing function-space gradients. All four residual targets are fitted exactly by a single threshold rule. With shrinkage one half the MSE falls from one to one quarter. The plotted first correction is part of the same teaching calculation, not a measured application. The factor one half in the per-observation loss makes its negative derivative exactly equal to the ordinary residual. The averaging factor in MSE affects its numerical scale, not the optimal fit.}
+\end{frame}
+
+\begin{frame}[t]{Correct what the previous model missed}
+\lead{Same four observations; refit to the new residuals each round; $\nu=\tfrac12$}
+\centering\fig{boosting-rounds}\par
+\small
+\[\operatorname{MSE}(F_0)=1\quad\longrightarrow\quad
+\operatorname{MSE}(F_1)=\tfrac14\quad\longrightarrow\quad
+\operatorname{MSE}(F_2)=\tfrac1{16}\quad\longrightarrow\quad
+\operatorname{MSE}(F_3)=\tfrac1{64}.\]
+\note{Each column displays one round: the upper panel compares observed responses with the previous and updated predictions, while the lower panel shows the newly computed residual targets and the fitted correction. The first, second and third residual magnitudes are one, one half and one quarter. Half of each correction is added, leaving residual magnitudes one half, one quarter and one eighth. This particularly simple dataset keeps the same split location; general datasets may require different rules at later rounds. It demonstrates recomputation and shrinkage, not the claim that any weak learner guarantees progress or that all datasets follow this geometric decrease. All coordinates and MSE values are generated and checked by examples/generate_boosting.py.}
+\end{frame}
+
+\begin{frame}[t]{Why squared loss leads to residuals}
+\small Let $L(F)=\tfrac12\sum_i(y_i-F(x_i))^2$ and $r_i=y_i-F(x_i)$.
+\uncover<2->{\begin{definitionbox}
+\[-\frac{\partial\ell(y_i,F(x_i))}{\partial F(x_i)}=y_i-F(x_i)=r_i.\]
+\end{definitionbox}}
+\uncover<3->{For a proposed correction $h_i=h(x_i)$,
+\[L(F+\eta h)-L(F)
+=-\eta\underbrace{\sum_i r_i h_i}_{\text{alignment with the residual}}
+ +\frac{\eta^2}{2}\sum_i h_i^2.\]
+\begin{takeaway}If $\sum_i r_i h_i>0$, a sufficiently small positive step lowers the training loss.\end{takeaway}}
+\note{Derive the expansion by substituting r_i minus eta h_i into one half the sum of squared residuals. For a nonzero correction, the exact sufficient interval is zero less than eta less than twice the residual inner product divided by the squared norm of h. If h fits the residuals better than the zero function in squared error, expanding that fitting inequality gives twice the residual inner product greater than the squared norm of h, so positive alignment follows. This makes the requirement on the weak learner concrete; fitting an arbitrary function is not itself a guarantee of improvement. The equality h=r is unconstrained steepest descent at the training coordinates.}
+\end{frame}
+
+\begin{frame}[t]{Gradient descent in prediction space}
+\lead{Think of the current training predictions as a vector $\mathbf f=(F(x_1),\ldots,F(x_n))$}
+\begin{definitionbox}
+\[L(\mathbf f)=\sum_i\ell(y_i,f_i),\qquad
+r_{im}=-\left.\frac{\partial\ell(y_i,f)}{\partial f}\right|_{f=F_{m-1}(x_i)}.\]
+\end{definitionbox}
+\small An unconstrained gradient step adds a multiple of $r_{im}$ to each prediction.\par
+\uncover<2->{\vspace{.06cm}
+To predict at a new $x$, fit a function to these \textbf{pseudo-residuals}:
+\[h_m\approx\argmin_{h\in\mathcal H}\sum_i\bigl(r_{im}-h(x_i)\bigr)^2.\]
+\begin{takeaway}The loss supplies the targets. The base learner supplies a function of $x$.\end{takeaway}}
+\note{Friedman (2001) formulates stagewise additive modeling as gradient descent in function space. On the training sample the gradient is an n-dimensional vector, which is a useful concrete way to explain the functional interpretation. A restricted learner approximates that direction and gives predictions away from the training inputs. Least-squares fitting to pseudo-residuals does not replace the original loss: it is the subproblem for finding a direction. The original loss is used to choose the step and to evaluate the model. An approximate fit must have positive alignment with the negative gradient to be a descent direction. The function class need not consist of trees. Using an average rather than a sum in L scales all gradient coordinates by the same constant, which can be absorbed by the step.}
+\end{frame}
+
+\begin{frame}[t]{The gradient boosting algorithm}
+\small
+\begin{enumerate}
+\setlength{\itemsep}{.12cm}
+\item Start from a constant: $F_0(x)=\argmin_c\sum_i\ell(y_i,c)$.
+\item For $m=1,\ldots,M$, compute negative-gradient targets:
+\[r_{im}=-\partial_F\ell\bigl(y_i,F_{m-1}(x_i)\bigr).\]
+\item Fit a simple regression function $h_m$ to $(x_i,r_{im})$.
+\item Choose a step using the \emph{original} loss, then update:
+\[\rho_m\in\argmin_{\rho}\sum_i\ell\bigl(y_i,F_{m-1}(x_i)+\rho h_m(x_i)\bigr),\]
+\[\boxed{F_m=F_{m-1}+\nu\rho_m h_m,\qquad 0<\nu\le1.}\]
+\end{enumerate}
+\vspace{-.1cm}
+\begin{takeaway}Each round changes the fitting targets. Shrinkage controls how much we add.\end{takeaway}
+\note{The displayed idealized line search assumes a finite minimizer exists. If it does not, or exact minimization is impractical, choose a finite loss-reducing step. For convex losses along a direction, shrinking an exact improving line-search step toward zero preserves nonincrease. Squared loss and logistic loss are convex in the score. A weak fit aligned with the negative gradient admits a sufficiently small descent step for a differentiable loss; without this alignment there is no general improvement guarantee. For squared-loss partition functions with residual means in each region, rho equals one whenever the correction is nonzero. Thus the original numerical experiment directly uses nu times h. The constant initializer is the sample mean for squared loss and the logit of the class proportion for binary log loss when both classes occur. This is Friedman (2001) Algorithm 1 with explicit shrinkage and numerical caveats in the notes.}
+\end{frame}
+
+\begin{frame}[t]{Classification still uses the logistic loss}
+\lead{Return to $y\in\{0,1\}$; $F(x)$ is a score and $\pi(x)=\sigm(F(x))$}
+\begin{definitionbox}
+\[\ell(y,F)=\log(1+e^F)-yF.\]
+\uncover<2->{\[\frac{\partial\ell}{\partial F}=\sigm(F)-y
+\quad\Longrightarrow\quad r_{im}=y_i-\pi_{m-1}(x_i).\]}
+\end{definitionbox}
+\uncover<2->{\small
+\[y=1:\quad \pi=0.2\Rightarrow r=+0.8;\qquad
+\pi=0.9\Rightarrow r=+0.1.\]
+\[\underbrace{x^{\mathsf T}\beta}_{\text{linear score}}
+\quad\longrightarrow\quad
+\underbrace{F_0+\sum_{m=1}^M\nu\rho_m h_m(x)}_{\text{additive ensemble score}}.\]
+\begin{takeaway}Keep the Bernoulli likelihood. Learn a more flexible score function.\end{takeaway}}
+\note{Explicitly switch from AdaBoost's plus/minus-one labels to zero/one labels. The response minus current probability is a pseudo-residual with respect to the score; it is not y minus the score and it is not the residual of a thresholded class prediction. Regress these real-valued targets on x. Corrections are added to the score, and the sigmoid is applied after summing; do not add predicted probabilities. For an observed positive label, a small predicted probability gives a larger positive correction target than a probability close to one. The optimal constant score is the logit of the observed class proportion if both classes occur. For stable numerical evaluation, use max(F,0)-yF+log1p(exp(-abs(F))). The example generator checks this gradient by finite differences. The chosen score convention is the log odds; it differs by a factor of two from some plus/minus-one formulations in Friedman's presentation.}
+\end{frame}
+
+\begin{frame}[t]{Simple corrections build a flexible fit}
+\lead{60 constructed observations; shrinkage $\nu=0.12$; fixed data across rounds}
+\centering\fig{boosting-fit}\par
+\small Each correction assigns constants to at most four input intervals.
+\note{The curves preserve the original computed run: seed 521223, target mean sin(1.6x)+0.22x, and independent Gaussian noise with standard deviation 0.38. Each base learner is a greedy depth-two regression tree with at least three training observations per leaf, introduced here simply as a fitted piecewise-constant correction with at most four intervals. Formal tree structure comes later. Each fit uses the residuals left by the current model, and the sum has more partitions than one constituent. Curves show rounds 1, 10 and 60 of the same run. The dashed conditional mean is known because this is a simulated teaching example, not a measured real-world result.}
+\end{frame}
+
+\begin{frame}[t]{Use validation to choose when to stop}
+\lead{Same run: 60 training observations and 500 independent validation observations}
+\centering\fig{boosting-loss}\par
+\small Lower training error does not guarantee lower error on new data.
+\note{The loss curves preserve the original computed teaching experiment. The validation minimum occurs at 71 rounds with validation MSE 0.214306; after 300 rounds it is 0.246702. Training MSE decreases monotonically and reaches 0.019923. These are properties of this realization, not universal stopping choices. The validation set chooses the stopping point; an additional untouched test set is needed for a final evaluation of the selected workflow. Shrinkage, base-function complexity and rounds interact and should be tuned together. Here we plot MSE, whereas the earlier derivation used one half the unnormalized sum of squared errors; their minima are identical. Real applications in the following case studies use task-appropriate validation.}
+\end{frame}

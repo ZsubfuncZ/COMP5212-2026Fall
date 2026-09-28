@@ -1,0 +1,23 @@
+\begin{frame}[t]{Forecast electricity demand}
+\lead{GEFCom2012: hourly demand from a US utility}
+\begin{center}\resizebox{.94\linewidth}{!}{\fig{case-load-pipeline}}\end{center}
+\small
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.55\textwidth}
+20 zones; 11 weather stations; 4.5 years of records.\par
+\uncover<2->{\begin{definitionbox}Team TinTin: boost \textbf{smooth spline functions}.\end{definitionbox}}
+\end{column}
+\begin{column}{.41\textwidth}
+\uncover<2->{\begin{takeaway}\textbf{5th of 105 teams}\\Reported competition ranking.\end{takeaway}}
+\end{column}
+\end{columns}
+\vfill{\scriptsize\href{https://robjhyndman.com/papers/kaggle-competition.pdf}{Ben Taieb \& Hyndman (2014), Abstract; Sections 3--4.}}
+\note{The study used separate hourly models and log-transformed demand. Spline learners extend the same residual-fitting principle beyond trees. This is a competition result on real utility records, not evidence of operational deployment or a universal ranking of algorithms.}
+\end{frame}
+
+\begin{frame}[t]{What is known when we predict?}
+\lead{Eight historical weeks to reconstruct; one future week to forecast}
+\begin{center}\resizebox{.86\linewidth}{!}{\fig{case-load-timeline}}\end{center}
+\vfill{\scriptsize\href{https://robjhyndman.com/papers/kaggle-competition.pdf}{Ben Taieb \& Hyndman (2014), Section 3. Timeline is schematic.}}
+
+\end{frame}

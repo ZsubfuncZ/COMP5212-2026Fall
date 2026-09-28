@@ -1,0 +1,15 @@
+\begin{frame}[t]{Phase 5: Bagging}
+\vspace{.42cm}
+\lead{A small change in the training data can change a deep tree.}
+\vspace{.28cm}
+\begin{definitionbox}
+\centering\vspace{.26cm}
+{\fontsize{21}{26}\selectfont Can several unstable trees\\produce a steadier prediction?\par}
+\vspace{.26cm}
+\end{definitionbox}
+\vspace{.48cm}
+\begin{takeaway}
+\textbf{Next:} Resample the observations. Fit trees independently. Average their predictions and analyze the variance.
+\end{takeaway}
+\note{The previous frame showed sensitivity to bootstrap resampling. Use that observation to motivate a new way for models to cooperate: independently fitted trees can be averaged instead of fitted as successive corrections. Bagging often uses deep, flexible trees, so do not call all these base models weak stumps. The variance calculation will describe when averaging is effective, without promising universally lower test error.}
+\end{frame}

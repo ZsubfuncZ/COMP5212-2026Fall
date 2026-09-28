@@ -1,0 +1,7 @@
+case,x_label,x,y_label,y,source
+Netflix 2012 historical report,Model,SVD,Reported RMSE,0.8914,https://netflixtechblog.com/netflix-recommendations-beyond-the-5-stars-part-1-55838468f429
+Netflix 2012 historical report,Model,RBM,Reported RMSE,0.899,https://netflixtechblog.com/netflix-recommendations-beyond-the-5-stars-part-1-55838468f429
+Netflix 2012 historical report,Model,Linear blend,Reported RMSE,0.88,https://netflixtechblog.com/netflix-recommendations-beyond-the-5-stars-part-1-55838468f429
+Facebook 2014,Model,Trees only,NE index (trees = 100),100,https://quinonero.net/Publications/predicting-clicks-facebook.pdf
+Facebook 2014,Model,LR only,NE index (trees = 100),99.43,https://quinonero.net/Publications/predicting-clicks-facebook.pdf
+Facebook 2014,Model,Trees + LR,NE index (trees = 100),96.58,https://quinonero.net/Publications/predicting-clicks-facebook.pdf

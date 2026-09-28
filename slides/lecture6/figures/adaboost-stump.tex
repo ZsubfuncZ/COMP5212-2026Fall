@@ -1,0 +1,17 @@
+% Generated original synthetic illustration.
+\begin{tikzpicture}
+\begin{axis}[width=.94\linewidth,height=3.9cm,xmin=.5,xmax=8.5,ymin=-1.5,ymax=1.5,
+ xlabel={Feature $x$},ylabel={Label or prediction},xtick={1,...,8},ytick={-1,1},
+ yticklabels={$-1$,$+1$},axis lines=left,tick label style={font=\small},
+ label style={font=\small},legend style={draw=none,font=\small,at={(.5,1.12)},anchor=south,legend columns=3}]
+\addplot[inkplot,thick] coordinates {(.5,-1) (2.5,-1) (2.5,1) (8.5,1)};
+\addlegendentry{First stump $h_1$}
+\addplot[only marks,mark=*,mark size=4pt,blueplot] coordinates {(1,-1) (2,-1) (5,-1) (6,-1)};
+\addlegendentry{Observed $y=-1$}
+\addplot[only marks,mark=*,mark size=4pt,redplot] coordinates {(3,1) (4,1) (7,1) (8,1)};
+\addlegendentry{Observed $y=+1$}
+\draw[titlered,thick,dashed] (axis cs:5,-1) circle[radius=7pt];
+\draw[titlered,thick,dashed] (axis cs:6,-1) circle[radius=7pt];
+\node[font=\small,text=titlered,anchor=south] at (axis cs:5.5,-.75) {two mistakes};
+\end{axis}
+\end{tikzpicture}

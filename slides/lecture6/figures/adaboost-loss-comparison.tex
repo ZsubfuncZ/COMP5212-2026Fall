@@ -1,0 +1,12 @@
+% Analytic losses at a common score convention: m=yF.
+\begin{tikzpicture}
+\begin{axis}[width=.98\linewidth,height=4.7cm,xmin=-3,xmax=3,ymin=0,ymax=21,
+ xlabel={Margin $m=yF(x)$},ylabel={Loss},axis lines=left,xtick={-3,0,3},ytick={0,5,10,20},
+ tick label style={font=\small},label style={font=\small},
+ legend style={draw=none,font=\small,at={(1,1)},anchor=north east}]
+\addplot[redplot,very thick,domain=-3:3,samples=100] {exp(-x)};
+\addlegendentry{$e^{-m}$}
+\addplot[blueplot,very thick,domain=-3:3,samples=100] {ln(1+exp(-x))};
+\addlegendentry{$\log(1+e^{-m})$}
+\end{axis}
+\end{tikzpicture}

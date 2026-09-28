@@ -1,0 +1,32 @@
+
+\begin{frame}[t]{From one score to a sum of rules}
+\lead{Linear and logistic regression start from one score: $F(x)=\beta_0+x^\top\beta$.}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\begin{definitionbox}\textbf{Regression}\par
+Prediction: $\widehat y=F(x)$.
+\[\ell(y,F)=\tfrac12(y-F)^2.\]
+\end{definitionbox}
+\column{.49\textwidth}
+\begin{definitionbox}\textbf{Binary classification}\par
+Prediction: $\widehat p=\sigm(F(x))$, $y\in\{0,1\}$.
+\[\ell(y,F)=\log(1+e^F)-yF.\]
+\end{definitionbox}
+\end{columns}
+\vspace{.15cm}
+\uncover<2->{\begin{takeaway}
+Learn the score as a sum of fitted rules:
+\[F_T(x)=F_0(x)+\sum_{t=1}^T\alpha_t h_t(x).\]
+Each rule can be simple; their combination can express a richer function.
+\end{takeaway}}
+\note{The sigmoid is s(z)=1/(1+exp(-z)). An intercept is included in the linear score. Feature expansion is another way to enrich a linear predictor; ensemble learning instead fits and combines multiple component functions. An ensemble is the umbrella term; boosting and bagging are two different construction strategies. This slide previews gradient boosting, where the previous regression or classification loss can be retained. AdaBoost first gives a particularly clean derivation using exponential loss and minus/plus-one labels; explicitly announce that change. Sums of linear functions of exactly the same features remain linear, so expressive gains require suitable nonlinear or varied rules, for example threshold functions. A weak model here means a simple component with limited individual predictive ability; the formal weighted-edge assumption will be stated when proving the AdaBoost training bound.}
+\end{frame}
+
+\begin{frame}[t]{Learning Goals}
+By the end of the lecture, you should be able to:
+\begin{itemize}\setlength{\itemsep}{.24cm}
+\item explain the high-level idea of ensemble learning
+\item explain how AdaBoost combines simple rules into a stronger classifier;
+\item connect residual fitting to gradient descent in prediction space;
+\end{itemize}
+\end{frame}

@@ -1,0 +1,46 @@
+% Two frames / three pages. Historical Netflix prediction-blending example.
+\begin{frame}[t]{Movie ratings: two views of taste}
+\lead{Netflix: predict a user's rating for a movie they have not rated.}
+\centering\fig{case-recommendations-pipeline}\par
+\vspace{.05cm}
+\uncover<2->{
+\begin{definitionbox}
+\centering
+\textbf{Prediction blending: a generic linear form}
+\[\hat r_{ui}=b+\beta_1 f_{\mathrm{SVD}}(u,i)+\beta_2 f_{\mathrm{RBM}}(u,i).\]
+\end{definitionbox}
+\begin{takeaway}Combine predictions from models that learn different patterns.\end{takeaway}}
+\vfill
+{\scriptsize\raggedright Amatriain and Basilico, Netflix Technology Blog (2012).
+\href{https://netflixtechblog.com/netflix-recommendations-beyond-the-5-stars-part-1-55838468f429}{\textcolor{blueplot}{Source}}\par}
+\note{Here u denotes a user, i a movie, and each f predicts that user's rating. Matrix factorization is commonly called SVD in this context; RBM is a restricted Boltzmann machine. The schematic and equation explain a generic linear blend, not a reconstruction of Netflix's exact formula. The source does not publish the coefficients or an intercept. Do not assume equal weights or weights summing to one. This is prediction blending, not AdaBoost, and its component models need not be weak learners. It broadens the ensemble idea beyond the specific sequential algorithm just derived. Different model families can make complementary errors, but improvement must be checked on held-out data.}
+\end{frame}
+
+\begin{frame}[t]{A blend improves rating prediction}
+\lead{Netflix's published comparison: offline error in predicted movie ratings.}
+\begin{columns}[T,onlytextwidth]
+\column{.62\textwidth}
+\vspace{.08cm}
+\centering\fig{case-recommendations-results}
+\column{.34\textwidth}
+\begin{definitionbox}\raggedright
+\textbf{Lower RMSE is better}\par
+The blend improves on\par
+both individual predictors.
+\end{definitionbox}
+\vspace{.15cm}
+\begin{takeaway}\raggedright
+Netflix reported deploying\par
+adapted versions of\par
+both algorithms.
+\end{takeaway}
+\vspace{.12cm}
+{\small Historical account: 2012.}
+\end{columns}
+\vspace{.12cm}
+{\small Rating accuracy is one component of recommendation quality.}
+\vfill
+{\scriptsize\raggedright Amatriain and Basilico (2012), ``The Netflix Prize and the Recommendation Problem.''
+\href{https://netflixtechblog.com/netflix-recommendations-beyond-the-5-stars-part-1-55838468f429}{\textcolor{blueplot}{Source}}\par}
+\note{All three RMSE values come from the same Netflix article: SVD 0.8914, RBM 0.8990, and linear blend 0.88. Preserve the reported precision; the source does not specify the exact evaluation split. The dot plot has an enlarged, explicitly labelled horizontal axis, rather than bars with a truncated baseline. These historical offline scores do not measure watch time, ranking quality, retention, or revenue. Netflix reported engineering changes before putting the two underlying algorithms into production; this slide does not claim that the pictured fixed blend was deployed unchanged or is used today. The two-model example is not the complete prize-winning ensemble.}
+\end{frame}

@@ -1,0 +1,39 @@
+% Original explanatory diagram; no photographed data or model predictions.
+\begin{tikzpicture}[x=1cm,y=.92cm,every node/.style={font=\small},line cap=round]
+\foreach \cx/\title in {0/Depth image,4.25/Body-part labels,8.5/3D joint proposals}{
+  \draw[rounded corners,fill=definitionblue,draw=lightplot] (\cx-1.4,-.25) rectangle (\cx+1.4,3.1);
+  \node[font=\small\bfseries] at (\cx,3.45) {\title};
+}
+% Depth-coded silhouette.
+\fill[blueplot!75] (0,2.54) circle (.23);
+\draw[blueplot!85,line width=15pt] (0,2.13)--(0,1.25);
+\draw[blueplot!65,line width=9pt] (0,2.02)--(-.5,1.7)--(-.85,2.05);
+\draw[blueplot!95,line width=9pt] (0,2.02)--(.55,1.7)--(.88,1.45);
+\draw[blueplot!65,line width=10pt] (-.13,1.27)--(-.29,.7)--(-.5,.15);
+\draw[blueplot!95,line width=10pt] (.13,1.27)--(.3,.73)--(.44,.15);
+% Body-part segmentation illustration.
+\begin{scope}[xshift=4.25cm]
+\fill[redplot] (0,2.54) circle (.23);
+\draw[blueplot,line width=15pt] (0,2.13)--(0,1.25);
+\draw[bulletgreen!95!black,line width=9pt] (0,2.02)--(-.5,1.7);
+\draw[redplot,line width=9pt] (-.5,1.7)--(-.85,2.05);
+\draw[lightplot,line width=9pt] (0,2.02)--(.55,1.7);
+\draw[titlered,line width=9pt] (.55,1.7)--(.88,1.45);
+\draw[redplot,line width=10pt] (-.13,1.27)--(-.29,.7);
+\draw[bulletgreen!95!black,line width=10pt] (-.29,.7)--(-.5,.15);
+\draw[lightplot,line width=10pt] (.13,1.27)--(.3,.73);
+\draw[blueplot,line width=10pt] (.3,.73)--(.44,.15);
+\end{scope}
+% Joint graph.
+\begin{scope}[xshift=8.5cm]
+\draw[blueplot,line width=2pt] (0,2.54)--(0,2.02)--(0,1.27);
+\draw[blueplot,line width=2pt] (-.85,2.05)--(-.5,1.7)--(0,2.02)--(.55,1.7)--(.88,1.45);
+\draw[blueplot,line width=2pt] (-.5,.15)--(-.29,.7)--(0,1.27)--(.3,.73)--(.44,.15);
+\foreach \xx/\yy in {0/2.54,0/2.02,0/1.27,-.85/2.05,-.5/1.7,.55/1.7,.88/1.45,-.5/.15,-.29/.7,.3/.73,.44/.15}{\fill[redplot] (\xx,\yy) circle (.075);}
+\end{scope}
+\draw[-{Stealth[length=3mm]},thick] (1.55,1.4)--(2.7,1.4);
+\draw[-{Stealth[length=3mm]},thick] (5.8,1.4)--(6.95,1.4);
+\node[align=center,font=\scriptsize] at (2.125,.7) {Forest};
+\node[align=center,font=\scriptsize] at (6.375,.7) {Spatial\\pooling};
+\node[font=\scriptsize,text=black!65] at (4.25,-.65) {Explanatory schematic; colors illustrate body parts.};
+\end{tikzpicture}

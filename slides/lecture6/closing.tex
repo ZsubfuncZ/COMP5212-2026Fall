@@ -1,0 +1,23 @@
+\begin{frame}[t]{How do the models work together?}
+\small\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{@{}p{.20\textwidth}YY@{}}
+\toprule
+\textbf{Method}&\textbf{How the next model is fitted}&\textbf{How predictions combine}\\\midrule
+AdaBoost&Fit a classifier under updated observation weights.&Weighted vote through $\sum_m\alpha_m h_m(x)$.\\[5pt]
+Gradient boosting&Fit a learner to a loss-gradient target.&Add corrections to scores or responses.\\[5pt]
+Bagging / RF&Resampled observations; RF also samples candidate features.&Average values or aggregate class predictions.\\\bottomrule
+\end{tabularx}
+\vspace{.15cm}\begin{takeaway}The loss, the base learner, and the way models are combined define the method.\end{takeaway}
+\note{Avoid equating bagging exclusively with variance reduction or boosting exclusively with bias reduction; these are intuitions, not universal decompositions. The variance formula earlier concerned a fixed input and repeated training samples. AdaBoost's training-error guarantee does not guarantee test performance. For binary gradient boosting, sum scores then apply sigmoid once. For random forests, averaging per-tree probabilities and majority voting need not make identical decisions.}
+\end{frame}
+
+\begin{frame}[t]{References and further reading}
+\small
+\begin{itemize}\setlength{\itemsep}{.15cm}
+\item Freund and Schapire (1997). \href{https://doi.org/10.1006/jcss.1997.1504}{\textit{A Decision-Theoretic Generalization of On-Line Learning and an Application to Boosting}.}
+\item Friedman (2001). \href{https://doi.org/10.1214/aos/1013203451}{\textit{Greedy Function Approximation: A Gradient Boosting Machine}.}
+\item Breiman (1996). \href{https://statistics.berkeley.edu/tech-reports/421}{\textit{Bagging Predictors}.}
+\item Breiman (2001). \href{https://www.stat.berkeley.edu/~breiman/randomforest2001.pdf}{\textit{Random Forests}.}
+\end{itemize}
+\note{Clickable primary references. Supporting sections and derivation conventions appear in module source ledgers. Figures distinguish constructed demonstrations, sourced measurements, and explanatory diagrams. The AdaBoost module also cites Schapire2003 for exponential loss and the training-error bound. Numerical scripts validate displayed calculations.}
+\end{frame}

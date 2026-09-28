@@ -1,0 +1,34 @@
+% Two frames / three physical pages. Original explanatory schematics.
+\begin{frame}[t]{Kinect: trees recognize body parts}
+\lead{Real deployment: body-pose estimation for controller-free games.}
+\begin{center}\fig{case-kinect-pipeline}\end{center}
+\pause
+\begin{takeaway}Turn a pose-estimation problem into many \textbf{body-part classification} problems.\end{takeaway}
+\vspace{.12cm}
+{\scriptsize\href{https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/BodyPartRecognition.pdf}{Shotton et al., CVPR 2011, Sections 1 and 3.}\par}
+\note{The paper identifies this method as a core Kinect component. The illustration explains the pipeline; it is not a captured camera frame or a model output. First describe the practical need to recover pose after tracking fails, then reveal the classification reformulation.}
+\end{frame}
+
+\begin{frame}[t]{From tree probabilities to joint positions}
+\lead{A randomized decision forest classifies each depth-image pixel.}
+\begin{columns}[T,onlytextwidth]
+\column{.56\textwidth}\centering\fig{case-kinect-forest}
+\column{.40\textwidth}
+\begin{definitionbox}\raggedright
+\textbf{Published configuration}\par
+31 body-part labels\par
+3 trees; depth 20
+\end{definitionbox}
+\begin{takeaway}\raggedright
+\textbf{Reported algorithm speed}\par
+Under 5 ms/frame\par
+Xbox 360 GPU\par
+\smallskip
+Camera input: 30 frames/s
+\end{takeaway}
+\vspace{.14cm}{\small Crossed arms and unseen poses can still cause errors.}
+\end{columns}
+\vspace{.08cm}
+{\scriptsize\href{https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/BodyPartRecognition.pdf}{Shotton et al. (2011), Sections 1, 2.1, 3.3--3.4, and 4.}\par}
+\note{Trees use separate synthetic-image sets and randomized candidate splits, not textbook bootstrap bagging. Leaf probabilities are averaged; spatial mode finding produces joint proposals. The speed is the paper's optimized algorithm, not the complete Kinect system. These historical results do not establish present-day performance.}
+\end{frame}

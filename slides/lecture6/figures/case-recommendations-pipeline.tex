@@ -1,0 +1,16 @@
+% Original explanatory diagram; not an exact deployed Netflix architecture.
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  stage/.style={rounded corners=3pt,draw=none,fill=definitionblue,
+    minimum width=3.15cm,minimum height=1.02cm,align=center,font=\small}]
+\path[use as bounding box] (-.1,-1.52) rectangle (14.0,1.52);
+\node[stage,minimum width=2.65cm] (history) at (1.4,0) {User--movie\\rating history};
+\node[stage] (svd) at (5.1,.82) {Matrix factorization\\(SVD)};
+\node[stage] (rbm) at (5.1,-.82) {Restricted Boltzmann\\machine (RBM)};
+\node[stage,fill=takeawaypeach,minimum width=2.65cm] (blend) at (9.6,0) {Linear\\blend};
+\draw[->,thick,blueplot] (history.east) -- (svd.west);
+\draw[->,thick,blueplot] (history.east) -- (rbm.west);
+\draw[->,thick,blueplot] (svd.east) -- node[above,sloped,font=\scriptsize] {prediction} (blend.west);
+\draw[->,thick,blueplot] (rbm.east) -- node[below,sloped,font=\scriptsize] {prediction} (blend.west);
+\draw[->,thick,blueplot] (blend.east) -- (11.85,0);
+\node[font=\small,align=center] at (12.77,0) {$\hat r_{ui}$\\blended rating};
+\end{tikzpicture}

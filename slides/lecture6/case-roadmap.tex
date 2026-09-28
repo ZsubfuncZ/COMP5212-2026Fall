@@ -1,0 +1,28 @@
+\begin{frame}[t]{Where do ensembles become useful?}
+\lead{Four documented applications accompany the algorithms}
+\vspace{.13cm}
+\begin{columns}[T,onlytextwidth]
+\column{.48\textwidth}
+\begin{definitionbox}\textbf{Predict a movie rating}\\
+User/movie history $\longrightarrow$ rating\\[3pt]
+Blend recommendation models
+\end{definitionbox}
+\vspace{.13cm}
+\begin{definitionbox}\textbf{Forecast electricity demand}\\
+Weather and history $\longrightarrow$ load\\[3pt]
+Gradient boosting with smooth functions
+\end{definitionbox}
+\column{.48\textwidth}
+\begin{definitionbox}\textbf{Estimate an ad's click probability}\\
+User/ad context $\longrightarrow$ probability\\[3pt]
+Boosted trees + logistic regression
+\end{definitionbox}
+\vspace{.13cm}
+\begin{definitionbox}\textbf{Track a player's body}\\
+Depth pixels $\longrightarrow$ body parts\\[3pt]
+Randomized decision forests
+\end{definitionbox}
+\end{columns}
+\vfill\begin{takeaway}What is predicted? What is combined? How is success measured?\end{takeaway}
+\note{Read the grid across each row: movie-rating prediction, click prediction, load forecasting, Kinect. Use these applications as motivation; the later case slides give primary sources and scope. These are historical examples, not descriptions of current product architectures. Small arithmetic examples remain useful for deriving the update rules. Diagrams explain pipelines; reported performance figures are explicitly labeled.}
+\end{frame}

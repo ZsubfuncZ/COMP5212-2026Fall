@@ -1,0 +1,13 @@
+% Exact weights in adaboost-results.json; bars grouped by observation.
+\begin{tikzpicture}
+\begin{axis}[width=.99\linewidth,height=4.8cm,ybar,bar width=5pt,
+ xmin=.4,xmax=8.6,ymin=0,ymax=.29,xlabel={Observation $i$},ylabel={Weight},
+ xtick={1,...,8},ytick={0,.125,.25},yticklabels={$0$,$1/8$,$1/4$},
+ axis lines=left,tick label style={font=\small},label style={font=\small},
+ legend style={draw=none,font=\small,at={(.5,1.04)},anchor=south,legend columns=2}]
+\addplot[fill=lightplot,draw=blueplot] coordinates {(1,0.125) (2,0.125) (3,0.125) (4,0.125) (5,0.125) (6,0.125) (7,0.125) (8,0.125)};
+\addlegendentry{$D_1$}
+\addplot[fill=redplot!70,draw=redplot] coordinates {(1,0.08333333333) (2,0.08333333333) (3,0.08333333333) (4,0.08333333333) (5,0.25) (6,0.25) (7,0.08333333333) (8,0.08333333333)};
+\addlegendentry{$D_2$}
+\end{axis}
+\end{tikzpicture}

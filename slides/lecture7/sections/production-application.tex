@@ -1,0 +1,20 @@
+% 35 --------------------------------------------------------------------------
+\begin{frame}{XGBoost in Production: Uber, 2026}
+  \textbf{Detect bounding-box annotation errors before submission.}
+  \vspace{.4cm}
+  \centering
+  \begin{tikzpicture}[node distance=.6cm]
+    \node[decision,text width=2.4cm] (a) {Video and\\annotations};
+    \node[decision,text width=2.6cm,right=of a] (b) {283 features\\11-frame window};
+    \node[orangebox,text width=2.2cm,right=of b] (c) {XGBoost\\error probability};
+    \node[leaf,text width=2.4cm,right=of c] (d) {Flag clusters\\for human review};
+    \draw[flow] (a)--(b);\draw[flow] (b)--(c);\draw[flow] (c)--(d);
+  \end{tikzpicture}
+  \vspace{.4cm}
+  \begin{itemize}\spaceditems
+    \item Visual, motion, and geometric features summarize video context.
+    \item Training anomalies simulate tracking jumps and identity swaps.
+    \item Deployed across Uber's bounding-box annotation projects.
+  \end{itemize}
+  \src{Deployment evidence; comparative metrics and savings not disclosed.}
+\end{frame}

@@ -1,0 +1,22 @@
+% Published Table 1 values, re-expressed as an index with trees = 100.
+\begin{tikzpicture}
+\begin{axis}[
+  width=8.2cm,height=4.55cm,
+  xbar,bar width=20pt,bar shift=0pt,
+  xmin=0,xmax=109,ymin=.4,ymax=3.6,
+  xtick={0,25,50,75,100},ytick={1,2,3},
+  yticklabels={Trees + LR,LR only,Trees only},
+  yticklabel style={font=\small},xticklabel style={font=\small},
+  xlabel={NE index (trees = 100)},xlabel style={font=\small},
+  axis x line*=bottom,axis y line*=left,
+  y axis line style={draw=none},ytick style={draw=none},
+  xmajorgrids,grid style={black!10},
+  tick align=outside,clip=false,
+  nodes near coords,nodes near coords align={horizontal},
+  every node near coord/.append style={font=\small,black,
+    /pgf/number format/fixed,/pgf/number format/precision=2},
+  enlarge y limits=false]
+\addplot[fill=blueplot!40,draw=none] coordinates {(100,3) (99.43,2)};
+\addplot[fill=redplot,draw=none] coordinates {(96.58,1)};
+\end{axis}
+\end{tikzpicture}

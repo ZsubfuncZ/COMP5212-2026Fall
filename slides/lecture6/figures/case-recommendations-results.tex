@@ -1,0 +1,24 @@
+% Published RMSE values from Netflix Technology Blog, April 6, 2012.
+% An explicitly enlarged axis is appropriate for a dot plot; no bars are used.
+\begin{tikzpicture}
+\begin{axis}[
+  width=7.8cm,height=4.25cm,
+  xmin=.875,xmax=.905,ymin=.45,ymax=3.55,
+  xtick={.875,.885,.895,.905},ytick={1,2,3},
+  yticklabels={Linear blend,RBM,SVD},
+  xticklabel style={font=\small,/pgf/number format/fixed,/pgf/number format/precision=3},
+  yticklabel style={font=\small},
+  xlabel={RMSE (enlarged scale; lower is better)},xlabel style={font=\small},
+  axis x line*=bottom,axis y line*=left,
+  y axis line style={draw=none},ytick style={draw=none},
+  xmajorgrids,grid style={black!10},tick align=outside,clip=false]
+\addplot[black!20,thick] coordinates {(.875,3) (.8914,3)};
+\addplot[black!20,thick] coordinates {(.875,2) (.8990,2)};
+\addplot[black!20,thick] coordinates {(.875,1) (.88,1)};
+\addplot[only marks,mark=*,mark size=3.8pt,blueplot] coordinates {(.8914,3) (.8990,2)};
+\addplot[only marks,mark=*,mark size=3.8pt,redplot] coordinates {(.88,1)};
+\node[anchor=west,font=\small,xshift=5pt] at (axis cs:.8914,3) {0.8914};
+\node[anchor=west,font=\small,xshift=5pt] at (axis cs:.8990,2) {0.8990};
+\node[anchor=west,font=\small,xshift=5pt] at (axis cs:.88,1) {0.88};
+\end{axis}
+\end{tikzpicture}

@@ -1,0 +1,5 @@
+\begin{tikzpicture}
+\begin{axis}[width=\linewidth,height=3.85cm,axis lines=left,xmin=1,xmax=10,ymin=0,ymax=.36,xlabel={Maximum depth},ylabel={MSE},xtick={2,4,6,8,10},tick label style={font=\scriptsize},label style={font=\small},legend style={font=\scriptsize,draw=none,at={(.5,1.04)},anchor=south,legend columns=2}]
+\addplot[blueplot,thick,mark=*] coordinates {(1,0.171072) (2,0.10667) (3,0.0741504) (4,0.0484958) (5,0.0301272) (6,0.0162945) (7,0.00741776) (8,0.00337387) (9,0.00147544) (10,0.000297437)};
+\addlegendentry{Training}\addplot[redplot,thick,mark=square*] coordinates {(1,0.231909) (2,0.18681) (3,0.166142) (4,0.148116) (5,0.1838) (6,0.188675) (7,0.192264) (8,0.197666) (9,0.197858) (10,0.198174)};
+\addlegendentry{Validation}\end{axis}\end{tikzpicture}

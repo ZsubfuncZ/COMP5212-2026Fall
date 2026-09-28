@@ -1,0 +1,157 @@
+% 9 frames: three-frame tree primer, then bagging and random forests.
+\section{Trees, bagging, and random forests}
+
+\begin{frame}[t]{A tree predicts within regions}
+\lead{A brief tree recap: a depth-two tree partitions the input into four intervals.}
+\begin{columns}[T,onlytextwidth]
+\column{.62\textwidth}\fig{foundations-partition}
+\column{.35\textwidth}\vspace{.1cm}
+\begin{definitionbox}
+For leaves $R_1,\ldots,R_J$,
+\[f(x)=\sum_{j=1}^{J}c_j\ind\{x\in R_j\}.\]
+Squared-loss prediction:
+\[c_j=\frac{\sum_{i:x_i\in R_j}y_i}{|\{i:x_i\in R_j\}|}.\]
+\end{definitionbox}
+\small First split: $x\leq0.463$.\par
+Repeat a split within each child.\par
+A \textbf{stump} has just one split.
+\end{columns}
+\note{We have already used simple learners for boosting. Before bagging, collect the essential tree ideas in three slides. Red is the depth-two tree, blue dots are training observations, and the dashed curve is the true mean. Root depth is zero. Each node asks an axis-aligned question; following the questions reaches a terminal leaf. Subsequent thresholds are 0.06287 on the left and 0.85587 on the right. Leaf predictions are 2.348, 3.113, 1.774 and 2.414. A univariate tree uses intervals; multiple features give axis-aligned regions. For squared loss, differentiating a leaf's SSE gives its sample mean.}
+\end{frame}
+
+\begin{frame}[t]{Choose a split by reducing error}
+\lead{At a node, try a feature $j$ and a threshold $t$.}
+\begin{definitionbox}
+\[L(j,t)=\{i:x_{ij}\leq t\},\qquad R(j,t)=\{i:x_{ij}>t\}.\]
+\[(j^*,t^*)=\argmin_{j,t}\left[\sum_{i\in L(j,t)}(y_i-\bar y_L)^2+\sum_{i\in R(j,t)}(y_i-\bar y_R)^2\right].\]
+\end{definitionbox}
+\vspace{.18cm}
+\begin{columns}[T,onlytextwidth]
+\column{.48\textwidth}\small Six observations:
+\[\begin{array}{c|rrrrrr}x&1&2&3&4&5&6\\\hline y&1&1&2&5&6&6\end{array}\]
+\column{.48\textwidth}\small
+\begin{tabular}{lrr}\toprule Threshold & Child means & Total SSE\\\midrule
+$2.5$ & $1,\;4.75$ & $10.75$\\ $3.5$ & $1.33,\;5.67$ & $1.33$\\\bottomrule\end{tabular}
+\end{columns}
+\begin{takeaway}Choose $t=3.5$ here. Grow the tree \textbf{greedily}, one node at a time.\end{takeaway}
+\vspace{.06cm}
+\small\textbf{Classification:} use class fractions $p_k$ and Gini impurity $G=1-\sum_k p_k^2$.
+\note{Both children must contain observations. Candidate thresholds lie between distinct observed feature values, with leaf-size constraints if used. Exhaustive enumeration over all five thresholds gives 3.5 as best. Its child SSE values are each 2/3, giving total 4/3. Greedy local splitting does not guarantee a globally optimal full tree. For classification, predict the most frequent class in the leaf or report its class fractions; these estimates need not be calibrated. Minimize (n_L/n)G_L+(n_R/n)G_R. The same partition mechanism supports regression and classification. Source: scikit-learn tree mathematical formulation.}
+\end{frame}
+
+\begin{frame}[t]{Deep trees can be unstable}
+\lead{Constructed regression data: 64 training rows and independent validation data.}
+\begin{columns}[T,onlytextwidth]
+\column{.49\textwidth}\fig{foundations-depth-error}
+\column{.49\textwidth}\fig{foundations-bootstrap}
+\end{columns}
+\small More depth can fit noise. Resampling the rows changes the fitted tree.
+\pause
+\begin{takeaway}Averaging 100 trees lowers validation MSE here: $0.153$, compared with $0.198$ for one tree.
+\end{takeaway}
+\note{All figures use the constructed regression mean 2+sin(2*pi*x)+0.8*x with Gaussian noise SD 0.32. The depth curve uses 64 training rows and 800 independent validation draws. Validation MSE is 0.148 at depth 4 and 0.198 at depth 8. Root depth is zero; minimum leaf size is one. Depth, leaf size, or pruning control capacity. The prediction plot shows three depth-eight bootstrap trees in pale colors and their 100-tree mean in blue. Each bootstrap draws 64 indices with replacement; dashed black is the true conditional mean. The single-tree baseline uses all original rows. Bootstrap sensitivity conditional on this sample differs from sampling variability over new datasets, and the improved MSE is an illustration, not a guarantee. If validation selects a model, final assessment needs separate appropriate test data. Bagging commonly averages deep, unstable trees; these need not be the deliberately weak stumps used to introduce boosting.}
+\end{frame}
+
+\input{transition-05-bagging.tex}
+
+\begin{frame}[t]{Bagging averages bootstrap fits}
+\lead{Bootstrap aggregation: train trees independently on resampled data, then combine them.}
+\begin{center}
+\begin{tikzpicture}[every node/.style={font=\small},box/.style={rounded corners,draw=blueplot,fill=definitionblue,minimum width=2.2cm,minimum height=.62cm,align=center}]
+\node[box] (data) at (0,0) {Training data $D$};
+\node[box] (d1) at (-3.4,-1.0) {$D^{*(1)}$};\node[box] (d2) at (0,-1.0) {$D^{*(2)}$};\node[box] (db) at (3.4,-1.0) {$D^{*(B)}$};
+\node[box] (t1) at (-3.4,-1.95) {Tree $f_1$};\node[box] (t2) at (0,-1.95) {Tree $f_2$};\node[box] (tb) at (3.4,-1.95) {Tree $f_B$};
+\foreach \a/\b in {data/d1,data/d2,data/db,d1/t1,d2/t2,db/tb}{\draw[-{Stealth}] (\a)--(\b);}
+\node at (1.75,-1.0) {$\cdots$};\node at (1.75,-1.95) {$\cdots$};
+\node[align=center] at (0,-2.95) {Each bootstrap: $n$ draws \textbf{with replacement}.\\Fit the trees independently, then aggregate.};
+\end{tikzpicture}
+\end{center}
+\begin{definitionbox}Regression: $\displaystyle\bar f(x)=\frac1B\sum_{b=1}^Bf_b(x)$.\quad Classification: plurality vote among tree labels.\end{definitionbox}
+\note{Source: Breiman, Bagging Predictors. Each bootstrap has n draws but repeats some rows and omits others. Trees can be fitted independently conditional on the original dataset. Classification here uses label voting, consistent with the original description; probability averaging is another common convention. A base tree need not be deliberately weak. Bagging can reduce variance for unstable learners but is not a universal improvement for every learner or problem.}
+\end{frame}
+
+\begin{frame}[t]{Why averaging can reduce variance}
+\lead{Fix an input $x$. View tree predictions $f_b(x)$ as random variables.}
+\begin{definitionbox}Assume $\Var(f_b(x))=v$ and $\Cov(f_b(x),f_c(x))=\rho v$ for $b\ne c$.\end{definitionbox}
+\[\begin{aligned}
+\Var\!\left(\frac1B\sum_{b=1}^Bf_b(x)\right)
+ &=\frac1{B^2}\left[\sum_b\Var(f_b(x))+\sum_{b\ne c}\Cov(f_b(x),f_c(x))\right]\\[6pt]
+\uncover<2->{&=\frac{Bv+B(B-1)\rho v}{B^2}}\\[6pt]
+\uncover<2->{&=\boxed{\rho v+\frac{(1-\rho)v}{B}}.}
+\end{aligned}\]
+\uncover<2->{\begin{takeaway}Lower correlation makes averaging more effective.\end{takeaway}}
+\note{Randomness can include the training sample and bootstrap or feature randomization. At fixed x, equal variances and equal pairwise correlations yield an exact algebraic identity. With independent bootstrap seeds conditional on a fixed dataset, predictions can be conditionally independent; shared training data induces dependence across repeated datasets. This is a schematic explanation of unconditional prediction variance, not a claim that empirical tree pairs have identical correlations. It removes neither bias nor irreducible noise and is not an MSE guarantee.}
+\end{frame}
+
+\begin{frame}[t]{Correlation limits the benefit}
+\begin{columns}[T,onlytextwidth]
+\column{.65\textwidth}\vspace{.25cm}\fig{foundations-correlation}
+\column{.32\textwidth}\vspace{.35cm}
+\begin{definitionbox}At $B=100$:
+\[\begin{array}{c|c}\rho&\Var(\bar f)/v\\\hline0&0.01\\0.2&0.208\\0.8&0.802\end{array}\]
+\end{definitionbox}
+\small More trees reduce the second term.\par
+\prompt{How can we also reduce correlation?}
+\end{columns}
+\note{Analytical curves plot rho+(1-rho)/B, not estimated learning curves. Nonnegative correlations are illustrative and fixed while B varies. Identical predictions have rho=1, giving no variance reduction. Random forests vary candidate features so a dominant feature does not force similar early splits in every tree. The outcome depends on data and individual-tree strength.}
+\end{frame}
+
+\input{transition-06-forests.tex}
+
+\begin{frame}[t]{Random forests vary each split}
+\lead{Bootstrap the rows; sample a fresh subset of candidate features at every node.}
+\begin{columns}[T,onlytextwidth]
+\column{.53\textwidth}\centering
+\begin{tikzpicture}[every node/.style={font=\small},box/.style={draw=blueplot,fill=definitionblue,rounded corners,align=center,minimum height=.9cm,minimum width=2.4cm}]
+\node[box] (root) at (0,0) {Candidates: $\{x_1,x_4\}$\\Choose the best split};
+\node[box] (l) at (-1.8,-1.65) {$\{x_2,x_5\}$\\Best split here};\node[box] (r) at (1.8,-1.65) {$\{x_1,x_3\}$\\Best split here};
+\draw[-{Stealth}] (root)--(l);\draw[-{Stealth}] (root)--(r);
+\node[align=center] at (0,-3.05) {Different nodes, different subsets.\\Repeat for each bootstrap tree.};
+\end{tikzpicture}
+\column{.43\textwidth}
+\begin{definitionbox}At each node:
+\begin{enumerate}\item Sample $m$ of the $d$ features.\item Search splits using these features.\item Keep the best split.\end{enumerate}
+\end{definitionbox}
+\small Smaller $m$ can reduce tree correlation, but may weaken each tree.\par Tune feature count and leaf complexity.
+\end{columns}
+\note{Source: Breiman and Cutler. Feature subsets are schematic with d=5 and m=2. A fresh subset is drawn at each node, not once per tree or forest. We describe standard bootstrap random forests; other variants exist. Use regression means and classification label votes here. Neither bagging nor forests is guaranteed never to overfit. Tree count mainly controls averaging accuracy; depth, leaf size and feature subsampling also affect the fitted predictor.}
+\end{frame}
+
+\begin{frame}[t]{Out-of-bag prediction}
+\lead{For row $i$, predict using only trees whose bootstrap sample omitted row $i$.}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\begin{definitionbox}A row is absent from one bootstrap with probability
+\[\begin{aligned}\Pr(i\text{ omitted})&=\left(1-\frac1n\right)^n\\[4pt]&\longrightarrow e^{-1}\approx0.368.\end{aligned}\]
+\end{definitionbox}
+\small Evaluate each row using its own out-of-bag trees, then average the losses.
+\column{.49\textwidth}\small Example: $n=5$ rows, three bootstrap samples.\vspace{.2cm}
+\begin{tabular}{cll}\toprule Tree & Sampled row IDs & Omitted IDs\\\midrule
+$1$ & $1,1,2,4,5$ & $\mathbf{3}$\\$2$ & $2,3,3,4,4$ & $1,5$\\$3$ & $1,2,2,3,5$ & $4$\\\bottomrule\end{tabular}
+\vspace{.3cm}
+\begin{takeaway}Row $3$ is evaluated with tree $1$ only in this tiny example.\end{takeaway}
+\end{columns}
+\note{The exact exclusion probability is (1-1/n)^n; 0.368 is its large-n limit. For regression average a row's OOB trees, and for classification vote. With too few trees some rows have no OOB prediction. OOB assessment is useful for bagging and bootstrap forests. Repeated tuning against OOB scores can bias selection; final assessment needs an appropriate held-out protocol, especially for dependent or shifted data.}
+\end{frame}
+
+\begin{frame}[t]{Two ways to build a stronger predictor}
+\begin{columns}[T,onlytextwidth]
+\column{.48\textwidth}
+\begin{definitionbox}\textbf{Boosting}\par Fit the next learner to improve the current ensemble.
+\[F_0\;\longrightarrow\;F_1\;\longrightarrow\;\cdots\;\longrightarrow\;F_M\]
+\[F_m=F_{m-1}+\alpha_m h_m.\]
+\end{definitionbox}
+\small AdaBoost: reweight difficult examples.\par
+Gradient boosting: fit negative gradients.\par
+Often use small, restricted base learners.
+\column{.48\textwidth}
+\begin{definitionbox}\textbf{Bagging / random forests}\par Fit diverse trees independently; average or vote.
+\[D\;\longrightarrow\;\begin{cases}f_1\\f_2\\\vdots\\f_B\end{cases}\;\longrightarrow\;\bar f\]
+\end{definitionbox}
+\small Stabilize variable predictions.\par
+Often use deep, individually flexible trees.\par
+Forests add random feature subsets.
+\end{columns}
+\begin{takeaway}Both combine models. Their training mechanisms and guarantees differ.\end{takeaway}
+\note{This compares methods already covered rather than announcing AdaBoost. Boosting stages depend on previous stages; bagged trees train independently across trees conditional on the original dataset. Computations within one boosting stage can still be parallel. The AdaBoost training-error bound requires a weighted error below one half at each relevant round; averaging arbitrary models alone has no analogous weak-learning guarantee. Bagging often uses deep trees with high variance, not necessarily weak learners. Variance reduction, bias reduction, and predictive accuracy are not exclusive to one family: state the mechanisms rather than a rigid bias-versus-variance taxonomy. The next case shows randomized forests in Kinect body tracking.}
+\end{frame}

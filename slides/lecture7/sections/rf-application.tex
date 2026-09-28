@@ -1,0 +1,50 @@
+% 17 --------------------------------------------------------------------------
+\begin{frame}{Random Forest for Port Energy Forecasting}
+  \textbf{Valletta Cruise Port, Malta: a 2025 study}
+  \vspace{.3cm}
+  \begin{itemize}\spaceditems
+    \item Predict next-day hourly demand to support energy scheduling.
+    \item Inputs: past demand, calendar, temperature, PV generation, ship activity.
+    \item 8,760 hourly records; metered baseline plus estimated shore-power demand.
+  \end{itemize}
+  \vspace{.4cm}
+  \centering
+  \begin{tikzpicture}[node distance=.9cm]
+    \node[decision,text width=4.8cm] (tr) {Initial training: Apr--Dec 2022\\6,600 hours};
+    \node[leaf,text width=4.8cm,right=of tr] (te) {Test: Jan--Mar 2023\\2,160 hours\\Expand training daily};
+    \draw[flow] (tr)--(te);
+  \end{tikzpicture}
+\end{frame}
+
+% 18 --------------------------------------------------------------------------
+\begin{frame}{Lower Forecast Error Than Linear Regression}
+  \begin{columns}[c,onlytextwidth]
+    \column{.59\textwidth}
+    \centering
+    \begin{tikzpicture}[x=1.85cm,y=.85cm]
+      \foreach \yy/\vv/\lab in {4/1.7861/{Linear regression},3/1.2843/{LSBoost},2/1.1904/{GPR}}{
+        \fill[bulletgray] (0,\yy-.2) rectangle (\vv,\yy+.2);
+        \node[anchor=east,font=\small] at (-.08,\yy) {\lab};
+        \node[anchor=west,font=\scriptsize] at (\vv,\yy) {\vv};
+      }
+      \fill[forestgreen] (0,.8) rectangle (1.1848,1.2);
+      \node[anchor=east,font=\small] at (-.08,1) {Random Forest};
+      \node[anchor=west,font=\scriptsize] at (1.1848,1) {1.1848};
+      \draw[flow] (0,.4)--(2.15,.4);
+      \foreach \xx in {0,.5,1,1.5,2}{
+        \draw (\xx,.4)--(\xx,.34);
+        \node[below,font=\scriptsize] at (\xx,.34) {\xx};
+      }
+      \node[below,font=\small] at (1.05,-.15) {Test RMSE (MW)};
+    \end{tikzpicture}
+    \column{.36\textwidth}
+    {\color{forestgreen}\fontsize{28}{32}\selectfont\textbf{33.7\%}}\par
+    lower RMSE than linear regression.\par
+    \vspace{.3cm}
+    GPR was nearly tied.\par
+    \vspace{.3cm}
+    All shown models use expanding-window evaluation.
+  \end{columns}
+  \vspace{.25cm}
+  \small Some future covariates were observed retrospectively. 
+\end{frame}

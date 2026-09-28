@@ -1,0 +1,113 @@
+% Bagging: a short, standalone section for the existing lecture.
+% Include inside the document body with: \input{bagging.tex}
+% Uses the existing theme.tex (Beamer, TikZ, PGFPlots, definitionbox, takeaway).
+% No external figures, data files, or additional project macros are required.
+% Seven logical frames; two frames use a second reveal. Presenter notes included.
+
+
+\begin{frame}[t]{Bootstrap Aggregation}
+	\lead{Training set $D=\{(x_i,y_i)\}_{i=1}^{n}$. Choose a base learner and a model count $B$.}
+	\begin{center}
+		\begin{tikzpicture}[x=1cm,y=.9cm,>=Stealth,
+			every node/.style={font=\small},
+			stage/.style={rounded corners=3pt,draw=none,fill=definitionblue,
+				minimum width=2.55cm,minimum height=.57cm,align=center}]
+			\node[stage] (data) at (0,0) {Training data $D$};
+			\node[stage] (d1) at (-4,-1.05) {$D^{*(1)}$};
+			\node[stage] (d2) at (0,-1.05) {$D^{*(2)}$};
+			\node[stage] (db) at (4,-1.05) {$D^{*(B)}$};
+			\node[stage] (f1) at (-4,-2.05) {Fit $f_1$};
+			\node[stage] (f2) at (0,-2.05) {Fit $f_2$};
+			\node[stage] (fb) at (4,-2.05) {Fit $f_B$};
+			\foreach \a/\b in {data/d1,data/d2,data/db,d1/f1,d2/f2,db/fb}
+			{\draw[->,thick,blueplot] (\a)--(\b);}
+			\node at (2,-1.05) {$\cdots$};
+			\node at (2,-2.05) {$\cdots$};
+			\node[font=\footnotesize] at (0,-2.7)
+			{Each bootstrap: $n$ draws \textbf{with replacement}. Fit the models separately.};
+		\end{tikzpicture}
+	\end{center}
+	\uncover<2->{
+		\begin{definitionbox}
+			\textbf{Regression:}\quad $\displaystyle \widehat f_{\mathrm{bag}}(x)=\frac1B\sum_{b=1}^{B}f_b(x)$.
+			\par\vspace{.09cm}
+			\textbf{Classification:}\quad take the most frequent predicted class.
+	\end{definitionbox}}
+	\vfill
+	{\scriptsize\href{https://www.stat.berkeley.edu/~breiman/bagging.pdf}{Breiman, \emph{Bagging Predictors}, Section 1.}\par}
+	\note{Use the same learning procedure on every bootstrap sample; fitted parameters differ because the sampled observations differ. The draws are uniform over the original training rows and independent with replacement. Each sample contains n draws, not necessarily n distinct observations. There is no residual target or error-dependent reweighting between fitted models. With independent sampling and training seeds, fits can be computed independently conditional on D and can be parallelized. Regression averages numerical predictions. Classification can use a plurality vote with a fixed tie rule; averaging class-probability vectors before taking the largest component is another common convention. Bagging does not generate new independent information about the population.}
+\end{frame}
+
+
+
+
+\begin{frame}[t]{Bagging for Movie Ratings}
+	\lead{Predict a user's rating for a movie they have not rated.}
+	\begin{columns}[T,onlytextwidth]
+		\column{.48\textwidth}
+		\begin{definitionbox}
+			\textbf{Base model: matrix factorization}\par
+			User vector $p_u$; movie vector $q_i$:
+			\[
+			\widehat r_{ui}=p_u^{\mathsf T}q_i.
+			\]
+		\end{definitionbox}
+		\vspace{.08cm}
+		\small Bootstrap the $(\text{user},\text{movie},\text{rating})$ records.\par
+		Fit one scoring model per sample.\par
+		Average the predicted ratings:
+		\[
+		\widehat r_{ui}^{\mathrm{bag}}=\frac1B\sum_{b=1}^{B}\widehat r_{ui}^{(b)}.
+		\]
+		\column{.48\textwidth}
+		\uncover<2->{
+			\begin{definitionbox}
+				\textbf{MovieLens 100K: reported RMSE}\par
+				\vspace{.18cm}
+				\begin{tabular}{@{}lr@{}}
+					Single ISMF model & $0.9434$\\[9pt]
+					Bagging, $B=50$ & $\mathbf{0.9173}$
+				\end{tabular}
+			\end{definitionbox}
+			\vspace{.16cm}
+			\begin{takeaway}
+				One algorithm, many resampled fits.\par
+				Lower RMSE in this experiment.
+			\end{takeaway}
+			\vspace{.16cm}
+			\small Offline result on real rating data.
+		}
+	\end{columns}
+	\vfill
+	{\scriptsize\href{https://arxiv.org/pdf/1211.2891}{Bar et al. (2012), Section 4.1 and Table 1: MovieLens 100K results.}\par}
+	\note{This paper studies several ensemble methods; use only its bagging results here. Section 4.1 explicitly samples rating records with replacement, trains one collaborative-filtering model per sample, and averages predictions. The displayed matrix-factorization expression explains the basic scoring mechanism; ISMF is the specific matrix-factorization baseline used for the quoted table values. Learners must account for repeated ratings or equivalent multiplicity weights. The 50-model ISMF bagging value and single-model value come from the MovieLens 100K comparison in Table 1; do not replace ISMF with an arbitrary modern matrix-factorization baseline. The paper reports the best tested configuration of each method, evaluated over five random 80:20 splits. Average model predictions, not the separately learned latent vectors, whose coordinates need not align. This is historical offline research evidence, not a Netflix production-deployment claim. Rating RMSE alone does not establish better ranking, engagement, or revenue. No new factorization derivation is required for this application slide.}
+\end{frame}
+
+\begin{frame}[t]{When and How to Use Bagging}
+	\begin{columns}[T,onlytextwidth]
+		\column{.47\textwidth}
+		\begin{definitionbox}
+			\textbf{Look for an unstable base learner}\par
+			Small changes to the training data can produce noticeably different predictions.
+		\end{definitionbox}
+		\vspace{.12cm}
+		\small Examples: flexible trees, neural networks, or regression with variable selection.\par
+		\vspace{.20cm}
+		\textbf{Account for the cost}\par
+		Store and evaluate $B$ fitted models.\par
+		Separate fits can be trained in parallel.
+		\column{.49\textwidth}
+		\begin{definitionbox}
+			\textbf{A practical workflow}
+			\begin{enumerate}
+				\setlength{\itemsep}{.14cm}
+				\item Reserve evaluation data before fitting.
+				\item Bootstrap the training portion only.
+				\item Tune using validation error.
+				\item Assess the selected ensemble on held-out test data.
+			\end{enumerate}
+		\end{definitionbox}
+	\end{columns}
+\end{frame}
+
+
