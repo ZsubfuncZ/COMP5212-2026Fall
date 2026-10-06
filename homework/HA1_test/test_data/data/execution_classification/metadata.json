@@ -1,0 +1,41 @@
+{
+  "dataset": "execution_classification",
+  "task": "binary_classification",
+  "target": "high_slippage",
+  "feature_names": [
+    "bid_price_1",
+    "bid_size_1",
+    "ask_price_1",
+    "ask_size_1",
+    "bid_price_2",
+    "bid_size_2",
+    "ask_price_2",
+    "ask_size_2",
+    "bid_price_3",
+    "bid_size_3",
+    "ask_price_3",
+    "ask_size_3",
+    "bid_price_4",
+    "bid_size_4",
+    "ask_price_4",
+    "ask_size_4",
+    "order_size",
+    "side",
+    "latency_ms",
+    "volatility_bps_sqrt_s"
+  ],
+  "n_features": 20,
+  "categorical_features": [
+    "side"
+  ],
+  "id_column": "sample_id",
+  "n_train": 5000,
+  "fold_column": "fold",
+  "n_folds": 5,
+  "missing_value_representation": "empty CSV field",
+  "source": "Original teaching simulation; independent draws from a fixed mechanism.",
+  "files": {
+    "test.csv": "13c7e421d61d263527aa8e0d6c899b1c314c6cc85f55e992e7d5ab36a306899a"
+  },
+  "n_test": 3000
+}

@@ -1,0 +1,27 @@
+% One-page motivation slide for user-behavior clustering.
+
+\begin{frame}{Motivation: User-Behavior Clustering}
+  \small
+  \begin{center}
+    \begin{tikzpicture}[node distance=.85cm]
+      \node[softbox,text width=3.0cm] (behavior)
+        {Users show different behavior patterns\\visits, clicks, purchases};
+      \node[greenbox,text width=3.0cm,right=of behavior] (groups)
+        {Group users with similar behavior};
+      \node[orangebox,text width=3.0cm,right=of groups] (recommend)
+        {Recommend similar products};
+      \draw[flow] (behavior)--(groups);
+      \draw[flow] (groups)--(recommend);
+    \end{tikzpicture}
+  \end{center}
+
+  \vspace{.35cm}
+  \begin{tikzpicture}
+    \node[softbox,text width=10.2cm]
+      {If users behave similarly, recommending similar items is a reasonable starting point.};
+  \end{tikzpicture}
+
+  \vspace{.2cm}
+  \centering
+  Better recommendations can increase engagement, conversion, and revenue.
+\end{frame}

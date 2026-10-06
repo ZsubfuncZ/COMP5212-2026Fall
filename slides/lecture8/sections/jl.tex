@@ -1,0 +1,83 @@
+% 21 --------------------------------------------------------------------------
+\begin{frame}{Random Projection Before K-means}
+  \centering
+  \begin{tikzpicture}[node distance=1.2cm]
+    \node[softbox,text width=3.7cm] (high) {High-dimensional data\\$X\in\R^{n\times d}$};
+    \node[orangebox,text width=3.7cm,right=of high] (low) {Projected data\\$RX\in\R^{n\times m}$};
+    \draw[flow] (high)--node[above,font=\small]{$m\ll d$}(low);
+  \end{tikzpicture}
+  \vspace{.45cm}
+  \begin{columns}[T,onlytextwidth]
+    \column{.47\textwidth}
+      \begin{itemize}\spaceditems
+        \item Lower memory and distance-computation cost;
+        \item useful when $d$ is much larger than $\log n$.
+      \end{itemize}
+    \column{.47\textwidth}
+      \begin{itemize}\spaceditems
+        \item Preserve sample geometry;
+        \item projected coordinates need not be interpretable.
+      \end{itemize}
+  \end{columns}
+  \pause
+  \vspace{.2cm}
+  \centering
+  The question is whether the K-means objective survives the projection.
+\end{frame}
+
+% 22 --------------------------------------------------------------------------
+\begin{frame}{Johnson--Lindenstrauss Lemma}
+  For $n$ points and failure probability $\delta$, a random linear map
+  $R:\R^d\to\R^m$ with
+  \[
+    m=O\!\left(\frac{\log(n/\delta)}{\varepsilon^2}\right)
+  \]
+  A common Gaussian-projection implementation uses the sufficient bound
+  \[
+    m\;\ge\;\frac{4\log n}{\varepsilon^2/2-\varepsilon^3/3}.
+  \]
+  can satisfy, simultaneously for every pair $i,j$,
+  \[
+    (1-\varepsilon)\norm{x_i-x_j}^2
+    \le \norm{Rx_i-Rx_j}^2
+    \le (1+\varepsilon)\norm{x_i-x_j}^2.
+  \]
+  \pause
+  \vspace{0pt}
+  \begin{tikzpicture}
+    \node[greenbox,text width=10.0cm,inner sep=2pt] {\small Typical choices: Gaussian entries scaled by $1/\sqrt m$, random signs, or a sparse random projection.};
+  \end{tikzpicture}
+\end{frame}
+
+% 23 --------------------------------------------------------------------------
+\begin{frame}{JL Preserve a K-means Cluster Cost}
+  For a cluster $C$ with mean $\mu_C$,
+  \[
+    \sum_{i\in C}\norm{x_i-\mu_C}^2
+    =\frac{1}{2|C|}\sum_{i,j\in C}\norm{x_i-x_j}^2.
+  \]
+  \pause
+  After projection, the projected mean is $R\mu_C$, so
+  \[
+    \sum_{i\in C}\norm{Rx_i-R\mu_C}^2
+    =\frac{1}{2|C|}\sum_{i,j\in C}\norm{Rx_i-Rx_j}^2.
+  \]
+  \pause
+  \centering
+  If JL preserves all pairwise distances, it preserves every fixed clustering cost within $1\pm\varepsilon$.
+\end{frame}
+
+% 24 --------------------------------------------------------------------------
+\begin{frame}{The Projected Optimum Is Approximately Competitive}
+  Let $C^*$ minimize the original K-means objective and $\widetilde C$ minimize the projected objective. For every partition $C$,
+  \[
+    (1-\varepsilon)J(C)\le J_R(C)\le(1+\varepsilon)J(C).
+  \]
+  \pause
+  \begin{align*}
+    J(\widetilde C)
+    \le \frac{J_R(\widetilde C)}{1-\varepsilon}&\le \frac{J_R(C^*)}{1-\varepsilon}\le \frac{1+\varepsilon}{1-\varepsilon}J(C^*).
+  \end{align*}
+\end{frame}
+
+% 25 -----------------------------------------------------------------------------------------------------------------------------

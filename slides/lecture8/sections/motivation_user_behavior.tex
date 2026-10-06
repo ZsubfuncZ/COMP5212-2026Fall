@@ -1,0 +1,70 @@
+% Two optional frames for the user-behavior clustering example.
+
+\definecolor{clusterblue}{HTML}{5A9DCC}
+
+\begin{frame}{User-Behavior Clustering: From Events to Features}
+  \small
+  \begin{columns}[c,onlytextwidth]
+    \column{.43\textwidth}
+      \IfFileExists{assets/motivation/shoppers.jpg}{%
+        \includegraphics[width=.98\textwidth]{assets/motivation/shoppers.jpg}%
+      }{%
+        \fbox{\parbox[c][4.4cm][c]{.92\linewidth}{\centering Insert a shopping image here}}%
+      }
+
+    \column{.52\textwidth}
+      \textbf{The raw object is a customer}
+
+      A customer generates events: visits, purchases, categories, returns, and time gaps.
+
+      \vspace{.14cm}
+      \textbf{The clustering input is a feature vector}
+      \[
+        x_i=(\text{recency},\text{frequency},\text{spend},\text{mix},\ldots).
+      \]
+
+      \vspace{.08cm}
+      After suitable scaling, Euclidean distance describes which customers behave similarly.
+  \end{columns}
+
+  \src{Photo: National Cancer Institute image via \href{https://commons.wikimedia.org/wiki/File:Women_grocery_shopping.jpg}{Wikimedia Commons}; public domain.}
+\end{frame}
+
+\begin{frame}{User-Behavior Clustering: From Segments to Actions}
+  \small
+  \begin{columns}[c,onlytextwidth]
+    \column{.43\textwidth}
+      \IfFileExists{assets/motivation/checkout.jpg}{%
+        \includegraphics[width=.98\textwidth]{assets/motivation/checkout.jpg}%
+      }{%
+        \fbox{\parbox[c][4.4cm][c]{.92\linewidth}{\centering Insert a checkout or retail image here}}%
+      }
+
+    \column{.52\textwidth}
+      \begin{tikzpicture}[x=.52cm,y=.52cm]
+        \draw[->] (0,0)--(7.1,0) node[right,font=\scriptsize]{frequency};
+        \draw[->] (0,0)--(0,6.2) node[above,font=\scriptsize]{spend};
+
+        \foreach \x/\y in {1.0/1.0,1.4/1.4,1.8/.8,2.2/1.2,2.0/1.8}
+          {\fill[forestgreen] (\x,\y) circle (2.4pt);}
+        \foreach \x/\y in {4.2/1.6,4.8/2.0,5.2/1.3,5.6/2.3,4.7/2.7}
+          {\fill[slideorange] (\x,\y) circle (2.4pt);}
+        \foreach \x/\y in {3.2/4.0,3.8/4.5,4.4/4.1,3.7/5.1,4.8/5.0}
+          {\fill[clusterblue] (\x,\y) circle (2.4pt);}
+
+        \foreach \x/\y in {1.6/1.3,4.9/1.9,4.0/4.5}{
+          \draw[black,line width=.8pt] (\x,\y) circle (.14);
+          \draw[black,line width=.8pt]
+            (\x-.09,\y-.09)--(\x+.09,\y+.09)
+            (\x-.09,\y+.09)--(\x+.09,\y-.09);
+        }
+      \end{tikzpicture}
+
+      \vspace{.08cm}
+      \textbf{Possible actions}
+
+      Retention offers, product recommendations, service priorities, or campaign design.
+  \end{columns}
+
+  \src{Photo: supermarket checkout by Velela, \href{https://commons.wikimedia.org/wiki/File:Supermarket_check_out.JPG}{Wikimedia Commons}; public domain / CC BY-SA 3.0.}
+\end{frame}

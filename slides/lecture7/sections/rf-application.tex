@@ -22,7 +22,7 @@
     \column{.59\textwidth}
     \centering
     \begin{tikzpicture}[x=1.85cm,y=.85cm]
-      \foreach \yy/\vv/\lab in {4/1.7861/{Linear regression},3/1.2843/{LSBoost},2/1.1904/{GPR}}{
+      \foreach \yy/\vv/\lab in {3/1.7861/{Linear regression},2/1.2843/{LSBoost}}{
         \fill[bulletgray] (0,\yy-.2) rectangle (\vv,\yy+.2);
         \node[anchor=east,font=\small] at (-.08,\yy) {\lab};
         \node[anchor=west,font=\scriptsize] at (\vv,\yy) {\vv};
@@ -41,10 +41,6 @@
     {\color{forestgreen}\fontsize{28}{32}\selectfont\textbf{33.7\%}}\par
     lower RMSE than linear regression.\par
     \vspace{.3cm}
-    GPR was nearly tied.\par
-    \vspace{.3cm}
     All shown models use expanding-window evaluation.
   \end{columns}
-  \vspace{.25cm}
-  \small Some future covariates were observed retrospectively. 
 \end{frame}

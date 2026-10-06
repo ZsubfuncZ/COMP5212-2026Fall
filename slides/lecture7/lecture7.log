@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.20)  29 SEP 2026 03:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.20)  29 SEP 2026 15:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1291,24 +1291,24 @@ LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <10.95> not available
 
 ] [6
 
-]
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 91
-.
-
-(/usr/local/texlive/2024/texmf-dist/tex/latex/lm/t1lmr.fd
-File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [7
+] [7
 
 ] [8
 
-] [9
+]
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 11
+9.
+
+(/usr/local/texlive/2024/texmf-dist/tex/latex/lm/t1lmr.fd
+File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [9
 
 ] [10
 
-]
-[11
+] [11
 
-] [12
+]
+[12
 
 ] [13
 
@@ -1334,27 +1334,20 @@ File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 
 ] [24
 
-]) [25
+] [25
+
+] [26
 
 ]
-(./sections/random-forests.tex [26
-
-] [27
+[27
 
 ] [28
 
 ] [29
 
-] [30
+]) [30
 
-]
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 72.
-LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <5> not available
-(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 72.
-LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 72.
- [31
+] (./sections/random-forests.tex [31
 
 ] [32
 
@@ -1365,7 +1358,14 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
 ]
 [35
 
-] [36
+]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 71.
+LaTeX Font Info:    Font shape `T1/lmss/b/n' in size <5> not available
+(Font)              Font shape `T1/lmss/bx/n' tried instead on input line 71.
+LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 71.
+ [36
 
 ] [37
 
@@ -1373,26 +1373,27 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
 
 ] [39
 
-]) (./sections/rf-application.tex [40
+] [40
 
 ] [41
 
-]) [42
+] [42
 
-]
-(./sections/xgboost.tex [43
+] [43
 
 ] [44
 
-] [45
+])
+(./sections/rf-application.tex [45
 
 ] [46
 
-] [47
+]) [47
 
-] [48
+] (./sections/xgboost.tex [48
 
-] [49
+]
+[49
 
 ] [50
 
@@ -1400,8 +1401,7 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
 
 ] [52
 
-]
-[53
+] [53
 
 ] [54
 
@@ -1423,7 +1423,8 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
 
 ] [63
 
-] [64
+]
+[64
 
 ] [65
 
@@ -1431,8 +1432,7 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
 
 ] [67
 
-]
-[68
+] [68
 
 ] [69
 
@@ -1446,23 +1446,33 @@ LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <5> not available
 
 ] [74
 
-]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 3
-04.
+] [75
 
-(/usr/local/texlive/2024/texmf-dist/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [75
-
-])
-(./sections/xgb-applications.tex [76
+] [76
 
 ] [77
 
-]
-(./sections/production-application.tex [78
+] [78
 
-])) (./sections/closing.tex [79
+]
+[79
+
+]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 3
+02.
+ (/usr/local/texlive/2024/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [80
+
+])
+(./sections/xgb-applications.tex [81
+
+] [82
+
+]
+(./sections/production-application.tex [83
+
+])) (./sections/closing.tex [84
 
 ])
 \tf@nav=\write6
@@ -1484,10 +1494,10 @@ Package rerunfilecheck Info: File `lecture7.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 37616 strings out of 474116
- 890396 string characters out of 5743681
- 1949187 words of memory out of 5000000
- 59088 multiletter control sequences out of 15000+600000
+ 37628 strings out of 474116
+ 890493 string characters out of 5743681
+ 1948187 words of memory out of 5000000
+ 59090 multiletter control sequences out of 15000+600000
  669001 words of font info for 98 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  128i,21n,123p,729b,2496s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1506,10 +1516,10 @@ ist/fonts/type1/public/lm/lmsso10.pfb></usr/local/texlive/2024/texmf-dist/fonts
 blic/lm/lmsso8.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/lm/lm
 sy10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></
 usr/local/texlive/2024/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on lecture7.pdf (79 pages, 436655 bytes).
+Output written on lecture7.pdf (84 pages, 441989 bytes).
 PDF statistics:
- 568 PDF objects out of 1000 (max. 8388607)
- 437 compressed objects within 5 object streams
- 159 named destinations out of 1000 (max. 500000)
+ 595 PDF objects out of 1000 (max. 8388607)
+ 459 compressed objects within 5 object streams
+ 169 named destinations out of 1000 (max. 500000)
  48 words of extra memory for PDF output out of 10000 (max. 10000000)
 

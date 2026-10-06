@@ -1,0 +1,38 @@
+{
+  "student_package_sha256": "ee2e93f83a3adb4cfe9743829ae3a6a2a19b0dbde7970c6fc9695973dfb76a7d",
+  "description": "Recovered original held-out data after verifying revised training data match byte for byte.",
+  "datasets": {
+    "cooling_regression": {
+      "n_train": 5000,
+      "n_test": 3000,
+      "n_features": 20,
+      "target": "cooling_load_kw",
+      "training_sha256": "2755f5e271a73d7e7966d5039cd238951423a6c251bb26a242f3e312468c29f9",
+      "test_sha256": "2dbc306e27757b3e7a3768cfc95f9c250b7c4e35f1db083ef5f25be6dd9efde2"
+    },
+    "credit_classification": {
+      "n_train": 5000,
+      "n_test": 3000,
+      "n_features": 20,
+      "target": "default_next_month",
+      "training_sha256": "729b7847b17076e1dc5779ae410be0211b5900e8ded699ebd56aea2c8326b586",
+      "test_sha256": "4ec86efed0411ee92ef0ced7f7d8f06dcd7670e8fd83f0a4f6dee48d6df92c54"
+    },
+    "execution_classification": {
+      "n_train": 5000,
+      "n_test": 3000,
+      "n_features": 20,
+      "target": "high_slippage",
+      "training_sha256": "3c240c9e85c04aa792860c07420db2f080957aaf0e5b7305538ceb13e211309c",
+      "test_sha256": "13c7e421d61d263527aa8e0d6c899b1c314c6cc85f55e992e7d5ab36a306899a"
+    },
+    "sarcos_regression": {
+      "n_train": 5000,
+      "n_test": 3000,
+      "n_features": 21,
+      "target": "torque_1",
+      "training_sha256": "fbc6b623981c1ab9a29948620de9c8faefc868aca6ff61035ba3dcdde945a6e7",
+      "test_sha256": "0cf9cb0a2d9650ccb83064579fcaf5fe3df4386da56db85d5fa78d454db90b28"
+    }
+  }
+}

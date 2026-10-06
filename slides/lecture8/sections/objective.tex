@@ -1,0 +1,187 @@
+% 3 ---------------------------------------------------------------------------
+
+
+
+\definecolor{kmOrange}{HTML}{C88753}
+\definecolor{kmLime}{HTML}{9BCB53}
+\definecolor{kmBlue}{HTML}{5A9DCC}
+\definecolor{kmPurple}{HTML}{8054C7}
+\definecolor{kmGreen}{HTML}{58B978}
+\definecolor{kmPink}{HTML}{C84D9A}
+
+\newcommand{\KmeansCloud}[6]{%
+	\foreach \x/\y in {
+		0.8/6.3,1.6/6.45,2.1/6.8,2.6/6.1,
+		1.8/6.0,2.9/6.35,2.4/5.85,1.2/6.0,
+		2.7/6.7,1.9/6.25,2.3/6.55,2.8/5.75,
+		1.5/5.8,2.1/5.7,2.9/6.05
+	}{\fill[#1] (\x,\y) circle (2.6pt);}
+	
+	\foreach \x/\y in {
+		9.0/6.6,9.4/6.2,9.8/6.8,10.2/6.35,
+		10.6/6.55,9.6/6.0,10.0/6.1,10.8/6.7,
+		9.3/5.85,9.9/6.45,10.4/6.05,9.7/6.55,
+		10.9/6.35,9.5/6.9,10.2/6.95
+	}{\fill[#2] (\x,\y) circle (2.6pt);}
+	
+	\foreach \x/\y in {
+		7.5/3.2,8.0/2.9,8.4/3.5,8.9/3.1,
+		9.2/2.7,8.2/2.3,7.8/2.4,8.7/2.6,
+		9.0/3.7,7.7/2.0,8.4/2.8,8.9/2.2,
+		7.9/3.8,8.6/3.3,9.4/2.9
+	}{\fill[#3] (\x,\y) circle (2.6pt);}
+	
+	\foreach \x/\y in {
+		10.3/4.1,10.8/4.4,11.1/3.8,10.6/3.5,
+		11.4/4.0,10.9/3.3,11.5/3.7,10.5/3.9,
+		11.0/4.6,10.2/3.6,11.3/4.2
+	}{\fill[#4] (\x,\y) circle (2.6pt);}
+	
+	\foreach \x/\y in {
+		9.5/2.2,9.8/2.5,10.2/2.0,10.6/2.4,
+		10.9/1.9,9.9/1.8,10.4/2.2,11.1/2.1,
+		9.7/1.6,10.7/1.7,10.3/2.7,9.4/1.9
+	}{\fill[#5] (\x,\y) circle (2.6pt);}
+	
+	\foreach \x/\y in {
+		3.2/2.6,3.8/2.0,4.2/2.4,4.7/1.7,
+		5.1/1.9,5.6/1.4,6.0/1.8,4.3/1.5,
+		3.6/1.8,4.8/2.2,5.4/1.3,5.8/2.1,
+		4.0/2.8,4.9/1.1,5.5/1.7,6.2/1.6,
+		3.4/1.4
+	}{\fill[#6] (\x,\y) circle (2.6pt);}
+}
+
+\newcommand{\KmeansCenters}{%
+	\foreach \x/\y in {
+		2.35/6.25,
+		9.75/6.4,
+		8.55/2.75,
+		10.85/3.85,
+		10.25/2.25,
+		4.75/1.85
+	}{
+		\draw[black,line width=.9pt] (\x,\y) circle (.16);
+		\draw[black,line width=.9pt]
+		(\x-.11,\y-.11)--(\x+.11,\y+.11)
+		(\x-.11,\y+.11)--(\x+.11,\y-.11);
+	}
+}
+
+% Before coloring
+
+
+
+% Before coloring
+
+\definecolor{clusterblue}{HTML}{5A9DCC}
+
+\begin{frame}{User-Behavior Clustering}
+	\small
+	\begin{center}
+		\begin{tikzpicture}[node distance=.85cm]
+			\node[softbox,text width=3.0cm] (behavior)
+			{Different user behavior\\visits, clicks, purchases};
+			
+			\node[greenbox,text width=3.0cm,right=of behavior] (groups)
+			{Group users with similar behavior};
+			
+			\node[orangebox,text width=3.0cm,right=of groups] (recommend)
+			{Recommend similar products};
+			
+			\draw[flow] (behavior)--(groups);
+			\draw[flow] (groups)--(recommend);
+		\end{tikzpicture}
+	\end{center}
+	
+	\vspace{.35cm}
+	
+	\begin{tikzpicture}
+		\node[softbox,text width=10.2cm]
+		{Users with similar behavior may prefer similar products, so behavior clusters can support recommendations and revenue.};
+	\end{tikzpicture}
+	\begin{itemize}
+		\item Why not classification?
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{A Clustering Example}
+	\centering
+	\resizebox{.80\textwidth}{!}{%
+		\begin{tikzpicture}[x=.9cm,y=.78cm]
+			\draw[rulegray!70,line width=1pt] (0,0)--(12.2,0);
+			\draw[rulegray!70,line width=1pt] (0,0)--(0,7.5);
+			
+			\KmeansCloud
+			{black}{black}{black}
+			{black}{black}{black}
+		\end{tikzpicture}
+	}
+\end{frame}
+
+% After coloring
+\begin{frame}{A Clustering Example}
+	\centering
+	\resizebox{.80\textwidth}{!}{%
+		\begin{tikzpicture}[x=.9cm,y=.78cm]
+			\draw[rulegray!70,line width=1pt] (0,0)--(12.2,0);
+			\draw[rulegray!70,line width=1pt] (0,0)--(0,7.5);
+			
+			\KmeansCloud
+			{kmOrange}{kmLime}{kmBlue}
+			{kmPurple}{kmGreen}{kmPink}
+			
+			\KmeansCenters
+		\end{tikzpicture}
+	}
+\end{frame}
+
+
+\begin{frame}{What Is the Object We Want to Learn?}
+  \begin{columns}[T,onlytextwidth]
+    \column{.48\textwidth}
+      \textbf{Observed data}
+      \[
+        x_1,\ldots,x_n\in\R^d.
+      \]
+      \vspace{.08cm}
+      \textbf{Unknown structure}
+      \[
+        C_1,\ldots,C_K\quad\text{a partition of }\{1,\ldots,n\}.
+      \]
+    \column{.46\textwidth}
+      For each proposed cluster $C_k$, compute its coordinate-wise mean
+      \[
+        \bar x_{C_k}=\frac{1}{|C_k|}\sum_{i\in C_k}x_i.
+      \]
+      \begin{itemize}\spaceditems
+        \item Labels are not supplied;
+        \item $K$ is chosen before fitting;
+        \item compactness is measured in the selected feature geometry.
+      \end{itemize}
+  \end{columns}
+  \vspace{.28cm}
+  \centering
+  \textbf{Goal: find a partition whose members are close to their own cluster mean.}
+\end{frame}
+
+% 4 ---------------------------------------------------------------------------
+\begin{frame}{Why Use Squared Error?}
+  \small
+  For a partition $C_1,\ldots,C_K$, define the empirical within-cluster error directly from the means:
+  \[
+    \operatorname{SSE}(C_1,\ldots,C_K)
+    =\sum_{k=1}^{K}\sum_{i\in C_k}\norm{x_i-\bar x_{C_k}}^2.
+  \]
+  \vspace{.08cm}
+\begin{itemize}
+	\item  Robust to general noise assumptions;
+	\item  Feasible to dimension reductions.
+\end{itemize}
+\end{frame}
+
+% 5 -----------------------------------------------------------------
+
+% 6 ---------------------------------------------------------------------------
+

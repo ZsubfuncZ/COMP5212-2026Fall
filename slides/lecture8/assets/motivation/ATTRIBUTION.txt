@@ -1,0 +1,17 @@
+Image resource: assets/motivation/kmeans_color_quantization.png
+
+Source/context: scikit-learn color quantization example using K-means on RGB pixels.
+Reference: https://scikit-learn.org/stable/auto_examples/cluster/plot_color_quantization.html
+The underlying sample image is the scikit-learn sample image commonly used in that example.
+
+Suggested photo for the customer-segmentation frame:
+https://commons.wikimedia.org/wiki/File:Women_grocery_shopping.jpg
+Direct download:
+https://commons.wikimedia.org/wiki/Special:FilePath/Women%20grocery%20shopping.jpg?width=1200
+The Wikimedia Commons page identifies the National Cancer Institute image as public domain.
+
+Suggested checkout photo for the second user-behavior frame:
+https://commons.wikimedia.org/wiki/File:Supermarket_check_out.JPG
+Direct download:
+https://commons.wikimedia.org/wiki/Special:FilePath/Supermarket%20check%20out.JPG?width=1200
+The Commons page lists the image as public domain and also notes CC BY-SA 3.0/GFDL licensing metadata; retain the attribution if you use it.

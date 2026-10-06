@@ -1,0 +1,72 @@
+% Visual style preserved from the supplied lecture0 template.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+
+\definecolor{slideorange}{HTML}{FF5500}
+\definecolor{bulletgreen}{HTML}{A8C9A0}
+\definecolor{bulletgray}{HTML}{D9E1E8}
+\definecolor{warningred}{HTML}{F12A16}
+\definecolor{rulegray}{HTML}{C9CED3}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=black,
+  linkcolor=black
+}
+\urlstyle{same}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=black,bg=white}
+\setbeamercolor{frametitle}{fg=slideorange,bg=white}
+\setbeamercolor{page number in head/foot}{fg=black,bg=white}
+\setbeamerfont{frametitle}{series=\bfseries,size=\LARGE}
+\setbeamerfont{page number in head/foot}{size=\scriptsize}
+\setbeamersize{text margin left=0.85cm,text margin right=0.85cm}
+
+\setbeamertemplate{frametitle}{%
+  \vspace*{0.18cm}%
+  \begin{beamercolorbox}[wd=\paperwidth,center,sep=0.08cm]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}%
+  \vspace*{0.12cm}%
+}
+
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \begin{beamercolorbox}[wd=\paperwidth,ht=0.42cm,dp=0.15cm,center]{page number in head/foot}
+    \insertframenumber
+  \end{beamercolorbox}%
+}
+
+\setbeamertemplate{itemize item}{%
+  \raisebox{0.15ex}{\tikz\fill[bulletgreen] (0,0) circle (0.082cm);}%
+}
+\setbeamertemplate{itemize subitem}{%
+  \raisebox{0.15ex}{\tikz\fill[bulletgray] (0,0) circle (0.064cm);}%
+}
+
+\newcommand{\SectionSlide}[1]{%
+  \begin{frame}
+    \centering
+    \vfill
+    {\color{slideorange}\Large\bfseries #1\par}
+    \vfill
+  \end{frame}
+}
+
+\newcommand{\SourceNote}[1]{%
+  \vfill
+  \begin{flushright}
+    {\scriptsize #1}
+  \end{flushright}
+}
+

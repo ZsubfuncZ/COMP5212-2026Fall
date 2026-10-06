@@ -1,0 +1,14 @@
+{
+  "n_train": 5000,
+  "n_test": 3000,
+  "seeds": {
+    "sarcos": 26093001,
+    "credit": 26093002,
+    "cooling_train": 26093011,
+    "cooling_test": 26093012,
+    "execution_train": 26093021,
+    "execution_test": 26093022,
+    "folds": 26093031
+  },
+  "version": "1.0"
+}

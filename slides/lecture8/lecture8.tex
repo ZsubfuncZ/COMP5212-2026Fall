@@ -1,0 +1,102 @@
+\documentclass[aspectratio=169,12pt]{beamer}
+\input{course-style.tex}
+\usepackage{booktabs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{matrix,fit,calc,backgrounds,intersections,patterns}
+
+\definecolor{forestgreen}{HTML}{4C7954}
+\definecolor{midgray}{HTML}{666666}
+\definecolor{softorange}{HTML}{FFF0E8}
+\definecolor{softgreen}{HTML}{EAF3E8}
+\definecolor{softblue}{HTML}{EEF3F7}
+
+\newcommand{\E}{\mathbb E}
+\newcommand{\R}{\mathbb R}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\src}[1]{\SourceNote{#1}}
+\newcommand{\spaceditems}{\setlength{\itemsep}{0.25cm}}
+\tikzset{
+  center/.style={draw=slideorange,fill=slideorange!15,circle,minimum size=.28cm,inner sep=0pt},
+  point/.style={draw=black,fill=white,circle,minimum size=.16cm,inner sep=0pt},
+  softbox/.style={draw=rulegray,rounded corners=3pt,fill=softblue,align=center,inner sep=7pt},
+  greenbox/.style={draw=forestgreen,rounded corners=3pt,fill=softgreen,align=center,inner sep=7pt},
+  orangebox/.style={draw=slideorange,rounded corners=3pt,fill=softorange,align=center,inner sep=7pt},
+  flow/.style={-{Latex[length=2.5mm]},line width=.8pt},
+  thinflow/.style={-{Latex[length=2mm]},line width=.6pt},
+}
+
+\hypersetup{pdftitle={K-means Clustering},pdfauthor={Zihan Zhang},pdfsubject={COMP 5212 Machine Learning}}
+\pdfstringdefDisableCommands{\def\translate#1{#1}}
+
+\newcommand{\SectionSlideN}[2]{%
+  \begin{frame}
+    \centering
+    \vfill
+    {\color{slideorange}\fontsize{29}{34}\selectfont\bfseries #1\par}
+    \vspace{0.38cm}
+    {\color{midgray}\fontsize{16}{21}\selectfont #2\par}
+    \vfill
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}
+	\begin{tikzpicture}[remember picture, overlay]
+		\node[anchor=north west, inner sep=10pt] at (current page.north west)
+		{\includegraphics[width=6cm]{../source/logo.png}};
+	\end{tikzpicture}
+	
+	\centering
+	\vspace*{1.15cm}
+	{\fontsize{28}{32}\selectfont COMP 5212\par}
+	\vspace{0.35cm}
+	{\fontsize{30}{33}\selectfont Machine Learning\par}
+	\vspace{0.75cm}
+	{\Large Instructor: Zihan Zhang\par}
+	\vspace{0.35cm}
+	{\large Lecture 8: K-means Clustering\par}
+	
+\end{frame}
+
+\begin{frame}{Learning Goals}
+  \begin{tikzpicture}[node distance=.65cm]
+    \node[softbox,text width=3.15cm] (obj) {\textbf{Objective}\par Find prototypes};
+    \node[greenbox,text width=3.15cm,right=of obj] (alg) {\textbf{Algorithm}\par Alternate two exact updates};
+    \node[orangebox,text width=3.15cm,right=of alg] (use) {\textbf{Practice}\par Diagnose and evaluate};
+    \draw[flow] (obj)--(alg); \draw[flow] (alg)--(use);
+  \end{tikzpicture}
+  \vspace{.45cm}
+  \begin{itemize}\setlength{\itemsep}{.23cm}
+    \item Justify squared error and derive the two Lloyd updates;
+    \item Distinguish local-optimum facts from approximation guarantees;
+    \item Choose preprocessing, $K$, and evaluation checks;
+    \item Use a Johnson--Lindenstrauss projection to reduce dimension
+  \end{itemize}
+\end{frame}
+
+\SectionSlideN{Motivation and Objective}
+
+\input{sections/objective.tex}
+
+\SectionSlideN{The Algorithm}
+
+\input{sections/algorithm.tex}
+
+\SectionSlideN{Theory and Practice}
+
+\input{sections/theory-practice.tex}
+
+\SectionSlideN{Applications}
+
+\input{sections/applications.tex}
+
+\SectionSlideN{Distance-Preserving Reduction}
+
+\input{sections/jl.tex}
+
+\input{sections/closing.tex}
+
+\end{document}
